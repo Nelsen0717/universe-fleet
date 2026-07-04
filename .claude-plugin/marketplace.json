@@ -1,0 +1,23 @@
+{
+  "name": "universe-fleet-marketplace",
+  "owner": {
+    "name": "Nelsen Chen"
+  },
+  "metadata": {
+    "description": "「宇宙艦隊」plugin 自架 marketplace（POC 階段、本機測試用）",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "universe-fleet",
+      "source": "./",
+      "description": "給不會寫程式的創作者用的 AI 宇宙艦隊——教練、守門員、寫手、Threads 接入精靈四名艦員，裝了就會動。",
+      "version": "0.1.0-poc",
+      "author": {
+        "name": "Nelsen Chen"
+      },
+      "category": "productivity",
+      "keywords": ["social-media", "threads", "content", "zh-tw", "creator-tools"]
+    }
+  ]
+}

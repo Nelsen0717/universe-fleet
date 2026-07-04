@@ -1,0 +1,12 @@
+{
+  "name": "universe-fleet",
+  "description": "給不會寫程式的創作者用的 AI 宇宙艦隊——教練、守門員、寫手、Threads 接入精靈四名艦員，裝了就會動。",
+  "version": "0.1.0-poc",
+  "author": {
+    "name": "Nelsen Chen"
+  },
+  "homepage": "https://github.com/nelsen0717/universe-fleet",
+  "license": "UNLICENSED",
+  "keywords": ["social-media", "threads", "content", "zh-tw", "creator-tools"],
+  "category": "productivity"
+}
