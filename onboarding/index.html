@@ -1,0 +1,909 @@
+<meta charset="utf-8">
+<title>裝備發放 — 我的宇宙艦隊</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a4a;
+    --ink-faint: #8a8a8a;
+    --line: #dcdcdc;
+    --line-soft: #ececec;
+    --bg: #ffffff;
+    --accent: #8a4a2a;
+    --radius: 4px;
+    --measure: 720px;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Helvetica Neue", "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    letter-spacing: 0.01em;
+  }
+
+  ::selection { background: #f0e4da; }
+
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+  a:hover { border-bottom-color: var(--accent); }
+
+  code, .mono {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 0.92em;
+    letter-spacing: 0;
+  }
+
+  .wrap {
+    max-width: var(--measure);
+    margin: 0 auto;
+    padding: 48px 24px 120px;
+  }
+
+  .mobile-notice {
+    display: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 32px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  @media (max-width: 720px) {
+    .mobile-notice { display: block; }
+  }
+
+  header.hero {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 32px;
+    margin-bottom: 40px;
+  }
+
+  .eyebrow {
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 28px;
+    line-height: 1.4;
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .lede {
+    color: var(--ink-soft);
+    font-size: 16px;
+    max-width: 56ch;
+  }
+
+  .crew-portrait {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    float: right;
+    margin: 0 0 12px 20px;
+  }
+  @media (max-width: 480px) {
+    .crew-portrait { width: 72px; height: 72px; }
+  }
+
+  .name-gate {
+    margin-top: 24px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  input[type="text"] {
+    font-family: inherit;
+    font-size: 15px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--ink);
+    min-width: 200px;
+  }
+  input[type="text"]:focus { outline: none; border-color: var(--accent); }
+
+  .badge-rail {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 12px 0;
+    margin-bottom: 40px;
+    z-index: 10;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 13px;
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+  .badge.done {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .badge.done::before { content: "✓ "; }
+
+  .chapter {
+    margin-bottom: 8px;
+    padding-top: 8px;
+  }
+  .chapter-num {
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+  }
+  .chapter h2 {
+    font-size: 22px;
+    margin: 4px 0 24px;
+    font-weight: 600;
+  }
+
+  .quest {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .quest.locked {
+    opacity: 0.5;
+  }
+  .quest.complete {
+    border-color: var(--accent);
+  }
+
+  .quest-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .quest-title {
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .quest-status {
+    font-size: 13px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+  .quest-status.done { color: var(--accent); }
+
+  .quest-optional-tag {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--ink-faint);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 1px 8px;
+    margin-left: 8px;
+  }
+
+  .quest-body { margin-top: 14px; }
+  .quest-body p { margin: 0 0 12px; color: var(--ink-soft); }
+
+  .platform-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .platform-tab {
+    font-size: 14px;
+    padding: 8px 14px;
+    color: var(--ink-faint);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+  }
+  .platform-tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+  .platform-panel { display: none; }
+  .platform-panel.active { display: block; }
+
+  .btn {
+    display: inline-block;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 9px 18px;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--ink);
+    color: var(--bg);
+    cursor: pointer;
+    text-align: center;
+  }
+  .btn:hover { background: #333; }
+  .btn.secondary {
+    background: var(--bg);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .btn.secondary:hover { border-color: var(--ink); }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 12px 0;
+  }
+
+  .copy-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fafafa;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin: 12px 0;
+  }
+  .copy-block code {
+    flex: 1;
+    overflow-x: auto;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+  .copy-feedback {
+    font-size: 13px;
+    color: var(--accent);
+    margin-left: 8px;
+    display: none;
+  }
+  .copy-feedback.show { display: inline; }
+
+  .fallback-box {
+    display: none;
+    margin-top: 8px;
+  }
+  .fallback-box.show { display: block; }
+  .fallback-box textarea {
+    width: 100%;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    resize: vertical;
+  }
+
+  .self-check {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+  }
+  .self-check-q {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .self-check-q input[type="checkbox"] {
+    margin-top: 4px;
+  }
+
+  details.stuck {
+    margin-top: 14px;
+    font-size: 14px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+  }
+  details.stuck summary {
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  details.stuck table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+  details.stuck th, details.stuck td {
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+  }
+  details.stuck th { color: var(--ink-faint); font-weight: 500; }
+
+  .escalate {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 48px 0;
+  }
+
+  .cert {
+    display: none;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    margin-top: 24px;
+  }
+  .cert.show { display: block; }
+  .cert .cert-eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+  }
+  .cert h3 {
+    font-size: 22px;
+    margin: 0 0 6px;
+  }
+  .cert .cert-meta {
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-top: 10px;
+  }
+
+  .code-input-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .gate-hint {
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-top: 6px;
+  }
+  .gate-hint.error { color: #a33; }
+  .gate-hint.ok { color: var(--accent); }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="mobile-notice">手機可以看、但這個遊戲需要開終端機裝軟體——請在電腦上完成。</div>
+
+  <header class="hero">
+    <img class="crew-portrait" src="assets/crew-coach.png" alt="教練" onerror="this.style.display='none'">
+    <div class="eyebrow">課前引導 · 裝備發放</div>
+    <h1>開課那天，你要帶著自己的艦來。<br>現在我們去領裝備。</h1>
+    <p class="lede">這頁的每個按鈕都是真動作：按「收下」會真的開官方頁面、複製鍵會真的寫進剪貼簿。玩完這頁，你的環境就真的裝好了——不是勾格子假裝完成。</p>
+    <div class="name-gate">
+      <input type="text" id="pilot-name" placeholder="艦長，你的名字是？" maxlength="20">
+      <button class="btn" id="save-name-btn">登記入艦</button>
+      <span class="gate-hint" id="name-hint"></span>
+    </div>
+  </header>
+
+  <nav class="badge-rail" id="badge-rail" aria-label="寶藏進度">
+    <span class="badge" data-badge="claude-code">🚢 主艦</span>
+    <span class="badge" data-badge="codex">🛠️ 副艦</span>
+    <span class="badge" data-badge="node">⛽ 燃料</span>
+    <span class="badge" data-badge="fleet">🧲 入列</span>
+    <span class="badge" data-badge="coach-checkin">🎖️ 報到</span>
+    <span class="badge" data-badge="meta-dev">📜 船籍</span>
+  </nav>
+
+  <!-- ============ 第一章 ============ -->
+  <section class="chapter">
+    <div class="chapter-num">第一章</div>
+    <h2>領艦</h2>
+  </section>
+
+  <!-- 寶藏 1：Claude Code -->
+  <div class="quest" data-quest="claude-code">
+    <div class="quest-head">
+      <div class="quest-title">🚢 主艦：Claude Code</div>
+      <div class="quest-status">尚未收下</div>
+    </div>
+    <div class="quest-body">
+      <p>這是你整支艦隊的駕駛艙。先選你的作業系統，再按「收下」去官方頁面下載。</p>
+
+      <div class="platform-tabs" role="tablist">
+        <button class="platform-tab active" data-platform="mac">Mac</button>
+        <button class="platform-tab" data-platform="windows">Windows</button>
+      </div>
+
+      <div class="platform-panel active" data-platform="mac">
+        <p>下載桌面版（含 Claude Code），或用終端機指令安裝：</p>
+        <div class="copy-block">
+          <code>curl -fsSL https://claude.ai/install.sh | bash</code>
+          <button class="btn secondary copy-btn" data-copy="curl -fsSL https://claude.ai/install.sh | bash">複製</button>
+          <span class="copy-feedback">已複製</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn treasure-btn" data-url="https://claude.com/download" data-quest="claude-code">收下（開官方下載頁）</button>
+        </div>
+      </div>
+
+      <div class="platform-panel" data-platform="windows">
+        <p>下載桌面版（含 Claude Code），或用 PowerShell 安裝：</p>
+        <div class="copy-block">
+          <code>irm https://claude.ai/install.ps1 | iex</code>
+          <button class="btn secondary copy-btn" data-copy="irm https://claude.ai/install.ps1 | iex">複製</button>
+          <span class="copy-feedback">已複製</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn treasure-btn" data-url="https://claude.com/download" data-quest="claude-code">收下（開官方下載頁）</button>
+        </div>
+      </div>
+
+      <div class="self-check" data-selfcheck="claude-code">
+        <div class="self-check-q"><input type="checkbox"> 打開後看得到輸入框嗎？</div>
+        <div class="self-check-q"><input type="checkbox"> 有登入你的 Anthropic 帳號了嗎？（沒帳號的話，下載頁會帶你註冊；Claude Code 需要 Pro / Max 等付費方案或 API 額度才能長期使用，免費額度有限）</div>
+      </div>
+
+      <details class="stuck">
+        <summary>卡住了？</summary>
+        <table>
+          <tr><th>現象</th><th>解法</th></tr>
+          <tr><td>終端機打指令沒反應</td><td>先確認你開的是「終端機」（Mac：Terminal／Windows：PowerShell），不是文字編輯器</td></tr>
+          <tr><td>裝完找不到 <code>claude</code> 指令</td><td>關掉終端機視窗、重新開一個再試一次（環境變數要重新載入）</td></tr>
+          <tr><td>要求登入但一直轉圈</td><td>回瀏覽器看有沒有跳出登入頁、確認網路連線正常</td></tr>
+        </table>
+        <div class="escalate">還是卡住？截圖傳給助教。</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- 寶藏 2：Codex -->
+  <div class="quest" data-quest="codex">
+    <div class="quest-head">
+      <div class="quest-title">🛠️ 副艦：Codex</div>
+      <div class="quest-status">尚未收下</div>
+    </div>
+    <div class="quest-body">
+      <p>Codex 是 OpenAI 的副艦，需要 ChatGPT 帳號（Plus / Pro / Business 以上方案才有 Codex，免費版沒有）。先去 ChatGPT 官方頁確認方案，再回來裝 CLI。</p>
+
+      <div class="copy-block">
+        <code>npm i -g @openai/codex</code>
+        <button class="btn secondary copy-btn" data-copy="npm i -g @openai/codex">複製</button>
+        <span class="copy-feedback">已複製</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn treasure-btn" data-url="https://chatgpt.com" data-quest="codex">收下（開 ChatGPT 官方頁確認方案）</button>
+      </div>
+
+      <div class="self-check" data-selfcheck="codex">
+        <div class="self-check-q"><input type="checkbox"> 你的 ChatGPT 帳號是 Plus 以上方案嗎？</div>
+        <div class="self-check-q"><input type="checkbox"> 終端機打 <code>codex</code> 有跳出畫面嗎？</div>
+      </div>
+
+      <details class="stuck">
+        <summary>卡住了？</summary>
+        <table>
+          <tr><th>現象</th><th>解法</th></tr>
+          <tr><td><code>npm</code> 指令找不到</td><td>代表 Node.js 還沒裝好，回上面「⛽ 燃料」那關先領</td></tr>
+          <tr><td>裝完 <code>codex</code> 說沒有權限用</td><td>確認 ChatGPT 帳號方案是 Plus 以上，免費版目前不含 Codex</td></tr>
+        </table>
+        <div class="escalate">還是卡住？截圖傳給助教。</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- 寶藏 3：Node.js（選配） -->
+  <div class="quest" data-quest="node">
+    <div class="quest-head">
+      <div class="quest-title">⛽ 燃料：Node.js LTS <span class="quest-optional-tag">選配寶藏</span></div>
+      <div class="quest-status">尚未收下</div>
+    </div>
+    <div class="quest-body">
+      <p>本頁的艦隊入列指令（<code>/plugin marketplace add</code>）本身不需要 Node.js。但如果你要裝 Codex（上面那關）、或未來遇到某些外掛要求，就需要它——教練說需要時再回來拿也不遲。</p>
+      <div class="btn-row">
+        <button class="btn treasure-btn" data-url="https://nodejs.org/en/download" data-quest="node">收下（開官方下載頁，選 LTS 版）</button>
+      </div>
+      <div class="self-check" data-selfcheck="node">
+        <div class="self-check-q"><input type="checkbox"> 終端機打 <code>node --version</code> 有跳出版本號嗎？</div>
+      </div>
+      <details class="stuck">
+        <summary>卡住了？</summary>
+        <table>
+          <tr><th>現象</th><th>解法</th></tr>
+          <tr><td>裝完 <code>node --version</code> 還是找不到</td><td>關掉終端機重開一個</td></tr>
+          <tr><td>不確定要不要裝</td><td>不確定就先跳過，需要時教練會提醒你回來領</td></tr>
+        </table>
+        <div class="escalate">還是卡住？截圖傳給助教。</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- 寶藏 4：艦隊入列 -->
+  <div class="quest" data-quest="fleet">
+    <div class="quest-head">
+      <div class="quest-title">🧲 艦隊入列</div>
+      <div class="quest-status">尚未收下</div>
+    </div>
+    <div class="quest-body">
+      <p>把「宇宙艦隊」這支團隊請進你的 Claude Code。複製下面兩行指令，貼進 Claude Code 的輸入列，一行一行按 Enter。</p>
+
+      <p><strong>第一步</strong>：加入艦隊倉庫</p>
+      <div class="copy-block">
+        <code>/plugin marketplace add Nelsen0717/universe-fleet</code>
+        <button class="btn secondary copy-btn" data-copy="/plugin marketplace add Nelsen0717/universe-fleet">複製</button>
+        <span class="copy-feedback">已複製</span>
+      </div>
+      <div class="fallback-box" data-fallback-for="fleet-1">
+        <p>剪貼簿權限被擋了？手動全選這段：</p>
+        <textarea rows="1" readonly onclick="this.select()">/plugin marketplace add Nelsen0717/universe-fleet</textarea>
+      </div>
+
+      <p><strong>第二步</strong>：安裝艦隊</p>
+      <div class="copy-block">
+        <code>/plugin install universe-fleet@universe-fleet-marketplace</code>
+        <button class="btn secondary copy-btn" data-copy="/plugin install universe-fleet@universe-fleet-marketplace">複製</button>
+        <span class="copy-feedback">已複製</span>
+      </div>
+      <div class="fallback-box" data-fallback-for="fleet-2">
+        <p>剪貼簿權限被擋了？手動全選這段：</p>
+        <textarea rows="1" readonly onclick="this.select()">/plugin install universe-fleet@universe-fleet-marketplace</textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="fleet-done-btn">兩行都貼完、按過 Enter 了</button>
+      </div>
+
+      <div class="self-check" data-selfcheck="fleet">
+        <div class="self-check-q"><input type="checkbox"> 看到艦隊安裝成功的訊息了嗎？</div>
+        <div class="self-check-q"><input type="checkbox"> 打 <code>/plugin list</code> 有看到 universe-fleet 嗎？</div>
+      </div>
+
+      <details class="stuck">
+        <summary>卡住了？</summary>
+        <table>
+          <tr><th>現象</th><th>解法</th></tr>
+          <tr><td>貼上去沒反應</td><td>確認游標真的在 Claude Code 的輸入列，不是終端機外面</td></tr>
+          <tr><td>說找不到 marketplace</td><td>確認網路連線、再跑一次第一步</td></tr>
+          <tr><td>裝完 <code>/plugin list</code> 沒看到</td><td>把兩行指令重新照順序跑一次，中間不要插別的指令</td></tr>
+        </table>
+        <div class="escalate">還是卡住？截圖傳給助教。</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- 寶藏 5：教練報到（真驗證） -->
+  <div class="quest" data-quest="coach-checkin">
+    <div class="quest-head">
+      <div class="quest-title">🎖️ 教練報到</div>
+      <div class="quest-status">尚未收下</div>
+    </div>
+    <div class="quest-body">
+      <p>這是真正的驗證關——網頁沒辦法偵測你電腦裝了什麼，但教練可以。複製下面這句，貼進 Claude Code：</p>
+
+      <div class="copy-block">
+        <code>教練、報到</code>
+        <button class="btn secondary copy-btn" data-copy="教練、報到">複製</button>
+        <span class="copy-feedback">已複製</span>
+      </div>
+      <div class="fallback-box" data-fallback-for="coach-checkin">
+        <p>剪貼簿權限被擋了？手動全選這段：</p>
+        <textarea rows="1" readonly onclick="this.select()">教練、報到</textarea>
+      </div>
+
+      <p>教練會自檢你的環境，通過後會給你一組通關碼。把它輸入在下面：</p>
+
+      <div class="code-input-row">
+        <input type="text" id="unlock-code" placeholder="輸入通關碼">
+        <button class="btn" id="unlock-btn">解鎖證書</button>
+      </div>
+      <div class="gate-hint" id="unlock-hint"></div>
+
+      <details class="stuck">
+        <summary>卡住了？</summary>
+        <table>
+          <tr><th>現象</th><th>解法</th></tr>
+          <tr><td>教練說某個艦員沒裝好</td><td>回對應那關重新走一次，教練會白話講缺哪個寶藏</td></tr>
+          <tr><td>不確定通關碼打對了沒</td><td>通關碼是四個字，注意有沒有多打空格</td></tr>
+        </table>
+        <div class="escalate">還是卡住？截圖傳給助教。</div>
+      </details>
+    </div>
+  </div>
+
+  <div class="cert" id="certificate">
+    <div class="cert-eyebrow">裝備完成證書</div>
+    <h3 id="cert-name">艦長</h3>
+    <p>五個寶藏全部到手，你的環境真的裝好了。</p>
+    <div class="cert-meta" id="cert-date"></div>
+    <p style="margin-top:16px; color: var(--ink-soft);">開課見，艦長。</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ 第二章 ============ -->
+  <section class="chapter">
+    <div class="chapter-num">第二章 · 課前完成即可</div>
+    <h2>船籍登記</h2>
+  </section>
+
+  <div class="quest" data-quest="meta-dev">
+    <div class="quest-head">
+      <div class="quest-title">📜 船籍：Meta 開發者註冊</div>
+      <div class="quest-status">尚未收下</div>
+    </div>
+    <div class="quest-body">
+      <p>如果你未來要讓艦隊自動幫你發 Threads，得先在 Meta 官方登記一個開發者身分。步驟跟 <code>skills/threads-setup/SKILL.md</code> 第一關、第二關完全一致——這裡不重複寫一套，直接跟教練或接入精靈走那份文件。</p>
+      <div class="btn-row">
+        <button class="btn treasure-btn" data-url="https://developers.facebook.com/" data-quest="meta-dev">收下（開 Meta 開發者官方頁）</button>
+      </div>
+      <div class="self-check" data-selfcheck="meta-dev">
+        <div class="self-check-q"><input type="checkbox"> 已經登記成為 Meta 開發者了嗎？</div>
+        <div class="self-check-q"><input type="checkbox"> 已經建立一個應用程式（App）了嗎？</div>
+      </div>
+      <p style="font-size:14px; color: var(--ink-faint);">送出權限申請後可能會進入「應用程式審查」等待期，實務上常抓 1-2 週；等待期間可以先完成第一章的其他關卡，不冷場。</p>
+      <details class="stuck">
+        <summary>卡住了？</summary>
+        <table>
+          <tr><th>現象</th><th>解法</th></tr>
+          <tr><td>「建立應用程式」按鈕找不到</td><td>第一次用會被要求先「註冊成為開發人員」，跟著畫面同意條款即可</td></tr>
+          <tr><td>不知道選哪個應用程式類型</td><td>認關鍵字「API」「開發」，選錯了之後還能再加使用案例，不是致命錯誤</td></tr>
+        </table>
+        <div class="escalate">還是卡住？截圖傳給助教。詳細步驟見 <code>skills/threads-setup/SKILL.md</code> 第一、二關。</div>
+      </details>
+    </div>
+  </div>
+
+  <footer>
+    我的宇宙艦隊 · 裝備發放 v1 &nbsp;·&nbsp; 進度自動存在這台電腦（<code>localStorage</code>），關掉分頁再回來不會歸零。
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "fleetOnboarding.v1";
+  var UNLOCK_CODE = "首航準備完成";
+
+  var QUESTS = ["claude-code", "codex", "node", "fleet", "coach-checkin", "meta-dev"];
+
+  var state = loadState();
+
+  function defaultState() {
+    return {
+      pilotName: "",
+      treasures: {
+        "claude-code": false,
+        "codex": false,
+        "node": false,
+        "fleet": false,
+        "coach-checkin": false,
+        "meta-dev": false
+      },
+      selfChecks: {},
+      certUnlocked: false
+    };
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaultState();
+      var parsed = JSON.parse(raw);
+      var base = defaultState();
+      return Object.assign(base, parsed, {
+        treasures: Object.assign(base.treasures, parsed.treasures || {}),
+        selfChecks: Object.assign({}, parsed.selfChecks || {})
+      });
+    } catch (e) {
+      return defaultState();
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      /* localStorage 不可用時靜默略過，不擋流程 */
+    }
+  }
+
+  function render() {
+    // 姓名
+    var nameInput = document.getElementById("pilot-name");
+    if (state.pilotName) nameInput.value = state.pilotName;
+
+    // 徽章列與寶藏卡狀態
+    QUESTS.forEach(function (q) {
+      var done = !!state.treasures[q];
+      var badge = document.querySelector('.badge[data-badge="' + q + '"]');
+      if (badge) badge.classList.toggle("done", done);
+
+      var card = document.querySelector('.quest[data-quest="' + q + '"]');
+      if (card) {
+        card.classList.toggle("complete", done);
+        var statusEl = card.querySelector(".quest-status");
+        if (statusEl) {
+          statusEl.textContent = done ? "已收下" : "尚未收下";
+          statusEl.classList.toggle("done", done);
+        }
+      }
+    });
+
+    // 自我檢查勾選還原
+    document.querySelectorAll(".self-check").forEach(function (block) {
+      var key = block.getAttribute("data-selfcheck");
+      var checks = state.selfChecks[key] || [];
+      var boxes = block.querySelectorAll('input[type="checkbox"]');
+      boxes.forEach(function (box, idx) {
+        box.checked = !!checks[idx];
+      });
+    });
+
+    // 證書
+    if (state.certUnlocked) {
+      var cert = document.getElementById("certificate");
+      cert.classList.add("show");
+      document.getElementById("cert-name").textContent =
+        (state.pilotName || "艦長") + " 艦長";
+      document.getElementById("cert-date").textContent =
+        "首航準備完成日：" + new Date().toLocaleDateString("zh-TW");
+    }
+  }
+
+  function markTreasure(name) {
+    state.treasures[name] = true;
+    saveState();
+    render();
+  }
+
+  // 姓名登記
+  document.getElementById("save-name-btn").addEventListener("click", function () {
+    var val = document.getElementById("pilot-name").value.trim();
+    var hint = document.getElementById("name-hint");
+    if (!val) {
+      hint.textContent = "先留個名字，證書上要印的";
+      hint.className = "gate-hint error";
+      return;
+    }
+    state.pilotName = val;
+    saveState();
+    hint.textContent = "登記完成，艦長";
+    hint.className = "gate-hint ok";
+    render();
+  });
+
+  // 平台分頁（Claude Code 寶藏卡內）
+  document.querySelectorAll(".platform-tab").forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      var platform = tab.getAttribute("data-platform");
+      var group = tab.closest(".quest-body");
+      group.querySelectorAll(".platform-tab").forEach(function (t) {
+        t.classList.toggle("active", t === tab);
+      });
+      group.querySelectorAll(".platform-panel").forEach(function (p) {
+        p.classList.toggle("active", p.getAttribute("data-platform") === platform);
+      });
+    });
+  });
+
+  // 寶藏鍵 = 真下載（window.open 官方網域）
+  document.querySelectorAll(".treasure-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var url = btn.getAttribute("data-url");
+      var quest = btn.getAttribute("data-quest");
+      window.open(url, "_blank", "noopener");
+      markTreasure(quest);
+    });
+  });
+
+  // 複製鍵 = 真複製進剪貼簿，失敗則顯示可全選的備援文字框
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.getAttribute("data-copy");
+      var feedback = btn.parentElement.querySelector(".copy-feedback");
+
+      function showFeedback() {
+        if (feedback) {
+          feedback.classList.add("show");
+          setTimeout(function () { feedback.classList.remove("show"); }, 1800);
+        }
+      }
+
+      function showFallback() {
+        var block = btn.closest(".quest-body") || document;
+        var idBits = text.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12);
+        var fb = block.querySelector('[data-fallback-for]');
+        // 找同一個 copy-block 底下最接近的 fallback（用相鄰 sibling 概念，找下一個 fallback-box）
+        var container = btn.closest(".copy-block");
+        var next = container ? container.nextElementSibling : null;
+        if (next && next.classList.contains("fallback-box")) {
+          next.classList.add("show");
+        }
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showFeedback, showFallback);
+      } else {
+        showFallback();
+      }
+    });
+  });
+
+  // 艦隊入列：手動確認完成鍵
+  var fleetDoneBtn = document.getElementById("fleet-done-btn");
+  if (fleetDoneBtn) {
+    fleetDoneBtn.addEventListener("click", function () {
+      markTreasure("fleet");
+    });
+  }
+
+  // 自我檢查勾選即存檔
+  document.querySelectorAll(".self-check").forEach(function (block) {
+    var key = block.getAttribute("data-selfcheck");
+    block.querySelectorAll('input[type="checkbox"]').forEach(function (box, idx) {
+      box.addEventListener("change", function () {
+        var checks = state.selfChecks[key] || [];
+        checks[idx] = box.checked;
+        state.selfChecks[key] = checks;
+        saveState();
+      });
+    });
+  });
+
+  // 通關碼解鎖證書
+  document.getElementById("unlock-btn").addEventListener("click", function () {
+    var input = document.getElementById("unlock-code").value.trim();
+    var hint = document.getElementById("unlock-hint");
+    var normalize = function (s) { return s.replace(/\s+/g, ""); };
+
+    if (normalize(input) === normalize(UNLOCK_CODE)) {
+      markTreasure("coach-checkin");
+      state.certUnlocked = true;
+      saveState();
+      hint.textContent = "通關碼正確，證書解鎖了";
+      hint.className = "gate-hint ok";
+      render();
+      var cert = document.getElementById("certificate");
+      cert.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      hint.textContent = "還不太對，跟教練確認一下有沒有打錯字（注意有沒有多打空格）";
+      hint.className = "gate-hint error";
+    }
+  });
+
+  render();
+})();
+</script>
