@@ -445,126 +445,46 @@
     color: var(--ink-faint);
   }
 
-  /* ============================================================
-     高擬真畫面復刻元件庫
-     step-frame = 三件套外框（畫面 / 你做的動作 / 你應該看到）
-     ============================================================ */
-
-  .step-frame {
+  /* ---- 示意圖：終端機是什麼 / 貼在這裡 ---- */
+  .explainer {
     margin: 20px 0 28px;
   }
-  .step-frame-label {
+  .explainer-label {
     font-size: 12px;
     color: var(--ink-faint);
     letter-spacing: 0.06em;
     margin-bottom: 8px;
   }
-  .mockup-tag {
-    font-size: 11px;
-    color: var(--ink-faint);
-    opacity: 0.75;
-  }
-
-  .step-action {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--ink);
-    margin: 12px 0 10px;
-    padding-left: 2px;
-  }
-  .step-action .step-num {
-    font-family: "SF Mono", Menlo, monospace;
-    font-size: 12px;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .step-result {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    font-size: 13px;
-    color: var(--ink-faint);
-    margin: 8px 0 4px;
-  }
-  .step-result .step-result-mark {
-    color: var(--accent);
-    flex-shrink: 0;
-  }
-
-  /* ---- macOS 風格通用視窗殼（終端機 / Claude Code 共用） ---- */
-  .os-window {
-    border-radius: 9px;
+  .term-window {
+    border-radius: 8px;
     overflow: hidden;
-    border: 1px solid #cfcfcf;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.10);
-    max-width: 480px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    max-width: 420px;
   }
-  .os-titlebar {
-    background: linear-gradient(#e9e9e9, #dedede);
-    padding: 7px 10px;
+  .term-titlebar {
+    background: #e8e8e8;
+    padding: 8px 10px;
     display: flex;
-    align-items: center;
     gap: 6px;
-    border-bottom: 1px solid #cacaca;
   }
-  .os-dot {
-    width: 11px;
-    height: 11px;
+  .term-dot {
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: #c9c9c9;
   }
-  .os-dot.red { background: #ec6a5e; }
-  .os-dot.yellow { background: #f4bf4f; }
-  .os-dot.green { background: #61c454; }
-  .os-titlebar-name {
-    flex: 1;
-    text-align: center;
-    font-size: 12px;
-    color: #6a6a6a;
-    font-family: -apple-system, "PingFang TC", sans-serif;
-    margin-right: 48px;
-  }
-
-  /* ---- 終端機（深色底、% 提示符） ---- */
   .term-body {
     background: #1e1e1e;
     color: #d4d4d4;
     font-family: "SF Mono", Menlo, monospace;
     font-size: 13px;
-    padding: 14px 16px;
-    line-height: 1.7;
+    padding: 16px;
+    line-height: 1.6;
   }
-  .term-line-dim {
-    opacity: 0.5;
-  }
-  .term-prompt {
+  .term-prompt::before {
+    content: "$ ";
     color: #7ec699;
-  }
-  .term-prompt::after {
-    content: " % ";
-    color: #7ec699;
-  }
-  .term-cmd {
-    color: #e8e8e8;
-    word-break: break-all;
-  }
-  .term-output {
-    color: #9fd9a0;
-    white-space: pre-wrap;
-    margin-top: 2px;
-  }
-  .term-output.term-output-plain {
-    color: #b8b8b8;
   }
   .term-cursor {
     display: inline-block;
@@ -579,143 +499,44 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
   }
-  .term-line-highlight {
-    background: rgba(224,169,92,0.16);
-    border: 1px solid #e0a95c;
-    border-radius: 4px;
-    padding: 4px 6px;
-    margin: 2px -6px;
+  .explainer-note {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-top: 10px;
+  }
+
+  .paste-diagram {
+    max-width: 460px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    margin: 4px 0 10px;
+  }
+  .paste-diagram .term-body {
+    padding: 14px 14px 10px;
+  }
+  .paste-diagram .term-line {
+    opacity: 0.55;
+    margin-bottom: 8px;
+  }
+  .paste-target {
+    border: 2px solid #e0a95c;
+    border-radius: 5px;
+    padding: 6px 8px;
+    background: rgba(224,169,92,0.08);
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
   }
-  .term-line-highlight .arrow-note {
+  .paste-target .arrow-note {
     font-family: -apple-system, "PingFang TC", sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     color: #e0a95c;
     white-space: nowrap;
+    margin-left: 10px;
   }
-
-  /* ---- Claude Code 輸入列窗（聊天式 UI、底部輸入框） ---- */
-  .cc-window .os-titlebar-name { margin-right: 48px; }
-  .cc-body {
-    background: #faf9f7;
-    font-family: -apple-system, "PingFang TC", sans-serif;
-    font-size: 13px;
-    padding: 14px 16px 12px;
-  }
-  .cc-msg {
-    color: #6a6a6a;
-    margin-bottom: 10px;
-    line-height: 1.6;
-  }
-  .cc-msg.cc-msg-system {
-    font-size: 12px;
-    color: #a8a8a8;
-    font-style: italic;
-  }
-  .cc-msg.cc-msg-reply {
-    background: #fff;
-    border: 1px solid #e6e2da;
-    border-radius: 6px;
-    padding: 10px 12px;
-    color: #333;
-  }
-  .cc-inputbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #fff;
-    border: 1px solid #d8d3c8;
-    border-radius: 8px;
-    padding: 8px 10px;
-    margin-top: 6px;
-  }
-  .cc-inputbar.cc-inputbar-target {
-    border: 2px solid #e0a95c;
-    background: rgba(224,169,92,0.06);
-  }
-  .cc-input-text {
-    flex: 1;
-    font-family: "SF Mono", Menlo, monospace;
-    font-size: 13px;
-    color: #333;
-    word-break: break-all;
-  }
-  .cc-input-text.placeholder {
-    color: #b8b2a4;
-    font-family: -apple-system, "PingFang TC", sans-serif;
-  }
-  .cc-send-btn {
-    flex-shrink: 0;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: var(--ink);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-  }
-  .cc-inputbar-note {
-    font-size: 11px;
-    color: #b8b2a4;
-    margin-top: 4px;
-    text-align: right;
-  }
-
-  /* ---- 瀏覽器網址列窗 ---- */
-  .browser-window .os-titlebar {
-    padding: 6px 10px;
-  }
-  .browser-addressbar {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #fff;
-    border: 1px solid #cfcfcf;
-    border-radius: 999px;
-    padding: 4px 12px;
-    margin-right: 48px;
-    font-family: "SF Mono", Menlo, monospace;
-    font-size: 12px;
-    color: #555;
-  }
-  .browser-addressbar .lock {
-    color: #8a8a8a;
-    font-size: 11px;
-  }
-  .browser-body {
-    background: #fff;
-    padding: 22px 18px;
-    text-align: center;
-  }
-  .browser-body-title {
-    font-family: -apple-system, "PingFang TC", sans-serif;
-    font-size: 15px;
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-  .browser-body-sub {
-    font-family: -apple-system, "PingFang TC", sans-serif;
-    font-size: 12px;
-    color: #999;
-  }
-  .browser-body-btn {
-    display: inline-block;
-    margin-top: 12px;
-    font-family: -apple-system, "PingFang TC", sans-serif;
-    font-size: 12px;
-    padding: 6px 16px;
-    border-radius: 5px;
-    background: #2a2a2a;
-    color: #fff;
-  }
-
   .expected-result {
     font-size: 13px;
     color: var(--ink-faint);
@@ -765,18 +586,17 @@
   </section>
 
   <!-- 圖解：什麼是終端機（第一個指令出現之前） -->
-  <div class="step-frame">
-    <div class="step-frame-label">畫面模擬 · 什麼是終端機 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-    <div class="os-window">
-      <div class="os-titlebar">
-        <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-        <span class="os-titlebar-name">terminal — zsh</span>
+  <div class="explainer">
+    <div class="explainer-label">示意圖 · 什麼是終端機</div>
+    <div class="term-window">
+      <div class="term-titlebar">
+        <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
       </div>
       <div class="term-body">
-        <div><span class="term-prompt">nelsen@fleet</span>~<span class="term-cursor"></span></div>
+        <div class="term-prompt">你在這裡打指令<span class="term-cursor"></span></div>
       </div>
     </div>
-    <p class="expected-result" style="margin-top:10px;">這個深色視窗就是「終端機」：一個只能打字、沒有滑鼠按鈕的軟體，指令打完按 Enter 它才會動作。<br>Mac：按 <code>cmd</code> + 空白鍵、輸入 <code>Terminal</code>；Windows：按開始鍵、輸入 <code>PowerShell</code>。</p>
+    <p class="explainer-note">這個深色視窗就是「終端機」：一個只能打字、沒有滑鼠按鈕的軟體，指令打完按 Enter 它才會動作。<br>Mac：按 <code>cmd</code> + 空白鍵、輸入 <code>Terminal</code>；Windows：按開始鍵、輸入 <code>PowerShell</code>。</p>
   </div>
 
   <!-- 寶藏 1：Claude Code -->
@@ -794,57 +614,11 @@
       </div>
 
       <div class="platform-panel active" data-platform="mac">
-        <p>下載桌面版（含 Claude Code），或用終端機指令安裝。</p>
-
-        <div class="step-action"><span class="step-num">1</span> 按一下「複製」，把安裝指令複製起來</div>
+        <p>下載桌面版（含 Claude Code），或用終端機指令安裝：</p>
         <div class="copy-block">
           <code>curl -fsSL https://claude.ai/install.sh | bash</code>
           <button class="btn secondary copy-btn" data-copy="curl -fsSL https://claude.ai/install.sh | bash">複製</button>
           <span class="copy-feedback">已複製</span>
-        </div>
-        <div class="fallback-box" data-fallback-for="cc-mac">
-          <p>剪貼簿權限被擋了？手動全選這段：</p>
-          <textarea rows="1" readonly onclick="this.select()">curl -fsSL https://claude.ai/install.sh | bash</textarea>
-        </div>
-
-        <div class="step-action"><span class="step-num">2</span> 切到終端機視窗、按 <code>cmd+V</code> 貼上、按 <code>Enter</code></div>
-        <div class="step-frame">
-          <div class="step-frame-label">畫面模擬 · 終端機 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-          <div class="os-window">
-            <div class="os-titlebar">
-              <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-              <span class="os-titlebar-name">terminal — zsh</span>
-            </div>
-            <div class="term-body">
-              <div class="term-line-highlight">
-                <span><span class="term-prompt"></span><span class="term-cmd">curl -fsSL https://claude.ai/install.sh | bash</span></span>
-                <span class="arrow-note">← 貼在這裡、按 Enter</span>
-              </div>
-              <div class="term-output">Installing Claude Code…
-Claude Code installed successfully ✓</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="step-result">
-          <span class="step-result-mark">你應該看到：</span>
-          <span>終端機吐出 <span class="mono">Claude Code installed successfully</span> 這行、沒有紅字錯誤訊息。</span>
-        </div>
-
-        <div class="step-action" style="margin-top:18px;"><span class="step-num">3</span> 也可以直接按下面按鈕、去官網下載桌面版</div>
-        <div class="step-frame">
-          <div class="step-frame-label">畫面模擬 · 瀏覽器 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-          <div class="os-window browser-window">
-            <div class="os-titlebar">
-              <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-              <span class="browser-addressbar"><span class="lock">🔒</span>claude.com/download</span>
-            </div>
-            <div class="browser-body">
-              <div class="browser-body-title">下載 Claude Code</div>
-              <div class="browser-body-sub">macOS · 桌面版安裝程式</div>
-              <span class="browser-body-btn">下載 for Mac</span>
-            </div>
-          </div>
         </div>
         <div class="btn-row">
           <button class="btn treasure-btn" data-url="https://claude.com/download" data-quest="claude-code">收下（開官方下載頁）</button>
@@ -852,57 +626,11 @@ Claude Code installed successfully ✓</div>
       </div>
 
       <div class="platform-panel" data-platform="windows">
-        <p>下載桌面版（含 Claude Code），或用 PowerShell 安裝。</p>
-
-        <div class="step-action"><span class="step-num">1</span> 按一下「複製」，把安裝指令複製起來</div>
+        <p>下載桌面版（含 Claude Code），或用 PowerShell 安裝：</p>
         <div class="copy-block">
           <code>irm https://claude.ai/install.ps1 | iex</code>
           <button class="btn secondary copy-btn" data-copy="irm https://claude.ai/install.ps1 | iex">複製</button>
           <span class="copy-feedback">已複製</span>
-        </div>
-        <div class="fallback-box" data-fallback-for="cc-win">
-          <p>剪貼簿權限被擋了？手動全選這段：</p>
-          <textarea rows="1" readonly onclick="this.select()">irm https://claude.ai/install.ps1 | iex</textarea>
-        </div>
-
-        <div class="step-action"><span class="step-num">2</span> 切到 PowerShell 視窗、按 <code>ctrl+V</code> 貼上、按 <code>Enter</code></div>
-        <div class="step-frame">
-          <div class="step-frame-label">畫面模擬 · PowerShell <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-          <div class="os-window">
-            <div class="os-titlebar">
-              <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-              <span class="os-titlebar-name">Windows PowerShell</span>
-            </div>
-            <div class="term-body" style="background:#012456; color:#e8e8e8;">
-              <div class="term-line-highlight" style="background:rgba(224,169,92,0.22);">
-                <span>PS C:\Users\pilot&gt; <span class="term-cmd">irm https://claude.ai/install.ps1 | iex</span></span>
-                <span class="arrow-note">← 貼在這裡、按 Enter</span>
-              </div>
-              <div class="term-output" style="color:#9fd9a0;">Installing Claude Code…
-Claude Code installed successfully ✓</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="step-result">
-          <span class="step-result-mark">你應該看到：</span>
-          <span>PowerShell 吐出 <span class="mono">Claude Code installed successfully</span> 這行、沒有紅字錯誤訊息。</span>
-        </div>
-
-        <div class="step-action" style="margin-top:18px;"><span class="step-num">3</span> 也可以直接按下面按鈕、去官網下載桌面版</div>
-        <div class="step-frame">
-          <div class="step-frame-label">畫面模擬 · 瀏覽器 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-          <div class="os-window browser-window">
-            <div class="os-titlebar">
-              <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-              <span class="browser-addressbar"><span class="lock">🔒</span>claude.com/download</span>
-            </div>
-            <div class="browser-body">
-              <div class="browser-body-title">下載 Claude Code</div>
-              <div class="browser-body-sub">Windows · 桌面版安裝程式</div>
-              <span class="browser-body-btn">下載 for Windows</span>
-            </div>
-          </div>
         </div>
         <div class="btn-row">
           <button class="btn treasure-btn" data-url="https://claude.com/download" data-quest="claude-code">收下（開官方下載頁）</button>
@@ -936,58 +664,14 @@ Claude Code installed successfully ✓</div>
     <div class="quest-body">
       <p>Codex 是 OpenAI 的副艦，需要 ChatGPT 帳號（Plus / Pro / Business 以上方案才有 Codex，免費版沒有）。先去 ChatGPT 官方頁確認方案，再回來裝 CLI。</p>
 
-      <div class="step-action"><span class="step-num">1</span> 按一下「開 ChatGPT 官方頁」按鈕，確認你的方案是 Plus 以上</div>
-      <div class="step-frame">
-        <div class="step-frame-label">畫面模擬 · 瀏覽器 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-        <div class="os-window browser-window">
-          <div class="os-titlebar">
-            <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="browser-addressbar"><span class="lock">🔒</span>chatgpt.com</span>
-          </div>
-          <div class="browser-body">
-            <div class="browser-body-title">ChatGPT</div>
-            <div class="browser-body-sub">確認方案：Plus / Pro / Business 以上才有 Codex</div>
-            <span class="browser-body-btn">查看我的方案</span>
-          </div>
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="btn treasure-btn" data-url="https://chatgpt.com" data-quest="codex">收下（開 ChatGPT 官方頁確認方案）</button>
-      </div>
-
-      <div class="step-action" style="margin-top:18px;"><span class="step-num">2</span> 按一下「複製」，把安裝指令複製起來</div>
       <div class="copy-block">
         <code>npm i -g @openai/codex</code>
         <button class="btn secondary copy-btn" data-copy="npm i -g @openai/codex">複製</button>
         <span class="copy-feedback">已複製</span>
       </div>
-      <div class="fallback-box" data-fallback-for="codex-install">
-        <p>剪貼簿權限被擋了？手動全選這段：</p>
-        <textarea rows="1" readonly onclick="this.select()">npm i -g @openai/codex</textarea>
-      </div>
 
-      <div class="step-action"><span class="step-num">3</span> 切到終端機視窗、貼上、按 <code>Enter</code></div>
-      <div class="step-frame">
-        <div class="step-frame-label">畫面模擬 · 終端機 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-        <div class="os-window">
-          <div class="os-titlebar">
-            <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="os-titlebar-name">terminal — zsh</span>
-          </div>
-          <div class="term-body">
-            <div class="term-line-highlight">
-              <span><span class="term-prompt"></span><span class="term-cmd">npm i -g @openai/codex</span></span>
-              <span class="arrow-note">← 貼在這裡、按 Enter</span>
-            </div>
-            <div class="term-output">added 1 package in 3s
-codex@0.x.x</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="step-result">
-        <span class="step-result-mark">你應該看到：</span>
-        <span>終端機顯示 <span class="mono">added 1 package</span>、再打 <span class="mono">codex</span> 會跳出 Codex 的歡迎畫面。</span>
+      <div class="btn-row">
+        <button class="btn treasure-btn" data-url="https://chatgpt.com" data-quest="codex">收下（開 ChatGPT 官方頁確認方案）</button>
       </div>
 
       <div class="self-check" data-selfcheck="codex">
@@ -1015,46 +699,9 @@ codex@0.x.x</div>
     </div>
     <div class="quest-body">
       <p>本頁的艦隊入列指令（<code>/plugin marketplace add</code>）本身不需要 Node.js。但如果你要裝 Codex（上面那關）、或未來遇到某些外掛要求，就需要它——教練說需要時再回來拿也不遲。</p>
-
-      <div class="step-action"><span class="step-num">1</span> 按一下下面按鈕，去官網下載 LTS 版</div>
-      <div class="step-frame">
-        <div class="step-frame-label">畫面模擬 · 瀏覽器 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-        <div class="os-window browser-window">
-          <div class="os-titlebar">
-            <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="browser-addressbar"><span class="lock">🔒</span>nodejs.org/en/download</span>
-          </div>
-          <div class="browser-body">
-            <div class="browser-body-title">Node.js 官方下載</div>
-            <div class="browser-body-sub">選 LTS（長期支援版）</div>
-            <span class="browser-body-btn">下載 LTS</span>
-          </div>
-        </div>
-      </div>
       <div class="btn-row">
         <button class="btn treasure-btn" data-url="https://nodejs.org/en/download" data-quest="node">收下（開官方下載頁，選 LTS 版）</button>
       </div>
-
-      <div class="step-action" style="margin-top:18px;"><span class="step-num">2</span> 裝完後，切到終端機打 <code>node --version</code> 驗證</div>
-      <div class="step-frame">
-        <div class="step-frame-label">畫面模擬 · 終端機 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-        <div class="os-window">
-          <div class="os-titlebar">
-            <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="os-titlebar-name">terminal — zsh</span>
-          </div>
-          <div class="term-body">
-            <div><span class="term-prompt"></span><span class="term-cmd">node --version</span></div>
-            <div class="term-output">v22.14.0</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="step-result">
-        <span class="step-result-mark">你應該看到：</span>
-        <span>跳出一組像 <span class="mono">v22.14.0</span> 的版本號，不是「command not found」。</span>
-      </div>
-
       <div class="self-check" data-selfcheck="node">
         <div class="self-check-q"><input type="checkbox"> 終端機打 <code>node --version</code> 有跳出版本號嗎？</div>
       </div>
@@ -1079,8 +726,23 @@ codex@0.x.x</div>
     <div class="quest-body">
       <p>把「宇宙艦隊」這支團隊請進你的 Claude Code。複製下面兩行指令，貼進 Claude Code 的輸入列，一行一行按 Enter。</p>
 
+      <div class="explainer">
+        <div class="explainer-label">示意圖 · 貼在這裡</div>
+        <div class="paste-diagram">
+          <div class="term-titlebar">
+            <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+          </div>
+          <div class="term-body">
+            <div class="term-line">Claude Code 已啟動……</div>
+            <div class="paste-target">
+              <span class="term-prompt">貼上指令<span class="term-cursor"></span></span>
+              <span class="arrow-note">← 貼在這裡、按 Enter</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <p><strong>第一步</strong>：加入艦隊倉庫</p>
-      <div class="step-action"><span class="step-num">1</span> 按一下「複製」</div>
       <div class="copy-block">
         <code>/plugin marketplace add Nelsen0717/universe-fleet</code>
         <button class="btn secondary copy-btn" data-copy="/plugin marketplace add Nelsen0717/universe-fleet">複製</button>
@@ -1091,32 +753,7 @@ codex@0.x.x</div>
         <textarea rows="1" readonly onclick="this.select()">/plugin marketplace add Nelsen0717/universe-fleet</textarea>
       </div>
 
-      <div class="step-action"><span class="step-num">2</span> 切到 Claude Code 視窗、按 <code>cmd+V</code>（Windows 為 <code>ctrl+V</code>）貼上、按 <code>Enter</code></div>
-      <div class="step-frame">
-        <div class="step-frame-label">畫面模擬 · Claude Code <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-        <div class="os-window cc-window">
-          <div class="os-titlebar">
-            <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="os-titlebar-name">Claude Code</span>
-          </div>
-          <div class="cc-body">
-            <div class="cc-msg cc-msg-system">Claude Code 已啟動……</div>
-            <div class="cc-inputbar cc-inputbar-target">
-              <span class="cc-input-text">/plugin marketplace add Nelsen0717/universe-fleet</span>
-              <span class="cc-send-btn">↑</span>
-            </div>
-            <div class="cc-inputbar-note">← 貼在這裡、按 Enter</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="step-result">
-        <span class="step-result-mark">你應該看到：</span>
-        <span>Claude Code 回覆已加入 marketplace（<span class="mono">Nelsen0717/universe-fleet</span> 出現在清單裡）。</span>
-      </div>
-
-      <p style="margin-top:20px;"><strong>第二步</strong>：安裝艦隊</p>
-      <div class="step-action"><span class="step-num">1</span> 按一下「複製」</div>
+      <p><strong>第二步</strong>：安裝艦隊</p>
       <div class="copy-block">
         <code>/plugin install universe-fleet@universe-fleet-marketplace</code>
         <button class="btn secondary copy-btn" data-copy="/plugin install universe-fleet@universe-fleet-marketplace">複製</button>
@@ -1127,29 +764,7 @@ codex@0.x.x</div>
         <textarea rows="1" readonly onclick="this.select()">/plugin install universe-fleet@universe-fleet-marketplace</textarea>
       </div>
 
-      <div class="step-action"><span class="step-num">2</span> 切回 Claude Code 視窗、貼上、按 <code>Enter</code></div>
-      <div class="step-frame">
-        <div class="step-frame-label">畫面模擬 · Claude Code <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-        <div class="os-window cc-window">
-          <div class="os-titlebar">
-            <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="os-titlebar-name">Claude Code</span>
-          </div>
-          <div class="cc-body">
-            <div class="cc-msg cc-msg-reply">✓ 已加入 marketplace：Nelsen0717/universe-fleet</div>
-            <div class="cc-inputbar cc-inputbar-target">
-              <span class="cc-input-text">/plugin install universe-fleet@universe-fleet-marketplace</span>
-              <span class="cc-send-btn">↑</span>
-            </div>
-            <div class="cc-inputbar-note">← 貼在這裡、按 Enter</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="step-result">
-        <span class="step-result-mark">你應該看到：</span>
-        <span>Claude Code 回「<strong>安裝成功</strong>」的訊息（兩行都跑完後才算數）。</span>
-      </div>
+      <p class="expected-result">貼完你會看到：<strong>安裝成功</strong>的訊息（兩行都跑完後才算數）。</p>
 
       <div class="btn-row">
         <button class="btn" id="fleet-done-btn">兩行都貼完、按過 Enter 了</button>
@@ -1182,7 +797,22 @@ codex@0.x.x</div>
     <div class="quest-body">
       <p>這是真正的驗證關——網頁沒辦法偵測你電腦裝了什麼，但教練可以。複製下面這句，貼進 Claude Code：</p>
 
-      <div class="step-action"><span class="step-num">1</span> 按一下「複製」</div>
+      <div class="explainer">
+        <div class="explainer-label">示意圖 · 貼在這裡</div>
+        <div class="paste-diagram">
+          <div class="term-titlebar">
+            <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+          </div>
+          <div class="term-body">
+            <div class="term-line">universe-fleet 已就緒……</div>
+            <div class="paste-target">
+              <span class="term-prompt">貼上「教練、報到」<span class="term-cursor"></span></span>
+              <span class="arrow-note">← 貼在這裡、按 Enter</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="copy-block">
         <code>教練、報到</code>
         <button class="btn secondary copy-btn" data-copy="教練、報到">複製</button>
@@ -1191,41 +821,6 @@ codex@0.x.x</div>
       <div class="fallback-box" data-fallback-for="coach-checkin">
         <p>剪貼簿權限被擋了？手動全選這段：</p>
         <textarea rows="1" readonly onclick="this.select()">教練、報到</textarea>
-      </div>
-
-      <div class="step-action"><span class="step-num">2</span> 切到 Claude Code 視窗、按 <code>cmd+V</code>（Windows 為 <code>ctrl+V</code>）貼上、按 <code>Enter</code></div>
-      <div class="step-frame">
-        <div class="step-frame-label">畫面模擬 · Claude Code <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-        <div class="os-window cc-window">
-          <div class="os-titlebar">
-            <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="os-titlebar-name">Claude Code</span>
-          </div>
-          <div class="cc-body">
-            <div class="cc-msg cc-msg-system">universe-fleet 已就緒……</div>
-            <div class="cc-inputbar cc-inputbar-target">
-              <span class="cc-input-text">教練、報到</span>
-              <span class="cc-send-btn">↑</span>
-            </div>
-            <div class="cc-inputbar-note">← 貼在這裡、按 Enter</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="step-result">
-        <span class="step-result-mark">你應該看到：</span>
-        <span>教練回覆的畫面長這樣。</span>
-      </div>
-      <div class="step-frame">
-        <div class="os-window cc-window">
-          <div class="os-titlebar">
-            <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="os-titlebar-name">Claude Code</span>
-          </div>
-          <div class="cc-body">
-            <div class="cc-msg cc-msg-reply">艦隊安裝成功、四名艦員入列：<br>🛰️ 偵查兵　✍️ 撰寫官　🛡️ 守衛　🎖️ 教練<br><br>自檢結果：環境正常，通關碼：<strong>首航準備完成</strong></div>
-          </div>
-        </div>
       </div>
 
       <p class="expected-result">貼完你會看到：教練列出<strong>艦員清單</strong>並告訴你自檢結果。</p>
@@ -1274,28 +869,6 @@ codex@0.x.x</div>
     </div>
     <div class="quest-body">
       <p>如果你未來要讓艦隊自動幫你發 Threads，得先在 Meta 官方登記一個開發者身分。步驟跟 <code>skills/threads-setup/SKILL.md</code> 第一關、第二關完全一致——這裡不重複寫一套，直接跟教練或接入精靈走那份文件。</p>
-
-      <div class="step-action"><span class="step-num">1</span> 按一下下面按鈕，去 Meta 開發者官方頁</div>
-      <div class="step-frame">
-        <div class="step-frame-label">畫面模擬 · 瀏覽器 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-        <div class="os-window browser-window">
-          <div class="os-titlebar">
-            <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="browser-addressbar"><span class="lock">🔒</span>developers.facebook.com</span>
-          </div>
-          <div class="browser-body">
-            <div class="browser-body-title">Meta for Developers</div>
-            <div class="browser-body-sub">註冊開發者身分 → 建立應用程式（App）</div>
-            <span class="browser-body-btn">開始使用</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="step-result">
-        <span class="step-result-mark">你應該看到：</span>
-        <span>同意條款後跳到「建立應用程式」頁面，選好類型即完成註冊。</span>
-      </div>
-
       <div class="btn-row">
         <button class="btn treasure-btn" data-url="https://developers.facebook.com/" data-quest="meta-dev">收下（開 Meta 開發者官方頁）</button>
       </div>

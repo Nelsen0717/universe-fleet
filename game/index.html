@@ -42,6 +42,7 @@
       </div>
     </div>
     <div id="bridge-title">艦橋 — 拓荒者號</div>
+    <div id="bridge-subtitle">這裡的每個任務、都對應你內容事業的一件真事。</div>
 
     <div id="crew-row"></div>
 
@@ -49,8 +50,12 @@
       <button class="nav-btn" id="nav-tasks-btn" type="button">任務板</button>
       <button class="nav-btn" id="nav-briefing-btn" type="button">晨會</button>
       <button class="nav-btn" id="nav-archive-btn" type="button">檔案室</button>
+      <!-- 「觀測窗」「艦長室」入口暫時隱藏（2026-07-06）：功能尚未開放、避免玩家點進去只看到佔位頁。
+           場景檔案（scene-placeholder）與 Placeholder.show 邏輯保留在 codebase，未來要重新啟用
+           只需把下面兩顆按鈕的 HTML 加回來即可，data-placeholder-nav 機制不需要改。
       <button class="nav-btn" data-placeholder-nav="觀測窗" data-placeholder-note="訊號還在路上——成就牆與航程統計即將開放">觀測窗</button>
       <button class="nav-btn" data-placeholder-nav="艦長室" data-placeholder-note="訊號還在路上——設定與聲線檔即將開放">艦長室</button>
+      -->
     </div>
   </section>
 

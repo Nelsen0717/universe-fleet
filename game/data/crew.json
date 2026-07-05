@@ -6,7 +6,6 @@
       "role": "每日晨會主持人",
       "catchphrase": "艦長你一定要看這個——",
       "portraitNeutral": "assets/crew-scout.png",
-      "portraitPleased": "assets/scout-pleased.png",
       "portraitFallback": "assets/crew-scout.png",
       "hasDialogue": true,
       "dialogueFile": "data/dialogue-scout.json"
@@ -28,7 +27,6 @@
       "role": "聲線任務線",
       "catchphrase": "等等、這個字的重量不對。",
       "portraitNeutral": "assets/crew-writer.png",
-      "portraitPleased": "assets/writer-pleased.png",
       "portraitFallback": "assets/crew-writer.png",
       "hasDialogue": true,
       "dialogueFile": "data/dialogue-writer.json"
@@ -39,7 +37,6 @@
       "role": "發佈儀式主持",
       "catchphrase": "好了嗎？能發了嗎？現在？",
       "portraitNeutral": "assets/crew-publisher.png",
-      "portraitPleased": "assets/publisher-pleased.png",
       "portraitFallback": "assets/crew-publisher.png",
       "hasDialogue": true,
       "dialogueFile": "data/dialogue-publisher.json"
@@ -50,7 +47,6 @@
       "role": "週報解讀、預測遊戲莊家",
       "catchphrase": "數字不會安慰你、但我可以……開玩笑的。",
       "portraitNeutral": "assets/crew-analyst.png",
-      "portraitPleased": "assets/analyst-pleased.png",
       "portraitFallback": "assets/crew-analyst.png",
       "hasDialogue": true,
       "dialogueFile": "data/dialogue-analyst.json"

@@ -2,7 +2,6 @@
   "crewId": "writer",
   "displayName": "寫手",
   "portraitNeutral": "assets/crew-writer.png",
-  "portraitPleased": "assets/writer-pleased.png",
   "portraitFallback": "assets/crew-writer.png",
   "start": "entry_router",
   "nodes": {
@@ -37,7 +36,7 @@
     "greet_rushed": {
       "speaker": "寫手",
       "expression": "neutral",
-      "lines": ["我知道你趕。發行官也知道你趕，他每三分鐘站到我後面一次。字都有在走，只是走得比按鈕慢。"],
+      "lines": ["我知道你趕。字都有在走，只是走得比按鈕慢。"],
       "choices": [
         { "text": "今天不催你。", "goto": "slow_open", "setFlags": { "writer_rushed": false, "writer_trusted": true } },
         { "text": "我還是需要版本。", "goto": "version_needed" },

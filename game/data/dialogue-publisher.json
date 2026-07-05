@@ -2,7 +2,6 @@
   "crewId": "publisher",
   "displayName": "發行官",
   "portraitNeutral": "assets/crew-publisher.png",
-  "portraitPleased": "assets/publisher-pleased.png",
   "portraitFallback": "assets/crew-publisher.png",
   "start": "entry_router",
   "nodes": {
@@ -17,7 +16,7 @@
     "greet_first": {
       "speaker": "發行官",
       "expression": "pleased",
-      "lines": ["好了嗎？能發了嗎？現在？催？我這叫替出口保持溫度。好了嗎？現在呢？"],
+      "lines": ["好了嗎？能發了嗎？"],
       "choices": [
         { "text": "還沒，先檢查。", "goto": "check_first", "setFlags": { "publisher_waited": true } },
         { "text": "可以，先發一版。", "goto": "publish_now", "setFlags": { "publisher_rushed_publish": true } },
@@ -27,7 +26,7 @@
     "greet_waited": {
       "speaker": "發行官",
       "expression": "neutral",
-      "lines": ["我記得。你上次叫我等檢查。我等了。很成熟。很痛苦。兩件事可以同時成立。"],
+      "lines": ["我記得。你上次叫我等檢查、我等了——很成熟，也很痛苦。"],
       "choices": [
         { "text": "今天也先看清單。", "goto": "launch_checklist" },
         { "text": "今天你可以催一次。", "goto": "controlled_hurry", "setFlags": { "publisher_allowed_hurry": true } },
@@ -57,7 +56,7 @@
     "publish_now": {
       "speaker": "發行官",
       "expression": "pleased",
-      "lines": ["好！我就喜歡這種句子。等等，守門員在看我。好，我補一句：發之前還是要確認不是空話。"],
+      "lines": ["好！我就喜歡這種句子。……守門員在看我，補一句：發之前先確認不是空話。"],
       "choices": [
         { "text": "你學會踩煞車了。", "goto": "brake_learned", "setFlags": { "publisher_waited": true } },
         { "text": "那還是發。", "goto": "launch_anyway" }
@@ -148,7 +147,7 @@
     "fast_error": {
       "speaker": "發行官",
       "expression": "neutral",
-      "lines": ["同意。所以我跟守門員不是敵人。他說『別亂發』，我說『別永遠不發』。中間那條路，艦長你來踩。"],
+      "lines": ["同意。他說『別亂發』，我說『別永遠不發』——中間那條路，艦長你來踩。"],
       "choices": [
         { "text": "我會踩。", "goto": "END" },
         { "text": "你們都很難搞。", "goto": "difficult_crew" }

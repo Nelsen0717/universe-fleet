@@ -2,7 +2,6 @@
   "crewId": "scout",
   "displayName": "情報員",
   "portraitNeutral": "assets/crew-scout.png",
-  "portraitPleased": "assets/scout-pleased.png",
   "portraitFallback": "assets/crew-scout.png",
   "start": "entry_router",
   "nodes": {
@@ -27,7 +26,7 @@
     "greet_trusted": {
       "speaker": "情報員",
       "expression": "pleased",
-      "lines": ["你上次有讓我把話講完，所以我今天只帶三個訊號。真的，三個。好啦，可能三個半。"],
+      "lines": ["你上次有讓我把話講完，所以我今天只帶三個訊號。好啦，可能三個半。"],
       "choices": [
         { "text": "三個半也可以。", "goto": "topic_signal" },
         { "text": "先說你最在意的那個。", "goto": "topic_favorite" },
@@ -47,7 +46,7 @@
     "slow_ack": {
       "speaker": "情報員",
       "expression": "pleased",
-      "lines": ["好！第一，今天的素材要從人開始，不要從工具開始。第二，讀者要看到自己。第三，守門員叫我不要用『爆款』兩個字。"],
+      "lines": ["第一，素材要從人開始，不要從工具開始。第二，讀者要看到自己——守門員還叫我別用『爆款』兩個字。"],
       "choices": [
         { "text": "那晨會你來主持。", "goto": "host_morning", "setFlags": { "scout_hosts_morning": true } },
         { "text": "守門員真的有說？", "goto": "guard_quote" },
@@ -67,7 +66,7 @@
     "three_lines": {
       "speaker": "情報員",
       "expression": "pleased",
-      "lines": ["一，今天先找現場畫面。二，金句要能被截圖。三，奇觀只會讓人看完就走。三行，完畢。"],
+      "lines": ["一，先找現場畫面。二，金句要能被截圖。三，奇觀只會讓人看完就走。"],
       "choices": [
         { "text": "這次很好。", "goto": "useful_overload", "setFlags": { "scout_respected": true } },
         { "text": "我要看完整版本。", "goto": "topic_signal" }
@@ -177,7 +176,7 @@
     "not_clipper": {
       "speaker": "情報員",
       "expression": "pleased",
-      "lines": ["對！我不是剪報員。我是把外面的風翻譯成艦橋能用的方向。這句我也要記。"],
+      "lines": ["對！我不是剪報員，我是把外面的風翻譯成艦橋能用的方向。"],
       "choices": [
         { "text": "你越來越像活人了。", "goto": "alive" },
         { "text": "回艦橋。", "goto": "END" }
@@ -186,7 +185,7 @@
     "talk_more": {
       "speaker": "情報員",
       "expression": "pleased",
-      "lines": ["你確定？我可以把一個訊號講成三個小故事。好，我收斂。收斂只是排隊、不是消失。"],
+      "lines": ["你確定？好，我收斂——收斂只是排隊、不是消失。"],
       "choices": [
         { "text": "排隊就好。", "goto": "END" }
       ]

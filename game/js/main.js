@@ -335,7 +335,10 @@
 
     updatePortraitExpression(expression, crew) {
       const img = document.getElementById("dialogue-portrait");
-      if (expression === "pleased" && crew.portraitPleased) {
+      // 表情差分目前只有守門員（guard-neutral / guard-pleased 同風格）。
+      // 其餘艦員（scout/writer/publisher/analyst）的動漫風差分已於
+      // 2026-07-06 移除、一律固定用單一立繪，不嘗試載入 pleased 圖檔。
+      if (crew.id === "guard" && expression === "pleased" && crew.portraitPleased) {
         img.onerror = () => {
           img.onerror = null;
           img.src = crew.portraitFallback;
@@ -572,7 +575,15 @@
           await this.completeQuest(quest);
         });
 
-        li.append(meta, title, desc, xp, btn);
+        const parts = [meta, title];
+        if (quest.real_outcome) {
+          const outcome = document.createElement("div");
+          outcome.className = "quest-real-outcome";
+          outcome.textContent = quest.real_outcome;
+          parts.push(outcome);
+        }
+        parts.push(desc, xp, btn);
+        li.append(...parts);
         list.appendChild(li);
       });
     },
@@ -618,7 +629,8 @@
       wrap.innerHTML = "";
       state.crewData.crew.forEach((crew) => {
         const img = document.createElement("img");
-        img.src = crew.portraitPleased || crew.portraitNeutral || crew.portraitFallback;
+        // 表情差分僅守門員保留；其餘艦員固定用 portraitNeutral（2026-07-06）。
+        img.src = (crew.id === "guard" && crew.portraitPleased) || crew.portraitNeutral || crew.portraitFallback;
         img.alt = crew.name;
         img.onerror = () => {
           img.onerror = null;
@@ -700,7 +712,10 @@
       document.getElementById("briefing-summary").textContent = data.summary;
       document.getElementById("briefing-host-name").textContent = host ? `${host.name}主持` : "情報員主持";
       const img = document.getElementById("briefing-host-portrait");
-      img.src = host && host.portraitPleased ? host.portraitPleased : "assets/crew-scout.png";
+      // 表情差分僅守門員保留；其餘艦員固定用 portraitNeutral（2026-07-06）。
+      img.src = host && host.id === "guard" && host.portraitPleased
+        ? host.portraitPleased
+        : (host && host.portraitNeutral) || "assets/crew-scout.png";
       img.onerror = () => {
         img.onerror = null;
         img.src = "assets/crew-scout.png";

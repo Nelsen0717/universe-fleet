@@ -18,3 +18,5 @@
 - `analyst-pleased.png`
   - 來源：`/Users/nelsen/.codex/generated_images/019f3273-3e12-77f3-83a7-12d08ee73e91/ig_0246cf93b6f5b799016a4a5bf9b4508191868cfddf67ac09fb.png`
   - Prompt：冷靜分析師，克制微笑與冷笑話氣質；手繪墨線、白紙背景、#8a4a2a 棕色點綴，無文字、無 UI。
+
+四張表情差分（scout/writer/publisher/analyst-pleased.png）因風格漂移於 2026-07-06 移除；四人一律固定用 `crew-*.png` 單圖，不再切換表情。守門員的 guard-neutral/guard-pleased 差分（同墨線風格）保留。
