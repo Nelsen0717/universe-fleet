@@ -27,7 +27,8 @@ function defaultSave() {
     createdAt: todayLocalDateString(),
     profile: {
       hasSeenIntro: false,
-      rank: "見習"
+      rank: "見習",
+      playerName: ""
     },
     flags: {},
     streak: {
@@ -209,6 +210,16 @@ const SaveSystem = {
     const s = this.load();
     s.profile.hasSeenIntro = true;
     this.persist();
+  },
+
+  setPlayerName(name) {
+    const s = this.load();
+    s.profile.playerName = name || "";
+    this.persist();
+  },
+
+  getPlayerName() {
+    return this.load().profile.playerName || "";
   },
 
   unlockArchivePages(pageNumbers) {

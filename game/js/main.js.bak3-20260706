@@ -70,7 +70,7 @@
       this.stars = this.makeStars(260);
       this.skipped = false;
       const start = performance.now();
-      const DURATION = 2800; // 首開流程鎖死：開場字卡壓到 3 秒內，不搶主線時間
+      const DURATION = 10000;
 
       await new Promise((resolve) => {
         const finish = () => {
@@ -154,146 +154,18 @@
   };
 
   // ---------------------------------------------------------------
-  // 任命書：輸入名字蓋章 → Nelsen 老師三句開場，講清楚這遊戲是幹嘛的
+  // 任命書：蓋章後 Nelsen 老師一句話講清楚這遊戲是幹嘛的
   // ---------------------------------------------------------------
   const TeacherOrders = {
-    LINES: [
-      "歡迎上艦、艦長。",
-      "這裡一關一關玩完、你電腦上就有一支真的 AI 團隊——開課那天帶著它來。",
-      "跟我來、先領第一件裝備。"
-    ],
-
     async play() {
       await window.SceneManager.transitionTo("orders", "任命書");
-      const playerName = await this.playNamingStep();
-      await this.playTeacherStep(playerName);
-    },
-
-    playNamingStep() {
-      return new Promise((resolve) => {
-        const namingStep = document.getElementById("orders-naming-step");
-        const teacherStep = document.getElementById("orders-teacher-step");
-        const input = document.getElementById("orders-name-input");
-        const btn = document.getElementById("orders-stamp-btn");
-        namingStep.classList.remove("orders-step-hidden");
-        teacherStep.classList.add("orders-step-hidden");
-        input.value = "";
-        input.focus();
-
-        const stamp = () => {
-          const name = input.value.trim().slice(0, 12);
-          window.SaveSystem.setPlayerName(name);
-          window.SFX.unlock();
-          namingStep.classList.add("orders-step-hidden");
-          teacherStep.classList.remove("orders-step-hidden");
-          resolve(name);
-        };
-        btn.addEventListener("click", stamp, { once: true });
-        input.addEventListener(
-          "keydown",
-          (e) => {
-            if (e.key === "Enter") {
-              btn.removeEventListener("click", stamp);
-              stamp();
-            }
-          },
-          { once: true }
-        );
-      });
-    },
-
-    async playTeacherStep(playerName) {
-      const lineEl = document.getElementById("orders-briefing-line");
-      const btn = document.getElementById("orders-continue-btn");
-
-      const lines = playerName
-        ? [`歡迎上艦、艦長${playerName}。`, ...this.LINES.slice(1)]
-        : this.LINES;
-
-      for (let i = 0; i < lines.length; i++) {
-        lineEl.textContent = lines[i];
-        btn.textContent = i < lines.length - 1 ? "繼續" : "出發";
-        await new Promise((resolve) => {
-          const onContinue = () => {
-            btn.removeEventListener("click", onContinue);
-            resolve();
-          };
-          btn.addEventListener("click", onContinue, { once: true });
-        });
-      }
-    }
-  };
-
-  // ---------------------------------------------------------------
-  // 常駐嚮導列：Nelsen 老師進度提示（艦橋／任務板都可見）
-  // 每關之間的過場一句，口吻溫暖直接、每關不同。
-  // ---------------------------------------------------------------
-  const MentorGuide = {
-    TRANSITION_LINES: {
-      "claude-code": "好、下一件。",
-      codex: "這關最多人卡住、慢慢來。",
-      node: "這個是選配、裝不裝得起來都不影響下一步。",
-      fleet: "快了，最後一件而已。",
-      "coach-checkin": "這是驗收關，交給教練了。"
-    },
-
-    show(text) {
-      const bar = document.getElementById("guide-bar");
-      const textEl = document.getElementById("guide-bar-text");
-      textEl.textContent = text;
-      bar.classList.remove("guide-bar-hidden");
-      this.repositionBelowDemoBanner();
-    },
-
-    // 體驗版提示橫幅是 position:fixed top:0，嚮導列必須疊在它下方、
-    // 否則兩條 fixed bar 會互相蓋住。動態量測、關閉提示橫幅後嚮導列會自動貼齊頂端。
-    repositionBelowDemoBanner() {
-      const banner = document.getElementById("demo-version-banner");
-      const bar = document.getElementById("guide-bar");
-      const bannerVisible = banner && getComputedStyle(banner).display !== "none";
-      bar.style.top = bannerVisible ? `${banner.getBoundingClientRect().height}px` : "0";
-    },
-
-    initResizeListener() {
-      window.addEventListener("resize", () => this.repositionBelowDemoBanner());
-    },
-
-    hide() {
-      document.getElementById("guide-bar").classList.add("guide-bar-hidden");
-    },
-
-    updateForQuestProgress() {
-      const total = state.installQuestsData.quests.length;
-      const done = InstallQuests.doneCount();
-      if (done >= total) {
-        this.hide();
-        return;
-      }
-      const current = state.installQuestsData.quests[done];
-      this.show(`目前第 ${done + 1}／${total} 關——${current.title}`);
-    },
-
-    transitionLineFor(questId) {
-      return this.TRANSITION_LINES[questId] || "好、下一件。";
-    },
-
-    // 過場一句：黑幕字卡形式插播老師的話，按繼續才進下一關
-    async playTransition(line) {
-      await window.SceneManager.transitionTo("orders", "下一關");
-      const namingStep = document.getElementById("orders-naming-step");
-      const teacherStep = document.getElementById("orders-teacher-step");
-      namingStep.classList.add("orders-step-hidden");
-      teacherStep.classList.remove("orders-step-hidden");
-      const lineEl = document.getElementById("orders-briefing-line");
-      const btn = document.getElementById("orders-continue-btn");
-      lineEl.textContent = line;
-      btn.textContent = "繼續";
       await new Promise((resolve) => {
+        const btn = document.getElementById("orders-continue-btn");
         const onContinue = () => {
           btn.removeEventListener("click", onContinue);
           resolve();
         };
-        btn.addEventListener("click", onContinue, { once: true });
+        btn.addEventListener("click", onContinue);
       });
     }
   };
@@ -335,8 +207,7 @@
       row.innerHTML = "";
       state.crewData.crew.forEach((crew, idx) => {
         const btn = document.createElement("button");
-        const locked = this.crewIsLocked(crew);
-        btn.className = "crew-icon-btn idle-bob" + (locked ? " crew-locked" : "");
+        btn.className = "crew-icon-btn idle-bob";
         btn.style.animationDelay = `${idx * 0.35}s`;
         btn.setAttribute("data-crew", crew.id);
         btn.setAttribute("aria-label", crew.name);
@@ -352,31 +223,19 @@
 
         const label = document.createElement("span");
         label.className = "crew-label";
-        label.textContent = locked ? "沉睡中" : crew.name;
+        label.textContent = crew.name;
         btn.appendChild(label);
 
-        if (locked) {
-          const lockBadge = document.createElement("span");
-          lockBadge.className = "crew-lock-badge";
-          lockBadge.textContent = "🔒";
-          btn.appendChild(lockBadge);
-        } else if (this.crewHasNewEvent(crew)) {
+        if (this.crewHasNewEvent(crew)) {
           const badge = document.createElement("span");
           badge.className = "exclaim-badge";
           badge.textContent = "!";
           btn.appendChild(badge);
         }
 
-        btn.addEventListener("click", () => this.onCrewClick(crew, locked));
+        btn.addEventListener("click", () => this.onCrewClick(crew));
         row.appendChild(btn);
       });
-    },
-
-    // 對應裝備關卡未完成的艦員，在艦橋顯示暗態＋鎖標（漸進揭露）
-    crewIsLocked(crew) {
-      const quest = state.installQuestsData.quests.find((q) => q.crewId === crew.id);
-      if (!quest) return false;
-      return !InstallQuests.isDone(quest.id);
     },
 
     crewHasNewEvent(crew) {
@@ -387,12 +246,8 @@
       return notCheckedIn || crisisPending;
     },
 
-    onCrewClick(crew, locked) {
+    onCrewClick(crew) {
       window.SFX.unlock();
-      if (locked) {
-        Placeholder.show(crew.name, "還在沉睡——去裝備任務把這名艦員叫醒。");
-        return;
-      }
       if (!crew.hasDialogue) {
         Placeholder.show(crew.name, crew.placeholderNote);
         return;
@@ -437,7 +292,6 @@
     refreshHud() {
       this.renderHud();
       this.renderCrewRow();
-      MentorGuide.updateForQuestProgress();
     }
   };
 
@@ -822,8 +676,6 @@
       if (isLast) {
         await FleetAwakenedCelebration.open();
       } else {
-        // 嚮導式主線：每關之間老師過場一句，自動進下一關，不落地艦橋
-        await MentorGuide.playTransition(MentorGuide.transitionLineFor(id));
         await TaskBoard.open();
       }
     },
@@ -856,7 +708,6 @@
   // ---------------------------------------------------------------
   const FleetAwakenedCelebration = {
     async open() {
-      MentorGuide.hide();
       await window.SceneManager.transitionTo("celebration", "全艦甦醒");
       document.querySelector("#scene-celebration .mode-badge").textContent = "M0 完成";
       document.querySelector("#scene-celebration .panel-title").textContent = "全艦甦醒";
@@ -874,7 +725,6 @@
     async open() {
       await window.SceneManager.transitionTo("tasks", "今日任務");
       this.render();
-      MentorGuide.updateForQuestProgress();
     },
 
     render() {
@@ -1024,19 +874,6 @@
   document.addEventListener("DOMContentLoaded", () => {
     const backBtn = document.getElementById("task-back-btn");
     if (backBtn) backBtn.addEventListener("click", () => TaskBoard.close());
-
-    // 常駐嚮導列「繼續」：任何場景點了都直接回到目前裝備關卡
-    const guideContinueBtn = document.getElementById("guide-bar-continue-btn");
-    if (guideContinueBtn) {
-      guideContinueBtn.addEventListener("click", () => {
-        window.SFX.unlock();
-        if (!InstallQuests.allDone()) {
-          TaskBoard.open();
-        } else {
-          window.SceneManager.transitionTo("bridge", "艦橋").then(() => Bridge.refreshHud());
-        }
-      });
-    }
   });
 
   // ---------------------------------------------------------------
@@ -1259,7 +1096,6 @@
   async function boot() {
     window.SceneManager.init();
     IntroSequence.init();
-    MentorGuide.initResizeListener();
 
     const [crewData, tasksData, briefingData, archiveData, questsData, installQuestsData] = await Promise.all([
       fetch("data/crew.json").then((r) => r.json()),
@@ -1282,30 +1118,10 @@
     Bridge.init();
 
     const save = window.SaveSystem.load();
-    const questsAllDone = InstallQuests.allDone();
-    const questsSomeDone = InstallQuests.doneCount() > 0;
-
     if (!save.profile.hasSeenIntro) {
-      // 首開流程鎖死：開場字卡 → 任命書（輸入名字＋蓋章）→ 老師三句 → 自動進第一關，
-      // 不落地艦橋，不給玩家迷路的機會。
       await IntroSequence.play();
       await TeacherOrders.play();
       window.SaveSystem.markIntroSeen();
-      await TaskBoard.open();
-      return;
-    }
-
-    if (!questsAllDone) {
-      // 回訪體驗：裝備任務沒通關前，永遠不落地艦橋——直接續關。
-      // 有進度才講「上次到第 X 關」；0 關時語氣比照首開的「跟我來」。
-      const done = InstallQuests.doneCount();
-      const total = state.installQuestsData.quests.length;
-      const line = questsSomeDone
-        ? `上次到第 ${done}／${total} 關、繼續？`
-        : "裝備還沒領完，跟我來。";
-      await MentorGuide.playTransition(line);
-      await TaskBoard.open();
-      return;
     }
 
     await window.SceneManager.transitionTo("bridge", "艦橋");
@@ -1323,7 +1139,6 @@
     replayIntro: () => IntroSequence.play(),
     replayOrders: () => TeacherOrders.play(),
     completeInstallQuest: (id) => InstallQuests.complete(id),
-    updateGuideBar: () => MentorGuide.updateForQuestProgress(),
     state
   };
 })();

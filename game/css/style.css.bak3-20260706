@@ -737,49 +737,8 @@ html, body {
   padding: 0.3em 0.8em;
   margin-bottom: 1.4rem;
 }
-.orders-stamp-pending {
-  opacity: 0.6;
-}
-.orders-step-hidden {
-  display: none;
-}
-#orders-naming-line {
-  font-size: 1rem;
-  line-height: 2;
-  color: var(--paper);
-  margin: 0 0 1.4rem;
-}
-#orders-name-input {
-  display: block;
-  width: 100%;
-  max-width: 16rem;
-  margin: 0 auto 1.4rem;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--line);
-  color: var(--paper);
-  font-size: 1rem;
-  text-align: center;
-  letter-spacing: 0.1em;
-  padding: 0.4em 0.2em;
-}
-#orders-name-input:focus {
-  outline: none;
-  border-bottom-color: var(--ink);
-}
 .orders-teacher-row {
   margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.7rem;
-}
-#mentor-avatar {
-  width: 3.4rem;
-  height: 3.4rem;
-  border-radius: 50%;
-  background: var(--ink-deep);
-  border: 1px solid var(--line);
 }
 .orders-teacher-nameplate {
   display: inline-block;
@@ -793,79 +752,6 @@ html, body {
   line-height: 2;
   color: var(--paper);
   margin: 0 0 1.8rem;
-  min-height: 3.2em;
-}
-
-/* ---------------- 常駐嚮導列（Nelsen 老師進度提示） ---------------- */
-#guide-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 9998;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.9rem;
-  padding: 0.5rem 1rem;
-  background: rgba(10, 8, 6, 0.92);
-  border-bottom: 1px solid var(--line);
-  color: var(--paper);
-  font-size: 0.78rem;
-  letter-spacing: 0.05em;
-  text-align: center;
-}
-#guide-bar.guide-bar-hidden {
-  display: none;
-}
-#guide-bar-label {
-  color: var(--ink);
-  letter-spacing: 0.15em;
-  flex-shrink: 0;
-}
-#guide-bar-continue-btn {
-  flex-shrink: 0;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--paper);
-  font-size: 0.72rem;
-  padding: 0.3em 0.9em;
-  cursor: pointer;
-}
-
-/* ---------------- 主線 CTA／暫停鍵 視覺分級 ---------------- */
-.nav-btn-primary {
-  border-color: var(--ink);
-  color: var(--ink-deep);
-  font-weight: 600;
-}
-.back-btn-pause {
-  opacity: 0.65;
-  font-size: 0.72rem;
-}
-
-/* ---------------- 艦員鎖態（對應裝備關卡未完成） ---------------- */
-.crew-icon-btn.crew-locked img {
-  filter: grayscale(1);
-  opacity: 0.45;
-}
-.crew-icon-btn.crew-locked .crew-label {
-  opacity: 0.5;
-}
-.crew-lock-badge {
-  position: absolute;
-  top: -0.3rem;
-  right: 0.2rem;
-  background: var(--night);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  width: 1.2rem;
-  height: 1.2rem;
-  font-size: 0.7rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* ---------------- 支線降級：晨會／檔案室鎖標 ---------------- */

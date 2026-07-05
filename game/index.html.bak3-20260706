@@ -11,14 +11,7 @@
 
 <div id="demo-version-banner" style="position:fixed; top:0; left:0; right:0; z-index:9999; display:flex; align-items:center; justify-content:center; gap:16px; padding:8px 16px; background:rgba(20,14,10,0.92); border-bottom:1px solid rgba(138,74,42,0.5); color:#e8ded6; font-family:'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif; font-size:12.5px; line-height:1.6; text-align:center;">
   <span>這是體驗版——感受學員視角用。實際課程中、這一切發生在你自己的電腦上、由你的 AI 艦隊真實執行。</span>
-  <button type="button" onclick="document.getElementById('demo-version-banner').style.display='none'; document.getElementById('guide-bar').style.top='0';" style="flex-shrink:0; background:none; border:1px solid rgba(232,222,214,0.5); color:#e8ded6; font-size:11px; line-height:1; padding:4px 8px; cursor:pointer; border-radius:2px;" aria-label="關閉提示">關閉</button>
-</div>
-
-<!-- 常駐嚮導列：Nelsen 老師進度提示，主線場景（艦橋／任務板）都看得到 -->
-<div id="guide-bar" class="guide-bar-hidden">
-  <span id="guide-bar-label">Nelsen 老師</span>
-  <span id="guide-bar-text">目前第 1／5 關</span>
-  <button type="button" id="guide-bar-continue-btn">繼續</button>
+  <button type="button" onclick="document.getElementById('demo-version-banner').style.display='none'" style="flex-shrink:0; background:none; border:1px solid rgba(232,222,214,0.5); color:#e8ded6; font-size:11px; line-height:1; padding:4px 8px; cursor:pointer; border-radius:2px;" aria-label="關閉提示">關閉</button>
 </div>
 
 <div id="scene-root">
@@ -41,29 +34,15 @@
     <button id="intro-skip-btn" type="button">跳過</button>
   </section>
 
-  <!-- 任命書：輸入名字蓋章 → Nelsen 老師三句開場、講清楚這遊戲是幹嘛的 -->
+  <!-- 任命書：蓋章後 Nelsen 老師講清楚這遊戲是幹嘛的 -->
   <section id="scene-orders" class="scene">
     <div class="orders-shell">
-
-      <!-- Step 1：輸入名字、蓋章 -->
-      <div id="orders-naming-step">
-        <div class="orders-stamp orders-stamp-pending">任命書</div>
-        <p id="orders-naming-line">報上你的名字、艦長。</p>
-        <input type="text" id="orders-name-input" placeholder="輸入你的名字" maxlength="12" autocomplete="off" />
-        <button class="back-btn" id="orders-stamp-btn" type="button">蓋章任命</button>
+      <div class="orders-stamp">任命已蓋章</div>
+      <div class="orders-teacher-row">
+        <div class="orders-teacher-nameplate">Nelsen 老師</div>
       </div>
-
-      <!-- Step 2：蓋章後、Nelsen 老師三句開場 -->
-      <div id="orders-teacher-step" class="orders-step-hidden">
-        <div class="orders-stamp">任命已蓋章</div>
-        <div class="orders-teacher-row">
-          <div id="mentor-avatar" aria-hidden="true"></div>
-          <div class="orders-teacher-nameplate">Nelsen 老師</div>
-        </div>
-        <p id="orders-briefing-line">歡迎上艦、艦長。</p>
-        <button class="back-btn" id="orders-continue-btn" type="button">繼續</button>
-      </div>
-
+      <p id="orders-briefing-line">這一關一關玩完、你的電腦上就有一支真的 AI 艦隊。開課那天、帶著它來。</p>
+      <button class="back-btn" id="orders-continue-btn" type="button">出發</button>
     </div>
   </section>
 
@@ -85,7 +64,7 @@
     <div id="crew-row"></div>
 
     <div id="bridge-nav">
-      <button class="nav-btn nav-btn-primary" id="nav-tasks-btn" type="button">裝備任務</button>
+      <button class="nav-btn" id="nav-tasks-btn" type="button">任務板</button>
       <button class="nav-btn nav-btn-locked" id="nav-briefing-btn" type="button">晨會 <span class="nav-lock-tag">開課後解鎖</span></button>
       <button class="nav-btn nav-btn-locked" id="nav-archive-btn" type="button">檔案室 <span class="nav-lock-tag">開課後解鎖</span></button>
       <!-- 「觀測窗」「艦長室」入口暫時隱藏（2026-07-06）：功能尚未開放、避免玩家點進去只看到佔位頁。
@@ -122,7 +101,7 @@
       <div id="quest-demo-notice"></div>
       <ol id="quest-list" class="locked-list"></ol>
       <ul id="placeholder-boards-list" class="locked-list"></ul>
-      <button class="back-btn back-btn-pause" id="task-back-btn" type="button">暫停回艦橋</button>
+      <button class="back-btn" id="task-back-btn" type="button">回艦橋</button>
     </div>
   </section>
 
