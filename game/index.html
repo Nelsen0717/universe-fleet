@@ -9,6 +9,11 @@
 </head>
 <body>
 
+<div id="demo-version-banner" style="position:fixed; top:0; left:0; right:0; z-index:9999; display:flex; align-items:center; justify-content:center; gap:16px; padding:8px 16px; background:rgba(20,14,10,0.92); border-bottom:1px solid rgba(138,74,42,0.5); color:#e8ded6; font-family:'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif; font-size:12.5px; line-height:1.6; text-align:center;">
+  <span>這是體驗版——感受學員視角用。實際課程中、這一切發生在你自己的電腦上、由你的 AI 艦隊真實執行。</span>
+  <button type="button" onclick="document.getElementById('demo-version-banner').style.display='none'" style="flex-shrink:0; background:none; border:1px solid rgba(232,222,214,0.5); color:#e8ded6; font-size:11px; line-height:1; padding:4px 8px; cursor:pointer; border-radius:2px;" aria-label="關閉提示">關閉</button>
+</div>
+
 <div id="scene-root">
 
   <!-- 開場劇情 -->
