@@ -1,0 +1,489 @@
+/* 拓荒者號 — S1 垂直切片
+   視覺語彙：白底墨線 #8a4a2a、全螢幕構圖、黑幕字卡轉場
+   禁：漸層俗套、emoji UI；不禁：氣氛與鏡頭緩推
+*/
+
+:root {
+  --ink: #8a4a2a;
+  --ink-deep: #5c3018;
+  --paper: #f7f3ec;
+  --paper-dim: #ece4d6;
+  --night: #0a0806;
+  --line: rgba(138, 74, 42, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--night);
+  color: var(--paper);
+  font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  overflow: hidden;
+}
+
+#scene-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+.scene-active {
+  display: block;
+}
+
+/* ---------------- 轉場字卡 ---------------- */
+#transition-card {
+  position: fixed;
+  inset: 0;
+  background: var(--night);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+#transition-card.card-visible {
+  opacity: 1;
+  pointer-events: all;
+}
+#transition-card-text {
+  font-size: 1.4rem;
+  letter-spacing: 0.4em;
+  color: var(--ink);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 0.8em 0;
+}
+
+/* ---------------- 開場劇情 ---------------- */
+#scene-intro {
+  background: var(--night);
+}
+#intro-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+#intro-title-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1.03);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 1.2s ease, transform 1.2s ease;
+}
+#intro-title-card.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+#intro-title-card h1 {
+  font-size: 2rem;
+  letter-spacing: 0.3em;
+  margin: 0 0 0.6em;
+  color: var(--paper);
+}
+#intro-title-card p {
+  font-size: 0.95rem;
+  color: var(--ink);
+  letter-spacing: 0.1em;
+  max-width: 24em;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+#intro-skip-btn {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--paper);
+  padding: 0.5em 1.2em;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  z-index: 10;
+}
+#intro-skip-btn:hover {
+  border-color: var(--ink);
+}
+#intro-static-fallback {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+#intro-static-fallback.visible {
+  display: flex;
+}
+
+/* ---------------- 艦橋 HUB ---------------- */
+#scene-bridge {
+  background: linear-gradient(#0a0806, #0a0806); /* 純色夜空，非漸層裝飾（避免俗套漸層 hero） */
+  background: var(--night);
+}
+.bridge-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+#bridge-star-layer {
+  background: radial-gradient(1px 1px at 10% 20%, #fff, transparent),
+    radial-gradient(1px 1px at 80% 40%, #fff, transparent),
+    radial-gradient(1px 1px at 40% 70%, #fff, transparent),
+    radial-gradient(1px 1px at 60% 15%, #fff, transparent),
+    radial-gradient(1px 1px at 25% 85%, #fff, transparent),
+    radial-gradient(1px 1px at 90% 80%, #fff, transparent);
+  animation: star-drift 90s linear infinite;
+  opacity: 0.7;
+}
+@keyframes star-drift {
+  from { background-position: 0 0; }
+  to { background-position: -400px 200px; }
+}
+#bridge-mid-layer {
+  background-image: var(--bridge-image, none);
+  background-position: center bottom;
+  background-size: cover;
+  opacity: 0.55;
+  transition: opacity 1.2s ease;
+}
+
+#bridge-hud {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  color: var(--paper);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.5rem;
+  z-index: 20;
+}
+#bridge-hud .hud-group {
+  display: flex;
+  gap: 1.2rem;
+}
+#bridge-hud .hud-label {
+  color: var(--ink);
+  margin-right: 0.3em;
+}
+
+#bridge-title {
+  position: absolute;
+  top: 3.2rem;
+  left: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  color: var(--ink);
+}
+
+#crew-row {
+  position: absolute;
+  bottom: 6rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  padding: 0 1rem;
+  z-index: 20;
+}
+.crew-icon-btn {
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--paper);
+  padding: 0;
+}
+.crew-icon-btn img {
+  width: 4.6rem;
+  height: 4.6rem;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--paper-dim);
+}
+.crew-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+}
+.idle-bob {
+  animation: idle-bob 3.4s ease-in-out infinite;
+}
+@keyframes idle-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.exclaim-badge {
+  position: absolute;
+  top: -0.3rem;
+  right: 0.2rem;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 50%;
+  width: 1.2rem;
+  height: 1.2rem;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: exclaim-pulse 1.6s ease-in-out infinite;
+}
+@keyframes exclaim-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+
+#bridge-nav {
+  position: absolute;
+  bottom: 1.2rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  z-index: 20;
+}
+.nav-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--paper);
+  padding: 0.5em 1em;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+}
+.nav-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+/* ---------------- 對話場景 ---------------- */
+#scene-dialogue {
+  background: var(--night);
+  display: none;
+}
+#scene-dialogue.scene-active {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+#dialogue-portrait-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+#dialogue-portrait {
+  max-height: 68vh;
+  max-width: 80vw;
+  object-fit: contain;
+  animation: portrait-in 0.5s ease;
+}
+@keyframes portrait-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+#dialogue-box {
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-deep);
+  padding: 1.2rem 1.4rem 1.6rem;
+  min-height: 9rem;
+}
+#dialogue-speaker-name {
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+  display: inline-block;
+  padding-bottom: 0.2rem;
+}
+#dialogue-text {
+  font-size: 1.05rem;
+  line-height: 1.9;
+  min-height: 3.4em;
+  cursor: pointer;
+}
+#dialogue-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.dialogue-choice-btn {
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-deep);
+  padding: 0.6em 0.9em;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.dialogue-choice-btn:hover {
+  border-color: var(--ink);
+  background: var(--paper-dim);
+}
+
+/* ---------------- 任務板 ---------------- */
+#scene-tasks {
+  background: var(--paper);
+  color: var(--ink-deep);
+  overflow-y: auto;
+}
+.panel-inner {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 3rem 1.4rem 2rem;
+}
+.panel-title {
+  font-size: 1.2rem;
+  letter-spacing: 0.3em;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.6rem;
+  margin-bottom: 1rem;
+}
+#task-demo-notice {
+  font-size: 0.75rem;
+  color: var(--ink);
+  letter-spacing: 0.05em;
+  margin-bottom: 1.4rem;
+  border-left: 2px solid var(--ink);
+  padding-left: 0.6rem;
+}
+#task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.task-item {
+  border-bottom: 1px solid var(--line);
+  padding: 0.9rem 0;
+}
+.task-title {
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+}
+.task-done .task-title {
+  color: var(--ink);
+}
+.task-desc {
+  font-size: 0.82rem;
+  opacity: 0.8;
+  margin-bottom: 0.4rem;
+}
+.task-xp {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 0.75rem;
+  color: var(--ink);
+}
+.task-action-btn {
+  margin-top: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--ink);
+  color: var(--ink-deep);
+  padding: 0.4em 1em;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.task-action-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+#placeholder-boards-list {
+  margin-top: 1.6rem;
+  list-style: none;
+  padding: 0;
+  font-size: 0.78rem;
+  color: var(--ink);
+  line-height: 2;
+}
+.back-btn {
+  margin-top: 1.6rem;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-deep);
+  padding: 0.5em 1.2em;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* ---------------- 佔位頁 ---------------- */
+#scene-placeholder {
+  background: var(--paper);
+  color: var(--ink-deep);
+}
+#scene-placeholder.scene-active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.placeholder-inner {
+  text-align: center;
+  max-width: 26rem;
+  padding: 2rem;
+}
+#placeholder-title {
+  font-size: 1.1rem;
+  letter-spacing: 0.3em;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px solid var(--line);
+  display: inline-block;
+  padding-bottom: 0.4rem;
+}
+#placeholder-note {
+  font-size: 0.88rem;
+  line-height: 1.8;
+  color: var(--ink);
+  margin-bottom: 1.4rem;
+}
+
+/* ---------------- 手機直式優先 ---------------- */
+@media (min-width: 700px) {
+  #dialogue-portrait {
+    max-height: 60vh;
+  }
+  .panel-inner {
+    padding-top: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .idle-bob, .exclaim-badge, #bridge-star-layer, #dialogue-portrait {
+    animation: none !important;
+  }
+}

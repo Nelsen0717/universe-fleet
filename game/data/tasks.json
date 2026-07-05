@@ -1,0 +1,39 @@
+{
+  "demoNotice": "示範資料模式——以下任務為佔位骨架，正式版將由選題日報／週報 plugin 寫入真實資料",
+  "dailyTasks": [
+    {
+      "id": "daily_checkin",
+      "title": "登艦簽到",
+      "description": "完成今日第一次登艦，累積連續天數。",
+      "xp": 10,
+      "auto": true
+    },
+    {
+      "id": "daily_guard_chat",
+      "title": "去找守門員報到",
+      "description": "跟守門員聊聊，看看他今天想說什麼。",
+      "xp": 20,
+      "targetCrew": "guard"
+    },
+    {
+      "id": "daily_crisis",
+      "title": "處理一場危機事件",
+      "description": "守門員可能會攔下一篇草稿——判斷改寫或堅持發佈。",
+      "xp": 30,
+      "targetEvent": "guard_crisis_draft_intercept"
+    }
+  ],
+  "placeholderBoards": [
+    { "id": "morning_briefing", "label": "晨會", "note": "訊號還在路上——晨會場景在 S2 開放" },
+    { "id": "archive_room", "label": "檔案室", "note": "訊號還在路上——前任艦長的航行日誌在 S2 逐頁解鎖" },
+    { "id": "observation_deck", "label": "觀測窗", "note": "訊號還在路上——成就牆與航程統計在 S2 開放" },
+    { "id": "captain_quarters", "label": "艦長室", "note": "訊號還在路上——設定與聲線檔在 S2 開放" }
+  ],
+  "rankThresholds": [
+    { "rank": "見習", "minStreak": 0 },
+    { "rank": "少尉", "minStreak": 3 },
+    { "rank": "中尉", "minStreak": 7 },
+    { "rank": "少校", "minStreak": 14 },
+    { "rank": "艦長", "minStreak": 30 }
+  ]
+}

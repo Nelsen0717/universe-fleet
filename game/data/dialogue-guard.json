@@ -1,0 +1,311 @@
+{
+  "crewId": "guard",
+  "displayName": "守門員",
+  "portraitNeutral": "assets/guard-neutral.png",
+  "portraitPleased": "assets/guard-pleased.png",
+  "portraitFallback": "assets/crew-guard.png",
+  "start": "entry_router",
+  "nodes": {
+    "entry_router": {
+      "type": "router",
+      "rules": [
+        { "if": "flags.guard_grudge === true", "goto": "greet_grudge" },
+        { "if": "flags.guard_warned === true", "goto": "greet_warned" },
+        { "goto": "greet_first" }
+      ]
+    },
+
+    "greet_first": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "艦長。終於。我盯這艘艦的品質盯了十四年、前任走後我就沒閤過眼。"
+      ],
+      "choices": [
+        { "text": "你是誰？", "goto": "q_who" },
+        { "text": "先讓我看看艦橋。", "goto": "q_bridge", "setFlags": { "guard_warned": true } }
+      ]
+    },
+
+    "greet_warned": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "艦長。又來了。我說過——這艘艦沉過一次、就沉在『看起來沒問題』四個字上。你還記得吧。"
+      ],
+      "choices": [
+        { "text": "記得。我在意。", "goto": "warned_ack_care" },
+        { "text": "你講過很多次了。", "goto": "warned_ack_tired" },
+        { "text": "問問前任艦長的事。", "goto": "topic_captain_hub" }
+      ]
+    },
+
+    "greet_grudge": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "……艦長。",
+        "（他別過頭、聲音比平常冷一截）上次那篇、我攔了、你還是發了。行、你是艦長。"
+      ],
+      "choices": [
+        { "text": "那件事、我道歉。", "goto": "grudge_apologize" },
+        { "text": "結果沒出事、不是嗎？", "goto": "grudge_defend" },
+        { "text": "先聊點別的。", "goto": "topic_hub" }
+      ]
+    },
+
+    "warned_ack_care": {
+      "speaker": "守門員",
+      "expression": "pleased",
+      "lines": [
+        "……行。你在意就好。這比什麼都重要。",
+        "很多艦長把我當麻煩、你不是。這點我記著。"
+      ],
+      "setFlags": { "guard_respect": "+1" },
+      "choices": [
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+    "warned_ack_tired": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "講很多次、是因為忘很多次的人也很多。",
+        "我不怕你嫌煩、我怕你哪天真的把我的話當耳邊風。"
+      ],
+      "choices": [
+        { "text": "（回到艦橋）", "goto": "END" },
+        { "text": "問問前任艦長的事。", "goto": "topic_captain_hub" }
+      ]
+    },
+
+    "grudge_apologize": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "（他愣了一下、像是沒料到）",
+        "……道歉不能改變那篇已經發出去了這件事。但、算你有點自覺。",
+        "下次攔你的時候、聽完再決定。這樣就好。"
+      ],
+      "setFlags": { "guard_grudge": false, "guard_respect": "+1" },
+      "choices": [
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+    "grudge_defend": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "「沒出事」跟「沒問題」是兩件事、艦長。",
+        "沉船前一秒、甲板上的人也覺得沒事。我不是烏鴉嘴、我是提早看到浪的人。"
+      ],
+      "choices": [
+        { "text": "……你說的對。", "goto": "grudge_defend_yield" },
+        { "text": "（先不接話、回到艦橋）", "goto": "END" }
+      ]
+    },
+    "grudge_defend_yield": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "（他表情鬆了一點、但沒完全鬆）",
+        "算你聽得進去。下次別讓我等你聽懂。"
+      ],
+      "setFlags": { "guard_grudge": false },
+      "choices": [
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+
+    "q_who": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "守門員。你發出去的每一個字、都要先過我這關。",
+        "不服氣？前任一開始也不服氣。"
+      ],
+      "choices": [
+        { "text": "那他後來服氣了？", "goto": "q_who_convinced" },
+        { "text": "所以你是來找碴的？", "goto": "q_who_pushback" },
+        { "text": "了解了、先看艦橋。", "goto": "q_bridge", "setFlags": { "guard_warned": true } }
+      ]
+    },
+    "q_who_convinced": {
+      "speaker": "守門員",
+      "expression": "pleased",
+      "lines": [
+        "他後來會在發之前、自己先問我一句『這句夠誠實嗎』。",
+        "那一刻我知道、他不是怕我、是懂我在防什麼了。"
+      ],
+      "choices": [
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+    "q_who_pushback": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "找碴？我是唯一一個在你發之前、把難聽話講在前面的人。",
+        "外面的讀者不會給你機會重寫、我會。"
+      ],
+      "choices": [
+        { "text": "……有道理。", "goto": "topic_hub" },
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+
+    "q_bridge": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "隨你。但記住——這艘艦沉過一次、就沉在『看起來沒問題』四個字上。"
+      ],
+      "choices": [
+        { "text": "沉過一次？怎麼回事？", "goto": "topic_captain_hub" },
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+
+    "topic_hub": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "還想聊什麼？我話不多、但問了我會答。"
+      ],
+      "choices": [
+        { "text": "前任艦長的事。", "goto": "topic_captain_hub" },
+        { "text": "你平常都在做什麼？", "goto": "topic_daily" },
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+
+    "topic_captain_hub": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "前任艦長剛接手時、追過一陣子『奇觀流量』——標題越誇張、他越愛用。",
+        "撞了牆才學會共鳴比奇觀耐久。這艘艦的守則、一半是他用教訓換來的。"
+      ],
+      "choices": [
+        { "text": "那些守則、你也守？", "goto": "topic_captain_rules" },
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+    "topic_captain_rules": {
+      "speaker": "守門員",
+      "expression": "pleased",
+      "lines": [
+        "我就是那些守則活過來的樣子。",
+        "他寫下規則、我負責讓沒人偷懶不遵守——包括你、艦長。"
+      ],
+      "setFlags": { "guard_respect": "+1" },
+      "choices": [
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+
+    "topic_daily": {
+      "speaker": "守門員",
+      "expression": "neutral",
+      "lines": [
+        "巡每一份草稿、每一句要發出去的話。",
+        "睡得少、但看到一篇誠實的東西被發出去、值了。"
+      ],
+      "choices": [
+        { "text": "你不累嗎？", "goto": "topic_daily_tired" },
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+    "topic_daily_tired": {
+      "speaker": "守門員",
+      "expression": "pleased",
+      "lines": [
+        "累。但比起累、我更怕鬆懈一次、艦長發出去的東西就再也收不回來了。",
+        "（他難得放軟語氣）你會問我累不累、算你有點人情味。"
+      ],
+      "choices": [
+        { "text": "（回到艦橋）", "goto": "END" }
+      ]
+    },
+
+    "END": { "type": "end" }
+  },
+
+  "crisisEvent": {
+    "id": "guard_crisis_draft_intercept",
+    "start": "crisis_intro",
+    "nodes": {
+      "crisis_intro": {
+        "speaker": "守門員",
+        "expression": "neutral",
+        "lines": [
+          "（他伸手攔下你正要送出的草稿、螢幕停在半空）",
+          "『在這個 AI 時代、我們不是被取代、而是被放大』——艦長、這句你真的要發？"
+        ],
+        "choices": [
+          { "text": "改寫它。", "goto": "crisis_rewrite" },
+          { "text": "堅持發、這句沒問題。", "goto": "crisis_insist", "setFlags": { "guard_grudge": true } },
+          { "text": "問他、為什麼覺得不行。", "goto": "crisis_ask_why" }
+        ]
+      },
+
+      "crisis_rewrite": {
+        "speaker": "守門員",
+        "expression": "pleased",
+        "lines": [
+          "（他把螢幕轉回去給你、指尖點了點那句話）",
+          "對。空話誰都會講、你講的東西要有你自己在裡面。",
+          "改完再給我看一眼、我就放行。"
+        ],
+        "setFlags": { "guard_respect": "+1" },
+        "reward": { "xp": 30, "log": "crisis_resolved_rewrite" },
+        "choices": [
+          { "text": "（改寫並送出）", "goto": "crisis_end" }
+        ]
+      },
+
+      "crisis_insist": {
+        "speaker": "守門員",
+        "expression": "neutral",
+        "lines": [
+          "（他沉默了兩秒、把手放開）",
+          "……行。你是艦長、這是你的決定。",
+          "（他轉身離開、沒再多說一句）"
+        ],
+        "reward": { "xp": 10, "log": "crisis_resolved_insist" },
+        "choices": [
+          { "text": "（送出草稿）", "goto": "crisis_end" }
+        ]
+      },
+
+      "crisis_ask_why": {
+        "speaker": "守門員",
+        "expression": "pleased",
+        "lines": [
+          "（他愣了一下、像是沒想到你會問）",
+          "……因為這句話誰都能講、講完等於沒講。讀者要的不是『被放大』這種漂亮詞、是你真的遇過什麼事。",
+          "（他難得笑了一下）你會問這句、比很多艦長都像樣。"
+        ],
+        "setFlags": { "guard_respect": "+1" },
+        "reward": { "xp": 30, "log": "crisis_resolved_ask_why" },
+        "choices": [
+          { "text": "那我重寫看看。", "goto": "crisis_rewrite_after_ask" },
+          { "text": "（回到艦橋）", "goto": "crisis_end" }
+        ]
+      },
+      "crisis_rewrite_after_ask": {
+        "speaker": "守門員",
+        "expression": "pleased",
+        "lines": [
+          "去吧。這次我不用攔、你自己就會改。"
+        ],
+        "reward": { "xp": 10, "log": "crisis_resolved_ask_why_rewrite" },
+        "choices": [
+          { "text": "（回到艦橋）", "goto": "crisis_end" }
+        ]
+      },
+
+      "crisis_end": { "type": "end" }
+    }
+  }
+}
