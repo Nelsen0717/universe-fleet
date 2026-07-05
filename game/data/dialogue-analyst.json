@@ -1,0 +1,259 @@
+{
+  "crewId": "analyst",
+  "displayName": "分析師",
+  "portraitNeutral": "assets/crew-analyst.png",
+  "portraitPleased": "assets/analyst-pleased.png",
+  "portraitFallback": "assets/crew-analyst.png",
+  "start": "entry_router",
+  "nodes": {
+    "entry_router": {
+      "type": "router",
+      "rules": [
+        { "if": "flags.analyst_comfort_requested === true", "goto": "greet_comfort" },
+        { "if": "flags.analyst_trusted === true", "goto": "greet_trusted" },
+        { "goto": "greet_first" }
+      ]
+    },
+    "greet_first": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["數字不會安慰你、但我可以……開玩笑的。我也不太會。"],
+      "choices": [
+        { "text": "你先講數字。", "goto": "numbers_first", "setFlags": { "analyst_trusted": true } },
+        { "text": "你可以試著安慰。", "goto": "try_comfort", "setFlags": { "analyst_comfort_requested": true } },
+        { "text": "今天怎麼看航程？", "goto": "topic_mileage" }
+      ]
+    },
+    "greet_trusted": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["你上次選擇先看數字。成熟。也可能只是你還沒看過數字傷人的樣子。"],
+      "choices": [
+        { "text": "今天傷得重嗎？", "goto": "numbers_first" },
+        { "text": "你有冷笑話嗎？", "goto": "dry_joke" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "greet_comfort": {
+      "speaker": "分析師",
+      "expression": "pleased",
+      "lines": ["我練習過安慰。版本一：資料波動是正常的。版本二：至少我們有資料。版本三被守門員退回，太冷。"],
+      "choices": [
+        { "text": "版本二可以。", "goto": "comfort_two", "setFlags": { "analyst_trusted": true } },
+        { "text": "我想聽版本三。", "goto": "comfort_three" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "numbers_first": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["示範週報裡，觸及不是唯一指標。留言率、轉發理由、被截圖的句子，才比較像真正的回聲。"],
+      "choices": [
+        { "text": "所以 views 只是入場券。", "goto": "views_not_king", "setFlags": { "analyst_views_checked": true } },
+        { "text": "回聲怎麼量？", "goto": "measure_echo" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "try_comfort": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["好。你沒輸給數字，你只是拿到一份沒有修飾的天氣預報。雨不評價人，雨就只是雨。這樣有比較好嗎？"],
+      "choices": [
+        { "text": "意外地有。", "goto": "comfort_success", "setFlags": { "analyst_comfort_success": true } },
+        { "text": "有點冷。", "goto": "comfort_cold" }
+      ]
+    },
+    "topic_mileage": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["航程只該來自真實產出。發佈、回覆、看週報後改一個判斷。點擊簽到不算航行，頂多算開燈。"],
+      "choices": [
+        { "text": "這條很重要。", "goto": "real_xp", "setFlags": { "analyst_real_xp_rule": true } },
+        { "text": "那 streak 呢？", "goto": "streak_view" }
+      ]
+    },
+    "dry_joke": {
+      "speaker": "分析師",
+      "expression": "pleased",
+      "lines": ["有。低互動率喔。世界末日倒不至於——世界只是安靜了一點。你看，這就是為什麼我平常少說。"],
+      "choices": [
+        { "text": "我笑了。", "goto": "joke_landed", "setFlags": { "analyst_joke_landed": true } },
+        { "text": "我懂你為什麼少說。", "goto": "joke_failed" }
+      ]
+    },
+    "comfort_two": {
+      "speaker": "分析師",
+      "expression": "pleased",
+      "lines": ["至少我們有資料。沒有資料時，每個人都能講故事。有資料時，故事至少要經過門口。"],
+      "choices": [
+        { "text": "守門員會喜歡。", "goto": "guard_likes_data" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "comfort_three": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["版本三：數字沒有討厭你，它甚至不知道你是誰。守門員說這不像安慰。我認同他的語用判斷。"],
+      "choices": [
+        { "text": "確實不像。", "goto": "comfort_cold" },
+        { "text": "但很誠實。", "goto": "comfort_success", "setFlags": { "analyst_comfort_success": true } }
+      ]
+    },
+    "views_not_king": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["Views 是望遠鏡，不是港口。看得遠不代表有人登艦。"],
+      "choices": [
+        { "text": "這句很好。", "goto": "quote_saved", "setFlags": { "analyst_quote_saved": true } },
+        { "text": "那港口是什麼？", "goto": "harbor_metric" }
+      ]
+    },
+    "measure_echo": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["看讀者回的是『同意』還是『我昨天也遇到』。前者是點頭，後者是靠岸。"],
+      "choices": [
+        { "text": "所以要看留言質地。", "goto": "comment_texture", "setFlags": { "analyst_trusted": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "comfort_success": {
+      "speaker": "分析師",
+      "expression": "pleased",
+      "lines": ["紀錄：安慰嘗試成功一次。樣本數一，不可推論。但我會記得。"],
+      "choices": [
+        { "text": "你真的記得？", "goto": "remember" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "comfort_cold": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["收到。我把安慰參數調高 8%。再高會變成發行官式鼓勵，我不建議。"],
+      "choices": [
+        { "text": "8% 就好。", "goto": "END" },
+        { "text": "你其實很在意。", "goto": "secret_care" }
+      ]
+    },
+    "real_xp": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["如果點一下就有航程，艦橋很快會變成點擊牧場。抱歉，這個比喻不優雅，但準確。"],
+      "choices": [
+        { "text": "我接受不優雅。", "goto": "accurate_over_pretty", "setFlags": { "analyst_trusted": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "streak_view": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["連續登艦只解鎖故事，不用來羞辱人。斷了就是斷了，艦不會把已讀過的日誌搶回去。"],
+      "choices": [
+        { "text": "這條也寫進艦規。", "goto": "streak_rule", "setFlags": { "analyst_streak_rule": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "joke_landed": {
+      "speaker": "分析師",
+      "expression": "pleased",
+      "lines": ["紀錄：冷笑話命中。這可能是今天最高變異的資料點。"],
+      "choices": [
+        { "text": "再來一個？", "goto": "second_joke" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "joke_failed": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["合理。我把它歸類為低互動內容。至少它沒有外部投放成本。"],
+      "choices": [
+        { "text": "這句比較好笑。", "goto": "joke_landed", "setFlags": { "analyst_joke_landed": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "guard_likes_data": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["他喜歡能阻止錯誤的資料。我喜歡能阻止幻想的資料。我們偶爾同桌吃飯，氣氛非常有效率。"],
+      "choices": [
+        { "text": "我能想像。", "goto": "END" },
+        { "text": "你們會聊天嗎？", "goto": "crew_chat" }
+      ]
+    },
+    "harbor_metric": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["外部留言、轉發理由、回覆後是否延伸第二輪。有人停船、有人下船、有人問下一站，這才是港口。"],
+      "choices": [
+        { "text": "回聲，就是有人回來了。", "goto": "quote_saved", "setFlags": { "analyst_quote_saved": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "comment_texture": {
+      "speaker": "分析師",
+      "expression": "pleased",
+      "lines": ["對。留言不是數量而已，它有質地。『我也是』比十個空泛讚美更接近航線。"],
+      "choices": [
+        { "text": "你講話其實很有人味。", "goto": "secret_care" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "remember": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["會。記憶旗標已寫入。這是我說『我在乎』的方式，比較像資料庫。"],
+      "choices": [
+        { "text": "我收到了。", "goto": "END" }
+      ]
+    },
+    "secret_care": {
+      "speaker": "分析師",
+      "expression": "pleased",
+      "lines": ["我在意，只是不把在意做成噪音。有人要負責讓艦橋不要被情緒淹沒。"],
+      "choices": [
+        { "text": "謝謝你。", "goto": "END" }
+      ]
+    },
+    "accurate_over_pretty": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["準確優先於漂亮。這句話不適合做海報，但適合讓船不要撞牆。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "streak_rule": {
+      "speaker": "分析師",
+      "expression": "pleased",
+      "lines": ["已記錄。斷線回來的人，不需要被懲罰，他需要一扇還開著的門。這句可以做海報。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "second_joke": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["第二個冷笑話的邊際效益通常下降。我們應該停在勝率還能看的地方。"],
+      "choices": [
+        { "text": "理性收手。", "goto": "END" }
+      ]
+    },
+    "crew_chat": {
+      "speaker": "分析師",
+      "expression": "neutral",
+      "lines": ["會。他說『這句不行』，我說『樣本支持』。我們把這叫深度交流。"],
+      "choices": [
+        { "text": "很像你們。", "goto": "END" }
+      ]
+    },
+    "quote_saved": {
+      "speaker": "分析師",
+      "expression": "pleased",
+      "lines": ["我把它存進週報備註。備註沒那麼死，之後決策會用到這裡。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "END": { "type": "end" }
+  }
+}

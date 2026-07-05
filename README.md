@@ -4,6 +4,12 @@
 
 課程教你當艦長，這支 plugin 就是你的艦員。
 
+## 線上入口
+
+- 提案站：https://universe-fleet-proposal.vercel.app
+- 艦橋：https://nelsen0717.github.io/universe-fleet/game/
+- 裝備發放：https://nelsen0717.github.io/universe-fleet/onboarding/
+
 ## 兩步安裝
 
 在 Claude Code 裡打：
@@ -46,3 +52,23 @@
 - 接入精靈是**文件版**：五關的步驟、欄位、自救表都寫好了，但還不會自動幫你操作瀏覽器——目前是「地圖」不是「自動導航」
 
 詳細建置紀錄看 `BUILD-REPORT.md`。
+
+## 目錄結構
+
+```text
+.
+├── README.md
+├── docs/
+│   ├── DATA-INTERFACE.md
+│   ├── GAME-DESIGN-v2.md
+│   └── ONBOARDING-DESIGN.md
+├── game/
+│   ├── index.html
+│   ├── assets/
+│   ├── css/
+│   ├── data/
+│   └── js/
+├── onboarding/
+├── skills/
+└── universe-fleet-marketplace/
+```

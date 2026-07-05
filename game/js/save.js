@@ -40,6 +40,8 @@ function defaultSave() {
     dailyTasks: {
       // date -> { taskId: true }
     },
+    unlockedArchivePages: [],
+    completedQuests: {},
     eventLog: []
   };
 }
@@ -66,8 +68,10 @@ const SaveSystem = {
         streak: { ...base.streak, ...(parsed.streak || {}) },
         xp: { ...base.xp, ...(parsed.xp || {}) },
         dailyTasks: { ...(parsed.dailyTasks || {}) },
+        completedQuests: { ...(parsed.completedQuests || {}) },
         eventLog: parsed.eventLog || []
       };
+      if (!this._cache.unlockedArchivePages) this._cache.unlockedArchivePages = [];
       return this._cache;
     } catch (e) {
       console.warn("[save.js] 讀檔失敗，使用預設存檔", e);
@@ -205,6 +209,35 @@ const SaveSystem = {
     const s = this.load();
     s.profile.hasSeenIntro = true;
     this.persist();
+  },
+
+  unlockArchivePages(pageNumbers) {
+    const s = this.load();
+    if (!s.unlockedArchivePages) s.unlockedArchivePages = [];
+    const before = s.unlockedArchivePages.length;
+    pageNumbers.forEach((page) => {
+      if (!s.unlockedArchivePages.includes(page)) s.unlockedArchivePages.push(page);
+    });
+    s.unlockedArchivePages.sort((a, b) => a - b);
+    if (s.unlockedArchivePages.length !== before) this.persist();
+    return s.unlockedArchivePages;
+  },
+
+  getUnlockedArchivePages() {
+    const s = this.load();
+    return s.unlockedArchivePages || [];
+  },
+
+  isQuestComplete(questId) {
+    return !!this.load().completedQuests[questId];
+  },
+
+  markQuestComplete(questId) {
+    const s = this.load();
+    if (s.completedQuests[questId]) return false;
+    s.completedQuests[questId] = true;
+    this.persist();
+    return true;
   }
 };
 

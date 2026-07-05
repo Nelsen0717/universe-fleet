@@ -9,6 +9,11 @@
   const state = {
     crewData: null,
     tasksData: null,
+    briefingData: null,
+    archiveData: null,
+    questsData: null,
+    archiveIndex: 0,
+    celebrationAnimId: null,
     activeCrewId: null,
     dialogueRuntime: null, // { tree, currentNodeId, typing }
     crisisAvailableToday: false
@@ -216,9 +221,9 @@
     },
 
     crewHasNewEvent(crew) {
-      if (crew.id !== "guard") return false;
-      // 守門員永遠值得聊：今日尚未報到，或危機事件今天還沒處理
-      const notCheckedIn = !window.SaveSystem.isDailyTaskDone("daily_guard_chat");
+      const notCheckedIn = !window.SaveSystem.isDailyTaskDone(`daily_${crew.id}_chat`);
+      if (crew.id !== "guard") return notCheckedIn;
+      // 守門員額外提示危機事件
       const crisisPending = !window.SaveSystem.isDailyTaskDone("daily_crisis");
       return notCheckedIn || crisisPending;
     },
@@ -243,6 +248,14 @@
       document.getElementById("nav-tasks-btn").addEventListener("click", () => {
         window.SFX.unlock();
         TaskBoard.open();
+      });
+      document.getElementById("nav-briefing-btn").addEventListener("click", () => {
+        window.SFX.unlock();
+        MorningBriefing.open();
+      });
+      document.getElementById("nav-archive-btn").addEventListener("click", () => {
+        window.SFX.unlock();
+        ArchiveRoom.open();
       });
       document.querySelectorAll("[data-placeholder-nav]").forEach((el) => {
         el.addEventListener("click", () => {
@@ -295,10 +308,8 @@
       state.dialogueRuntime = { tree, crew };
       this.renderNode(tree, startNodeId);
 
-      // 標記今日已與守門員互動
-      if (window.SaveSystem.markDailyTaskDone("daily_guard_chat")) {
-        window.SaveSystem.addXP(20, "daily_guard_chat");
-      }
+      // 標記今日已與艦員互動；聊天只寫入狀態，不給航程。
+      window.SaveSystem.markDailyTaskDone(`daily_${crew.id}_chat`);
     },
 
     async openCrisis(crew) {
@@ -418,6 +429,27 @@
       });
     },
 
+    async openInline(crew, line, cardText) {
+      if (!crew) return;
+      const inlineTree = {
+        start: "quest_done",
+        nodes: {
+          quest_done: {
+            speaker: crew.name,
+            expression: "pleased",
+            lines: [line],
+            choices: [{ text: "回艦橋", goto: "END" }]
+          },
+          END: { type: "end" }
+        }
+      };
+      state.activeCrewId = crew.id;
+      await window.SceneManager.transitionTo("dialogue", cardText || crew.name);
+      this.setupPortrait(crew);
+      state.dialogueRuntime = { tree: inlineTree, crew };
+      this.renderNode(inlineTree, inlineTree.start);
+    },
+
     async endDialogue() {
       await window.SceneManager.transitionTo("bridge", "艦橋");
       Bridge.refreshHud();
@@ -457,7 +489,7 @@
 
         const xp = document.createElement("div");
         xp.className = "task-xp";
-        xp.textContent = `+${task.xp} XP`;
+        xp.textContent = task.xp > 0 ? `+${task.xp} XP` : "不給航程";
         li.appendChild(xp);
 
         if (task.id === "daily_checkin" && !done) {
@@ -467,7 +499,7 @@
           btn.addEventListener("click", () => {
             const result = window.SaveSystem.checkinToday();
             if (window.SaveSystem.markDailyTaskDone("daily_checkin")) {
-              window.SaveSystem.addXP(task.xp, "daily_checkin");
+              if (task.xp > 0) window.SaveSystem.addXP(task.xp, "daily_checkin");
             }
             window.SFX.achievement();
             this.render();
@@ -502,6 +534,63 @@
         li.textContent = `${b.label}——${b.note}`;
         boardsEl.appendChild(li);
       });
+
+      this.renderQuests();
+    },
+
+    renderQuests() {
+      document.getElementById("quest-demo-notice").textContent =
+        `${state.questsData.modeLabel}——${state.questsData.description}`;
+      const list = document.getElementById("quest-list");
+      list.innerHTML = "";
+
+      state.questsData.quests.forEach((quest, index) => {
+        const done = window.SaveSystem.isQuestComplete(quest.id);
+        const previousDone =
+          index === 0 || window.SaveSystem.isQuestComplete(state.questsData.quests[index - 1].id);
+        const li = document.createElement("li");
+        li.className = "quest-item";
+        if (done) li.classList.add("quest-done");
+
+        const meta = document.createElement("div");
+        meta.className = "quest-meta";
+        meta.textContent = quest.module;
+        const title = document.createElement("div");
+        title.className = "task-title";
+        title.textContent = `${done ? "✓ " : ""}${quest.title}`;
+        const desc = document.createElement("div");
+        desc.className = "task-desc";
+        desc.textContent = quest.description;
+        const xp = document.createElement("div");
+        xp.className = "task-xp";
+        xp.textContent = `+${quest.xp} XP`;
+        const btn = document.createElement("button");
+        btn.className = "task-action-btn";
+        btn.textContent = done ? "已完成" : previousDone ? "完成任務" : "前序未完成";
+        btn.disabled = done || !previousDone;
+        btn.addEventListener("click", async () => {
+          await this.completeQuest(quest);
+        });
+
+        li.append(meta, title, desc, xp, btn);
+        list.appendChild(li);
+      });
+    },
+
+    async completeQuest(quest) {
+      const changed = window.SaveSystem.markQuestComplete(quest.id);
+      if (changed) {
+        window.SaveSystem.addXP(quest.xp, quest.id);
+        window.SaveSystem.logEvent("quest_completed", { questId: quest.id });
+      }
+      this.render();
+      Bridge.refreshHud();
+      const crew = state.crewData.crew.find((c) => c.id === quest.crewId);
+      if (quest.boss) {
+        await CelebrationScene.open();
+      } else {
+        await DialogueScene.openInline(crew, quest.dialogue, "任務完成");
+      }
     },
 
     async close() {
@@ -515,18 +604,234 @@
   });
 
   // ---------------------------------------------------------------
+  // 首航慶祝
+  // ---------------------------------------------------------------
+  const CelebrationScene = {
+    async open() {
+      await window.SceneManager.transitionTo("celebration", "首航完成");
+      this.renderCrew();
+      this.startParticles();
+    },
+
+    renderCrew() {
+      const wrap = document.getElementById("celebration-crew");
+      wrap.innerHTML = "";
+      state.crewData.crew.forEach((crew) => {
+        const img = document.createElement("img");
+        img.src = crew.portraitPleased || crew.portraitNeutral || crew.portraitFallback;
+        img.alt = crew.name;
+        img.onerror = () => {
+          img.onerror = null;
+          img.src = crew.portraitFallback;
+        };
+        wrap.appendChild(img);
+      });
+    },
+
+    startParticles() {
+      const canvas = document.getElementById("celebration-canvas");
+      const ctx = canvas.getContext("2d");
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const resize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      };
+      resize();
+      window.addEventListener("resize", resize, { once: true });
+      if (state.celebrationAnimId) cancelAnimationFrame(state.celebrationAnimId);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const particles = Array.from({ length: reducedMotion ? 36 : 120 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: 1 + Math.random() * 3,
+        vx: -0.4 + Math.random() * 0.8,
+        vy: reducedMotion ? 0 : 0.4 + Math.random() * 1.6,
+        a: 0.35 + Math.random() * 0.55
+      }));
+      const draw = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p) => {
+          ctx.fillStyle = `rgba(138, 74, 42, ${p.a})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+          if (!reducedMotion) {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.y > canvas.height + 8) p.y = -8;
+            if (p.x < -8) p.x = canvas.width + 8;
+            if (p.x > canvas.width + 8) p.x = -8;
+          }
+        });
+        if (!reducedMotion && window.SceneManager.current === "celebration") {
+          state.celebrationAnimId = requestAnimationFrame(draw);
+        }
+      };
+      draw();
+    },
+
+    async close() {
+      if (state.celebrationAnimId) cancelAnimationFrame(state.celebrationAnimId);
+      state.celebrationAnimId = null;
+      await window.SceneManager.transitionTo("bridge", "艦橋");
+      Bridge.refreshHud();
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const backBtn = document.getElementById("celebration-back-btn");
+    if (backBtn) backBtn.addEventListener("click", () => CelebrationScene.close());
+  });
+
+  // ---------------------------------------------------------------
+  // 晨會
+  // ---------------------------------------------------------------
+  const MorningBriefing = {
+    async open() {
+      await window.SceneManager.transitionTo("briefing", "晨會");
+      this.render();
+    },
+
+    render() {
+      const data = state.briefingData;
+      const host = state.crewData.crew.find((crew) => crew.id === data.hostCrewId);
+      document.getElementById("briefing-mode-badge").textContent = data.modeLabel;
+      document.getElementById("briefing-title").textContent = data.title;
+      document.getElementById("briefing-summary").textContent = data.summary;
+      document.getElementById("briefing-host-name").textContent = host ? `${host.name}主持` : "情報員主持";
+      const img = document.getElementById("briefing-host-portrait");
+      img.src = host && host.portraitPleased ? host.portraitPleased : "assets/crew-scout.png";
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = "assets/crew-scout.png";
+      };
+
+      const signalsEl = document.getElementById("briefing-signals");
+      signalsEl.innerHTML = "";
+      data.signals.forEach((signal) => {
+        const item = document.createElement("section");
+        item.className = "briefing-signal";
+        const label = document.createElement("div");
+        label.className = "briefing-signal-label";
+        label.textContent = signal.label;
+        const value = document.createElement("p");
+        value.textContent = signal.value;
+        const note = document.createElement("blockquote");
+        note.textContent = signal.crewNote;
+        item.append(label, value, note);
+        signalsEl.appendChild(item);
+      });
+
+      const task = data.dailyTenMinuteTask;
+      const taskEl = document.getElementById("briefing-daily-task");
+      taskEl.innerHTML = "";
+      const title = document.createElement("div");
+      title.className = "task-title";
+      title.textContent = task.title;
+      const desc = document.createElement("div");
+      desc.className = "task-desc";
+      desc.textContent = task.description;
+      taskEl.append(title, desc);
+    },
+
+    async close() {
+      await window.SceneManager.transitionTo("bridge", "艦橋");
+      Bridge.refreshHud();
+    }
+  };
+
+  // ---------------------------------------------------------------
+  // 檔案室
+  // ---------------------------------------------------------------
+  const ArchiveRoom = {
+    async open() {
+      this.refreshUnlocks();
+      const unlocked = this.getUnlockedPages();
+      state.archiveIndex = Math.max(0, Math.min(state.archiveIndex, unlocked.length - 1));
+      await window.SceneManager.transitionTo("archive", "檔案室");
+      this.render();
+    },
+
+    refreshUnlocks() {
+      const save = window.SaveSystem.load();
+      const streak = save.streak.count || 0;
+      const available = state.archiveData.unlockRules
+        .filter((rule) => streak >= rule.minStreak)
+        .map((rule) => rule.page);
+      window.SaveSystem.unlockArchivePages(available);
+    },
+
+    getUnlockedPages() {
+      const unlockedNums = window.SaveSystem.getUnlockedArchivePages();
+      return state.archiveData.pages.filter((page) => unlockedNums.includes(page.page));
+    },
+
+    render() {
+      const unlocked = this.getUnlockedPages();
+      document.getElementById("archive-mode-badge").textContent = state.archiveData.modeLabel;
+      document.getElementById("archive-title").textContent = state.archiveData.title;
+      const note = document.getElementById("archive-unlock-note");
+      const save = window.SaveSystem.load();
+      note.textContent = `已解鎖 ${unlocked.length}/${state.archiveData.pages.length} 頁。連續登艦 ${save.streak.count || 0} 天；已讀過的日誌永不回鎖。`;
+
+      const page = unlocked[state.archiveIndex] || state.archiveData.pages[0];
+      document.getElementById("archive-page-number").textContent =
+        `第 ${page.page} 頁 / ${state.archiveData.pages.length}`;
+      document.getElementById("archive-page-title").textContent = page.title;
+      document.getElementById("archive-page-body").textContent = page.body;
+
+      const book = document.getElementById("archive-book");
+      book.classList.remove("page-turn");
+      void book.offsetWidth;
+      book.classList.add("page-turn");
+
+      document.getElementById("archive-prev-btn").disabled = state.archiveIndex <= 0;
+      document.getElementById("archive-next-btn").disabled = state.archiveIndex >= unlocked.length - 1;
+    },
+
+    turn(delta) {
+      const unlocked = this.getUnlockedPages();
+      state.archiveIndex = Math.max(0, Math.min(unlocked.length - 1, state.archiveIndex + delta));
+      window.SFX.choiceSelect();
+      this.render();
+    },
+
+    async close() {
+      await window.SceneManager.transitionTo("bridge", "艦橋");
+      Bridge.refreshHud();
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const briefingBack = document.getElementById("briefing-back-btn");
+    if (briefingBack) briefingBack.addEventListener("click", () => MorningBriefing.close());
+    const archiveBack = document.getElementById("archive-back-btn");
+    if (archiveBack) archiveBack.addEventListener("click", () => ArchiveRoom.close());
+    const archivePrev = document.getElementById("archive-prev-btn");
+    if (archivePrev) archivePrev.addEventListener("click", () => ArchiveRoom.turn(-1));
+    const archiveNext = document.getElementById("archive-next-btn");
+    if (archiveNext) archiveNext.addEventListener("click", () => ArchiveRoom.turn(1));
+  });
+
+  // ---------------------------------------------------------------
   // Boot
   // ---------------------------------------------------------------
   async function boot() {
     window.SceneManager.init();
     IntroSequence.init();
 
-    const [crewData, tasksData] = await Promise.all([
+    const [crewData, tasksData, briefingData, archiveData, questsData] = await Promise.all([
       fetch("data/crew.json").then((r) => r.json()),
-      fetch("data/tasks.json").then((r) => r.json())
+      fetch("data/tasks.json").then((r) => r.json()),
+      fetch("data/demo-briefing.json").then((r) => r.json()),
+      fetch("data/archive-log.json").then((r) => r.json()),
+      fetch("data/quests.json").then((r) => r.json())
     ]);
     state.crewData = crewData;
     state.tasksData = tasksData;
+    state.briefingData = briefingData;
+    state.archiveData = archiveData;
+    state.questsData = questsData;
 
     // 危機事件：示範模式下，每日登艦後隨機開放（示範用固定觸發，確保可驗收）
     state.crisisAvailableToday = !window.SaveSystem.isDailyTaskDone("daily_crisis");

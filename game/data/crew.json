@@ -5,10 +5,11 @@
       "name": "情報員",
       "role": "每日晨會主持人",
       "catchphrase": "艦長你一定要看這個——",
-      "portraitNeutral": "assets/scout-neutral.png",
+      "portraitNeutral": "assets/crew-scout.png",
+      "portraitPleased": "assets/scout-pleased.png",
       "portraitFallback": "assets/crew-scout.png",
-      "hasDialogue": false,
-      "placeholderNote": "訊號還在路上——情報員的對話樹在 S2 開放"
+      "hasDialogue": true,
+      "dialogueFile": "data/dialogue-scout.json"
     },
     {
       "id": "guard",
@@ -26,30 +27,33 @@
       "name": "寫手",
       "role": "聲線任務線",
       "catchphrase": "等等、這個字的重量不對。",
-      "portraitNeutral": "assets/writer-neutral.png",
+      "portraitNeutral": "assets/crew-writer.png",
+      "portraitPleased": "assets/writer-pleased.png",
       "portraitFallback": "assets/crew-writer.png",
-      "hasDialogue": false,
-      "placeholderNote": "訊號還在路上——寫手的對話樹在 S2 開放"
+      "hasDialogue": true,
+      "dialogueFile": "data/dialogue-writer.json"
     },
     {
       "id": "publisher",
       "name": "發行官",
       "role": "發佈儀式主持",
       "catchphrase": "好了嗎？能發了嗎？現在？",
-      "portraitNeutral": "assets/publisher-neutral.png",
+      "portraitNeutral": "assets/crew-publisher.png",
+      "portraitPleased": "assets/publisher-pleased.png",
       "portraitFallback": "assets/crew-publisher.png",
-      "hasDialogue": false,
-      "placeholderNote": "訊號還在路上——發行官的對話樹在 S2 開放"
+      "hasDialogue": true,
+      "dialogueFile": "data/dialogue-publisher.json"
     },
     {
       "id": "analyst",
       "name": "分析師",
       "role": "週報解讀、預測遊戲莊家",
       "catchphrase": "數字不會安慰你、但我可以……開玩笑的。",
-      "portraitNeutral": "assets/analyst-neutral.png",
+      "portraitNeutral": "assets/crew-analyst.png",
+      "portraitPleased": "assets/analyst-pleased.png",
       "portraitFallback": "assets/crew-analyst.png",
-      "hasDialogue": false,
-      "placeholderNote": "訊號還在路上——分析師的對話樹在 S2 開放"
+      "hasDialogue": true,
+      "dialogueFile": "data/dialogue-analyst.json"
     }
   ]
 }

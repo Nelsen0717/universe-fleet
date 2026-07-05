@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>拓荒者號 — 艦橋</title>
+<link rel="icon" href="data:," />
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -46,7 +47,8 @@
 
     <div id="bridge-nav">
       <button class="nav-btn" id="nav-tasks-btn" type="button">任務板</button>
-      <button class="nav-btn" data-placeholder-nav="檔案室" data-placeholder-note="訊號還在路上——前任艦長的航行日誌將在連續登艦與任務完成後逐頁解鎖">檔案室</button>
+      <button class="nav-btn" id="nav-briefing-btn" type="button">晨會</button>
+      <button class="nav-btn" id="nav-archive-btn" type="button">檔案室</button>
       <button class="nav-btn" data-placeholder-nav="觀測窗" data-placeholder-note="訊號還在路上——成就牆與航程統計即將開放">觀測窗</button>
       <button class="nav-btn" data-placeholder-nav="艦長室" data-placeholder-note="訊號還在路上——設定與聲線檔即將開放">艦長室</button>
     </div>
@@ -70,9 +72,62 @@
       <div class="panel-title">今日任務</div>
       <div id="task-demo-notice"></div>
       <ul id="task-list"></ul>
-      <div class="panel-title" style="margin-top:2rem; font-size:1rem;">其他艦內設施</div>
+      <div class="panel-title compact-panel-title">主線任務鏈</div>
+      <div id="quest-demo-notice"></div>
+      <ol id="quest-list"></ol>
+      <div class="panel-title compact-panel-title">其他艦內設施</div>
       <ul id="placeholder-boards-list"></ul>
       <button class="back-btn" id="task-back-btn" type="button">回艦橋</button>
+    </div>
+  </section>
+
+  <!-- 晨會 -->
+  <section id="scene-briefing" class="scene">
+    <div class="panel-inner">
+      <div class="mode-badge" id="briefing-mode-badge">示範資料</div>
+      <div class="panel-title" id="briefing-title">晨會</div>
+      <div class="briefing-host">
+        <img id="briefing-host-portrait" src="assets/crew-scout.png" alt="情報員" />
+        <div>
+          <div id="briefing-host-name">情報員</div>
+          <p id="briefing-summary"></p>
+        </div>
+      </div>
+      <div id="briefing-signals"></div>
+      <div id="briefing-daily-task"></div>
+      <button class="back-btn" id="briefing-back-btn" type="button">回艦橋</button>
+    </div>
+  </section>
+
+  <!-- 檔案室 -->
+  <section id="scene-archive" class="scene">
+    <div id="archive-bg"></div>
+    <div class="archive-shell">
+      <div class="mode-badge" id="archive-mode-badge">示範資料</div>
+      <div class="panel-title" id="archive-title">前任艦長日誌</div>
+      <div id="archive-unlock-note"></div>
+      <article id="archive-book">
+        <div id="archive-page-number"></div>
+        <h2 id="archive-page-title"></h2>
+        <p id="archive-page-body"></p>
+      </article>
+      <div id="archive-controls">
+        <button class="back-btn" id="archive-prev-btn" type="button">上一頁</button>
+        <button class="back-btn" id="archive-next-btn" type="button">下一頁</button>
+      </div>
+      <button class="back-btn" id="archive-back-btn" type="button">回艦橋</button>
+    </div>
+  </section>
+
+  <!-- 首航慶祝 -->
+  <section id="scene-celebration" class="scene">
+    <canvas id="celebration-canvas"></canvas>
+    <div class="celebration-inner">
+      <div class="mode-badge">示範資料</div>
+      <div class="panel-title">首航完成</div>
+      <div id="celebration-crew"></div>
+      <p id="celebration-message">五名艦員在艦橋集合。這次不是彩排，是第一篇真的出航。</p>
+      <button class="back-btn" id="celebration-back-btn" type="button">回艦橋</button>
     </div>
   </section>
 

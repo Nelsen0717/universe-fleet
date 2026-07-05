@@ -1,0 +1,80 @@
+{
+  "modeLabel": "示範資料",
+  "title": "八模組主線任務鏈",
+  "description": "課中任務鏈示範版。正式版由課程進度與本地發文事件 JSON 驅動，遊戲端不呼叫社群 API。",
+  "quests": [
+    {
+      "id": "module_1_positioning",
+      "module": "模組一",
+      "title": "定義艦長聲線座標",
+      "description": "寫下你的讀者、場景與不可碰紅線，完成一份聲線座標草稿。",
+      "xp": 30,
+      "crewId": "writer",
+      "dialogue": "這份座標還不需要漂亮，它只需要誠實。聲音不是裝飾，是之後每一次出航的扶手。"
+    },
+    {
+      "id": "module_2_signal_scan",
+      "module": "模組二",
+      "title": "建立三格選題雷達",
+      "description": "從現場、症狀、立場三格各放入一個候選題。",
+      "xp": 30,
+      "crewId": "scout",
+      "dialogue": "艦長你一定要看這個——你不是沒有題目，你是以前把噪音和訊號放在同一個抽屜。"
+    },
+    {
+      "id": "module_3_draft_scene",
+      "module": "模組三",
+      "title": "完成第一份現場錨草稿",
+      "description": "用一個具體畫面開場，寫出 6 到 10 行草稿。",
+      "xp": 50,
+      "crewId": "writer",
+      "dialogue": "這次有人在句子裡了。你看，當畫面站穩，讀者就有地方靠岸。"
+    },
+    {
+      "id": "module_4_guard_review",
+      "module": "模組四",
+      "title": "通過守門員品質檢查",
+      "description": "刪掉模板句、空泛形容詞與 AI 腔，留下能被轉述的一句話。",
+      "xp": 50,
+      "crewId": "guard",
+      "dialogue": "我不是要你變慢，我是要你別把空話送出去。這版可以過，別讓我後悔。"
+    },
+    {
+      "id": "module_5_publish_plan",
+      "module": "模組五",
+      "title": "排定發佈前檢查",
+      "description": "確認標題、主文、收尾與人工發佈邊界，準備出航。",
+      "xp": 40,
+      "crewId": "publisher",
+      "dialogue": "清單過了就不要躲在碼頭。發佈鍵在你手上，我只負責把燈全部點亮。"
+    },
+    {
+      "id": "module_6_reply_loop",
+      "module": "模組六",
+      "title": "完成一則讀者回覆",
+      "description": "針對一則真實或示範留言，寫出能延伸對話的回覆。",
+      "xp": 20,
+      "crewId": "analyst",
+      "dialogue": "回覆不是售後服務，是第二次靠岸。數字會記錄，但人會先感覺到。"
+    },
+    {
+      "id": "module_7_weekly_read",
+      "module": "模組七",
+      "title": "讀週報並改一個判斷",
+      "description": "看一份週報，寫下下週要保留、停止或調整的一個判斷。",
+      "xp": 30,
+      "crewId": "analyst",
+      "dialogue": "你沒有被數字支配，你只是讓判斷有了天氣圖。這很好，雖然聽起來不太熱血。"
+    },
+    {
+      "id": "first_real_publish",
+      "module": "模組八",
+      "title": "首航：完成第一次真實發佈",
+      "description": "把一篇從選題、草稿、守門、發佈到回填的內容完整送出。",
+      "xp": 100,
+      "crewId": "publisher",
+      "boss": true,
+      "dialogue": "好了嗎？能發了嗎？已經發了？很好，全艦集合。這次不是彩排，是首航。"
+    }
+  ]
+}

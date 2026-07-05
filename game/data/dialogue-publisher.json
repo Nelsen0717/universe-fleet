@@ -1,0 +1,218 @@
+{
+  "crewId": "publisher",
+  "displayName": "發行官",
+  "portraitNeutral": "assets/crew-publisher.png",
+  "portraitPleased": "assets/publisher-pleased.png",
+  "portraitFallback": "assets/crew-publisher.png",
+  "start": "entry_router",
+  "nodes": {
+    "entry_router": {
+      "type": "router",
+      "rules": [
+        { "if": "flags.publisher_waited === true", "goto": "greet_waited" },
+        { "if": "flags.publisher_rushed_publish === true", "goto": "greet_rushed" },
+        { "goto": "greet_first" }
+      ]
+    },
+    "greet_first": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["好了嗎？能發了嗎？現在？催？我這叫替出口保持溫度。好了嗎？現在呢？"],
+      "choices": [
+        { "text": "還沒，先檢查。", "goto": "check_first", "setFlags": { "publisher_waited": true } },
+        { "text": "可以，先發一版。", "goto": "publish_now", "setFlags": { "publisher_rushed_publish": true } },
+        { "text": "你為什麼這麼急？", "goto": "why_fast" }
+      ]
+    },
+    "greet_waited": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["我記得。你上次叫我等檢查。我等了。很成熟。很痛苦。兩件事可以同時成立。"],
+      "choices": [
+        { "text": "今天也先看清單。", "goto": "launch_checklist" },
+        { "text": "今天你可以催一次。", "goto": "controlled_hurry", "setFlags": { "publisher_allowed_hurry": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "greet_rushed": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["上次你說先發一版，我欣賞。守門員不欣賞，但他欣賞的東西本來就比較少。"],
+      "choices": [
+        { "text": "這次補檢查。", "goto": "check_first", "setFlags": { "publisher_waited": true } },
+        { "text": "快跟穩怎麼平衡？", "goto": "fast_and_stable" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "check_first": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["好，三項：標題有沒有現場、內文有沒有你、最後有沒有一個人能回的口。過了就發，不要在碼頭寫遺書。"],
+      "choices": [
+        { "text": "這清單很好。", "goto": "checklist_kept", "setFlags": { "publisher_checklist_saved": true } },
+        { "text": "什麼叫回的口？", "goto": "reply_gate" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "publish_now": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["好！我就喜歡這種句子。等等，守門員在看我。好，我補一句：發之前還是要確認不是空話。"],
+      "choices": [
+        { "text": "你學會踩煞車了。", "goto": "brake_learned", "setFlags": { "publisher_waited": true } },
+        { "text": "那還是發。", "goto": "launch_anyway" }
+      ]
+    },
+    "why_fast": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["因為草稿放太久會長出藉口。不是每篇都要完美，但每篇都要有一次真的抵達讀者。"],
+      "choices": [
+        { "text": "你怕的是停在草稿。", "goto": "draft_fear", "setFlags": { "publisher_understood": true } },
+        { "text": "但太快會出錯。", "goto": "fast_error" }
+      ]
+    },
+    "launch_checklist": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["檢查一：這篇有真人畫面。檢查二：守門員沒皺眉到第三層。檢查三：發出去之後，有人知道要回什麼。"],
+      "choices": [
+        { "text": "第三點最重要。", "goto": "reply_gate" },
+        { "text": "守門員第三層是什麼？", "goto": "guard_layers" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "controlled_hurry": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["好。我的一次催促用在這裡：不要把『再修一下』當安全毯。檢查過，就讓它出門。"],
+      "choices": [
+        { "text": "收到。", "goto": "END" },
+        { "text": "你其實很懂卡稿。", "goto": "draft_fear" }
+      ]
+    },
+    "fast_and_stable": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["快是節奏，穩是底線。底線沒過，不發；底線過了，別裝作還在追求藝術。寫手聽到會瞪我，但他知道我對。"],
+      "choices": [
+        { "text": "這句很發行官。", "goto": "publisher_proud", "setFlags": { "publisher_respected": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "reply_gate": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["回的口就是讀者看完能接一句自己的話。別叫他買、別叫他點——給他一個位置、把經驗放下來就好。"],
+      "choices": [
+        { "text": "所以 CTA 不是吼人。", "goto": "cta_not_shout" },
+        { "text": "我會留位置。", "goto": "checklist_kept", "setFlags": { "publisher_checklist_saved": true } }
+      ]
+    },
+    "checklist_kept": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["很好。清單哪有拖慢你，它是讓你不用每次都靠焦慮決定能不能出航。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "brake_learned": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["煞車我會踩，只是不喜歡把煞車當家。艦是拿來飛的，永遠校準那是修船廠的事。"],
+      "choices": [
+        { "text": "有道理。", "goto": "publisher_proud", "setFlags": { "publisher_respected": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "launch_anyway": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["收到，發射序列預熱。別誤會，這裡不會真的替你按發佈鍵；我只是把儀式感準備好。"],
+      "setFlags": { "publisher_publish_boundary_seen": true },
+      "choices": [
+        { "text": "發佈鍵在人手上。", "goto": "human_button" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "draft_fear": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["對。我看過太多好東西死在『再等等』。它們夠好了，就差一個願意替它們開門的人。"],
+      "choices": [
+        { "text": "你就是開門的人。", "goto": "publisher_proud", "setFlags": { "publisher_respected": true } },
+        { "text": "但門不能亂開。", "goto": "fast_error" }
+      ]
+    },
+    "fast_error": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["同意。所以我跟守門員不是敵人。他說『別亂發』，我說『別永遠不發』。中間那條路，艦長你來踩。"],
+      "choices": [
+        { "text": "我會踩。", "goto": "END" },
+        { "text": "你們都很難搞。", "goto": "difficult_crew" }
+      ]
+    },
+    "guard_layers": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["第一層是皺眉，第二層是安靜，第三層是把筆放下。看到第三層，今天先別發。"],
+      "choices": [
+        { "text": "這很實用。", "goto": "checklist_kept", "setFlags": { "publisher_checklist_saved": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "publisher_proud": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["終於有人懂我。急，是我尊重一個完成品該去見讀者。好，這句我自己很滿意。"],
+      "choices": [
+        { "text": "你也有金句。", "goto": "gold_line" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "cta_not_shout": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["對！不要在出口拿擴音器吼人。把門開好，燈點亮，人自己會知道能不能進來。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "human_button": {
+      "speaker": "發行官",
+      "expression": "neutral",
+      "lines": ["沒錯。任何自動發佈都不准越過你。我的工作是把發佈變清楚，不是偷走你的手。"],
+      "choices": [
+        { "text": "這條寫進艦規。", "goto": "boundary_rule", "setFlags": { "publisher_boundary_rule": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "difficult_crew": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["難搞代表還活著。全都點頭的艦隊，通常已經偏航很久了。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "gold_line": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["當然。我只是講得快，不代表沒有句子。好了，能發了嗎？"],
+      "choices": [
+        { "text": "先回艦橋。", "goto": "END" }
+      ]
+    },
+    "boundary_rule": {
+      "speaker": "發行官",
+      "expression": "pleased",
+      "lines": ["很好。你給我邊界，我就能跑得更快。沒有邊界的速度，叫失控。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "END": { "type": "end" }
+  }
+}

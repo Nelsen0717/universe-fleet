@@ -1,0 +1,33 @@
+{
+  "modeLabel": "示範資料",
+  "date": "2026-07-05",
+  "hostCrewId": "scout",
+  "title": "今日晨會：把靈感變成可航行路線",
+  "summary": "這份晨會用示範資料呈現。正式版會由 plugin 寫入本地 JSON，情報員只負責把資料講成人話。",
+  "signals": [
+    {
+      "id": "briefing_signal_1",
+      "label": "現場錨",
+      "value": "今天的素材不要從工具新聞開場，先從你剛踩過的卡點開場。",
+      "crewNote": "艦長你一定要看這個——讀者通常不是缺新聞，是缺一個『我也是』的入口。"
+    },
+    {
+      "id": "briefing_signal_2",
+      "label": "共鳴判斷",
+      "value": "先問：讀者會截圖哪一句？答不出來，代表這篇還沒有核心句。",
+      "crewNote": "我知道我話很多，但這題真的很短：哪一句會被帶走？"
+    },
+    {
+      "id": "briefing_signal_3",
+      "label": "避雷",
+      "value": "不要追奇觀流量；奇觀讓人看完就走，共鳴讓人回頭找你。",
+      "crewNote": "前任艦長就是在這裡撞過船。檔案室有痕跡，真的。"
+    }
+  ],
+  "dailyTenMinuteTask": {
+    "id": "demo_pick_one_anchor",
+    "title": "10 分鐘任務：替今天的貼文選一個開場錨",
+    "description": "從現場、症狀、反差、立場四種錨點中選一個，寫下一句可被讀者代入的開場。",
+    "xp": 0
+  }
+}

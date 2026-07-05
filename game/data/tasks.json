@@ -4,15 +4,15 @@
     {
       "id": "daily_checkin",
       "title": "登艦簽到",
-      "description": "完成今日第一次登艦，累積連續天數。",
-      "xp": 10,
+      "description": "完成今日第一次登艦，累積連續天數；這只開燈，不給航程。",
+      "xp": 0,
       "auto": true
     },
     {
       "id": "daily_guard_chat",
       "title": "去找守門員報到",
-      "description": "跟守門員聊聊，看看他今天想說什麼。",
-      "xp": 20,
+      "description": "跟守門員聊聊，看看他今天想說什麼；聊天只寫入記憶，不給航程。",
+      "xp": 0,
       "targetCrew": "guard"
     },
     {
@@ -24,8 +24,8 @@
     }
   ],
   "placeholderBoards": [
-    { "id": "morning_briefing", "label": "晨會", "note": "訊號還在路上——晨會場景在 S2 開放" },
-    { "id": "archive_room", "label": "檔案室", "note": "訊號還在路上——前任艦長的航行日誌在 S2 逐頁解鎖" },
+    { "id": "morning_briefing", "label": "晨會", "note": "已開放——情報員主持示範資料晨會" },
+    { "id": "archive_room", "label": "檔案室", "note": "已開放——前任艦長日誌依連續登艦逐頁解鎖" },
     { "id": "observation_deck", "label": "觀測窗", "note": "訊號還在路上——成就牆與航程統計在 S2 開放" },
     { "id": "captain_quarters", "label": "艦長室", "note": "訊號還在路上——設定與聲線檔在 S2 開放" }
   ],

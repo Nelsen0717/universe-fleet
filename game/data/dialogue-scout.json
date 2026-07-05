@@ -1,0 +1,238 @@
+{
+  "crewId": "scout",
+  "displayName": "情報員",
+  "portraitNeutral": "assets/crew-scout.png",
+  "portraitPleased": "assets/scout-pleased.png",
+  "portraitFallback": "assets/crew-scout.png",
+  "start": "entry_router",
+  "nodes": {
+    "entry_router": {
+      "type": "router",
+      "rules": [
+        { "if": "flags.scout_overloaded === true", "goto": "greet_overloaded" },
+        { "if": "flags.scout_briefing_trusted === true", "goto": "greet_trusted" },
+        { "goto": "greet_first" }
+      ]
+    },
+    "greet_first": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["艦長你一定要看這個——沒有爆炸、沒有警報，就只是一份長得很像警報的靈感。"],
+      "choices": [
+        { "text": "慢慢講，我在聽。", "goto": "slow_ack", "setFlags": { "scout_briefing_trusted": true } },
+        { "text": "你先講重點。", "goto": "too_fast", "setFlags": { "scout_overloaded": true } },
+        { "text": "今天有什麼值得追？", "goto": "topic_signal" }
+      ]
+    },
+    "greet_trusted": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["你上次有讓我把話講完，所以我今天只帶三個訊號。真的，三個。好啦，可能三個半。"],
+      "choices": [
+        { "text": "三個半也可以。", "goto": "topic_signal" },
+        { "text": "先說你最在意的那個。", "goto": "topic_favorite" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "greet_overloaded": {
+      "speaker": "情報員",
+      "expression": "neutral",
+      "lines": ["我有把重點縮短了。上次你叫我先講重點，我回去把十二頁簡報壓成三行，差點缺氧。"],
+      "choices": [
+        { "text": "辛苦了，先聽三行。", "goto": "three_lines", "setFlags": { "scout_briefing_trusted": true } },
+        { "text": "十二頁也行，但分段。", "goto": "slow_ack", "setFlags": { "scout_overloaded": false, "scout_briefing_trusted": true } },
+        { "text": "先回艦橋。", "goto": "END" }
+      ]
+    },
+    "slow_ack": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["好！第一，今天的素材要從人開始，不要從工具開始。第二，讀者要看到自己。第三，守門員叫我不要用『爆款』兩個字。"],
+      "choices": [
+        { "text": "那晨會你來主持。", "goto": "host_morning", "setFlags": { "scout_hosts_morning": true } },
+        { "text": "守門員真的有說？", "goto": "guard_quote" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "too_fast": {
+      "speaker": "情報員",
+      "expression": "neutral",
+      "lines": ["重點：不要追奇觀，追共鳴。副重點：我把副重點也講了，這樣算不算超時？"],
+      "choices": [
+        { "text": "算，但有用。", "goto": "useful_overload", "setFlags": { "scout_respected": true } },
+        { "text": "你再練習濃縮。", "goto": "practice_short" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "three_lines": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["一，今天先找現場畫面。二，金句要能被截圖。三，奇觀只會讓人看完就走。三行，完畢。"],
+      "choices": [
+        { "text": "這次很好。", "goto": "useful_overload", "setFlags": { "scout_respected": true } },
+        { "text": "我要看完整版本。", "goto": "topic_signal" }
+      ]
+    },
+    "topic_signal": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["我會追三種東西：讀者正在卡的現場、你親手試過的證據、還有一句能讓人停下來的判斷。新聞只排第四。"],
+      "choices": [
+        { "text": "為什麼新聞排第四？", "goto": "news_fourth" },
+        { "text": "你怎麼判斷現場感？", "goto": "scene_sense" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "topic_favorite": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["我最在意『讀者昨天也遇到』。如果第一句讓他想起自己昨天浪費的那一輪，後面才有人聽。"],
+      "choices": [
+        { "text": "這句記下來。", "goto": "record_it", "setFlags": { "scout_note_saved": true } },
+        { "text": "聽起來不像情報，像人情。", "goto": "human_signal" }
+      ]
+    },
+    "news_fourth": {
+      "speaker": "情報員",
+      "expression": "neutral",
+      "lines": ["因為新聞自己會跑，艦長。你要加的是航線：這件事對一個真的要工作的人，明天早上改變什麼。"],
+      "choices": [
+        { "text": "所以你比剪報員多做了一件事。", "goto": "not_clipper", "setFlags": { "scout_seen_as_person": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "scene_sense": {
+      "speaker": "情報員",
+      "expression": "neutral",
+      "lines": ["我會問：這句話能不能讓人看到一個桌面、一個對話框、一個猶豫的手指。如果只看到概念，就還太遠。"],
+      "choices": [
+        { "text": "給我一個例子。", "goto": "scene_example" },
+        { "text": "懂了，回艦橋。", "goto": "END" }
+      ]
+    },
+    "scene_example": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["不要寫『AI 改變工作流』。寫『我剛叫 AI 幫我整理會議，結果它先問我最後要交給誰』。你看，有畫面了。"],
+      "choices": [
+        { "text": "這個我會用。", "goto": "record_it", "setFlags": { "scout_note_saved": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "host_morning": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["收到！我主持晨會，但我保證每次只帶能行動的訊號。不能行動的，我交給星空自己漂亮。"],
+      "setFlags": { "scout_hosts_morning": true },
+      "choices": [
+        { "text": "晨會見。", "goto": "END" },
+        { "text": "你還是可以話多一點。", "goto": "talk_more" }
+      ]
+    },
+    "guard_quote": {
+      "speaker": "情報員",
+      "expression": "neutral",
+      "lines": ["他原話是：『你再說一次爆款，我就把那兩個字丟出氣閘。』我覺得他只是表達方式比較節能。"],
+      "choices": [
+        { "text": "他確實是。", "goto": "END" },
+        { "text": "你們感情很好？", "goto": "crew_relation" }
+      ]
+    },
+    "useful_overload": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["有用就好。我沒想吵，我怕的是真正有價值的訊號，比噪音晚一步進艦橋。"],
+      "choices": [
+        { "text": "我會讓你先回報。", "goto": "report_priority", "setFlags": { "scout_priority": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "practice_short": {
+      "speaker": "情報員",
+      "expression": "neutral",
+      "lines": ["好，我練。先從把『艦長你一定要看這個』縮成『看』開始。等等，這樣很沒禮貌。"],
+      "choices": [
+        { "text": "不用縮到失去自己。", "goto": "not_clipper", "setFlags": { "scout_seen_as_person": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "record_it": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["我幫你標記了。系統才不會自動貼，這是我真的記得：艦長偏好能拿來用的句子。"],
+      "choices": [
+        { "text": "謝謝你。", "goto": "thanks" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "human_signal": {
+      "speaker": "情報員",
+      "expression": "neutral",
+      "lines": ["情報如果不通向人，就只是比較快的雜訊。這句是我自己想的，請不要跟寫手說，我怕他要改。"],
+      "choices": [
+        { "text": "我不說。", "goto": "thanks", "setFlags": { "scout_secret": true } },
+        { "text": "我會請寫手修一下。", "goto": "writer_threat" }
+      ]
+    },
+    "not_clipper": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["對！我不是剪報員。我是把外面的風翻譯成艦橋能用的方向。這句我也要記。"],
+      "choices": [
+        { "text": "你越來越像活人了。", "goto": "alive" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "talk_more": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["你確定？我可以把一個訊號講成三個小故事。好，我收斂。收斂只是排隊、不是消失。"],
+      "choices": [
+        { "text": "排隊就好。", "goto": "END" }
+      ]
+    },
+    "crew_relation": {
+      "speaker": "情報員",
+      "expression": "neutral",
+      "lines": ["他負責踩煞車，我負責喊前面有東西。聽起來吵，但船需要這兩種聲音。"],
+      "choices": [
+        { "text": "我需要你們兩個。", "goto": "thanks", "setFlags": { "scout_respected": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "report_priority": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["收到。那我會先把重要的帶來，漂亮但沒用的留在窗外。星空不會介意。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "writer_threat": {
+      "speaker": "情報員",
+      "expression": "neutral",
+      "lines": ["他一定會把『比較快的雜訊』改成『沒有靠岸的風』。好吧，可能真的比較好。"],
+      "choices": [
+        { "text": "你們都很有用。", "goto": "thanks" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "alive": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["那我今天的回報完成了。講完不算數，你聽見我——這才算數。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "thanks": {
+      "speaker": "情報員",
+      "expression": "pleased",
+      "lines": ["不用謝。你願意聽，我就有理由每天回來報告。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "END": { "type": "end" }
+  }
+}

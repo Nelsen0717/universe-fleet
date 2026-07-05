@@ -1,0 +1,234 @@
+{
+  "crewId": "writer",
+  "displayName": "寫手",
+  "portraitNeutral": "assets/crew-writer.png",
+  "portraitPleased": "assets/writer-pleased.png",
+  "portraitFallback": "assets/crew-writer.png",
+  "start": "entry_router",
+  "nodes": {
+    "entry_router": {
+      "type": "router",
+      "rules": [
+        { "if": "flags.writer_rushed === true", "goto": "greet_rushed" },
+        { "if": "flags.writer_trusted === true", "goto": "greet_trusted" },
+        { "goto": "greet_first" }
+      ]
+    },
+    "greet_first": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["等等、這個字的重量不對。你沒說錯，它只是還沒找到該站的位置。"],
+      "choices": [
+        { "text": "你慢慢說。", "goto": "slow_open", "setFlags": { "writer_trusted": true } },
+        { "text": "可以快一點嗎？", "goto": "rush_open", "setFlags": { "writer_rushed": true } },
+        { "text": "你在改哪一句？", "goto": "topic_sentence" }
+      ]
+    },
+    "greet_trusted": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["你上次沒有催我，所以我把那句留著，讓它自己沉下去。今天它比較像話了。"],
+      "choices": [
+        { "text": "念給我聽。", "goto": "read_line" },
+        { "text": "你怎麼判斷像話？", "goto": "judge_weight" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "greet_rushed": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["我知道你趕。發行官也知道你趕，他每三分鐘站到我後面一次。字都有在走，只是走得比按鈕慢。"],
+      "choices": [
+        { "text": "今天不催你。", "goto": "slow_open", "setFlags": { "writer_rushed": false, "writer_trusted": true } },
+        { "text": "我還是需要版本。", "goto": "version_needed" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "slow_open": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["謝謝。文字有時候像人，你一直推，它就只會防守。你坐一下，它反而會自己走近。"],
+      "choices": [
+        { "text": "你真的很浪漫。", "goto": "romantic_shy", "setFlags": { "writer_praised": true } },
+        { "text": "那今天的句子是什麼？", "goto": "read_line" }
+      ]
+    },
+    "rush_open": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["可以。我會給你一個能發的版本，但它可能只是能站穩，還不會發光。"],
+      "choices": [
+        { "text": "先能站穩。", "goto": "version_needed", "setFlags": { "writer_pragmatic": true } },
+        { "text": "算了，我等它發光。", "goto": "slow_open", "setFlags": { "writer_rushed": false, "writer_trusted": true } }
+      ]
+    },
+    "topic_sentence": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["原句是『AI 讓你變得更強』。它太滑了，像沒有扶手的走廊。我要把它改成一個人真的踩得到的句子。"],
+      "choices": [
+        { "text": "怎麼改？", "goto": "rewrite_example" },
+        { "text": "為什麼滑？", "goto": "why_slippery" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "read_line": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["『AI 讓做出來變便宜，但沒有讓判斷變便宜。』這句可以站。它有骨頭。"],
+      "choices": [
+        { "text": "這句留下。", "goto": "keep_line", "setFlags": { "writer_line_kept": true } },
+        { "text": "再柔一點？", "goto": "softer_line" },
+        { "text": "守門員會放行嗎？", "goto": "guard_check" }
+      ]
+    },
+    "judge_weight": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["我看三件事：拿掉形容詞還剩什麼，讀者能不能轉述，還有它是不是只有我們這艘艦寫得出來。"],
+      "choices": [
+        { "text": "這像出航前檢查。", "goto": "preflight" },
+        { "text": "給我一個不合格例子。", "goto": "bad_example" }
+      ]
+    },
+    "version_needed": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["那我給你版本一：先穩住現場，再補判斷。不要先喊宏大，宏大會把人的聲音蓋掉。"],
+      "choices": [
+        { "text": "可以，先用它。", "goto": "pragmatic_accept", "setFlags": { "writer_pragmatic": true } },
+        { "text": "你還是想修吧？", "goto": "romantic_shy" }
+      ]
+    },
+    "romantic_shy": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["……我只是覺得，一句話如果要陪讀者走一段路，就不該穿錯鞋。你不要跟發行官說這句，他會笑我。"],
+      "choices": [
+        { "text": "我不說。", "goto": "secret_kept", "setFlags": { "writer_secret": true } },
+        { "text": "我覺得他會喜歡。", "goto": "publisher_reaction" }
+      ]
+    },
+    "rewrite_example": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["改成：『我以前叫 AI 開工，現在先問它最後要交給誰。』你看，畫面回來了，人也回來了。"],
+      "choices": [
+        { "text": "這句有重量。", "goto": "keep_line", "setFlags": { "writer_line_kept": true } },
+        { "text": "還能更短嗎？", "goto": "shorter" }
+      ]
+    },
+    "why_slippery": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["因為誰都能講。誰都能講的句子，像走廊裡的回音，很響，但你找不到人。"],
+      "choices": [
+        { "text": "那我要找到人。", "goto": "find_person", "setFlags": { "writer_trusted": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "softer_line": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["可以：『AI 幫你省下製作時間，但判斷還是要自己扛。』柔一點，但刀還在。"],
+      "choices": [
+        { "text": "刀留著。", "goto": "keep_line", "setFlags": { "writer_line_kept": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "guard_check": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["他會皺眉，但會放。守門員不怕尖銳，他怕空。"],
+      "choices": [
+        { "text": "懂了。", "goto": "END" },
+        { "text": "你們很互補。", "goto": "crew_balance" }
+      ]
+    },
+    "preflight": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["對。只是我的檢查表比較安靜。發行官的檢查表會自己發出腳步聲。"],
+      "choices": [
+        { "text": "我聽得到。", "goto": "publisher_reaction" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "bad_example": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["『AI 時代最重要的是心態。』這句沒有錯，但它沒有房間、沒有桌子、沒有一個正在卡住的人。"],
+      "choices": [
+        { "text": "我以後會抓畫面。", "goto": "find_person", "setFlags": { "writer_trusted": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "pragmatic_accept": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["好。你接受版本，不等於放棄品質。只是承認今天先讓船離港，明天再校準帆。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "secret_kept": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["謝謝。被理解比被稱讚更安靜，也更久。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "publisher_reaction": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["他會說『很好，能發了嗎』。這就是他的詩。非常短，標點很急。"],
+      "choices": [
+        { "text": "我笑了。", "goto": "small_joke" },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "shorter": {
+      "speaker": "寫手",
+      "expression": "neutral",
+      "lines": ["更短是：『先問交給誰，再叫 AI 開工。』短，但還有人。"],
+      "choices": [
+        { "text": "留下。", "goto": "keep_line", "setFlags": { "writer_line_kept": true } },
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "find_person": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["找到人，句子就不會漂。這是我今天想交給你的東西。"],
+      "choices": [
+        { "text": "收下。", "goto": "END" }
+      ]
+    },
+    "crew_balance": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["他守門，我找聲音，情報員找風，發行官找出口，分析師找回聲。艦長，你找方向。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "small_joke": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["不要告訴他。他會以為自己真的寫了詩，然後要求立刻發佈。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "keep_line": {
+      "speaker": "寫手",
+      "expression": "pleased",
+      "lines": ["好，我把它放進聲線檔。這不算鎖死，比較像提醒我們：下一句也要有人。"],
+      "choices": [
+        { "text": "回艦橋。", "goto": "END" }
+      ]
+    },
+    "END": { "type": "end" }
+  }
+}
