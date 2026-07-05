@@ -34,18 +34,6 @@
     <button id="intro-skip-btn" type="button">跳過</button>
   </section>
 
-  <!-- 任命書：蓋章後 Nelsen 老師講清楚這遊戲是幹嘛的 -->
-  <section id="scene-orders" class="scene">
-    <div class="orders-shell">
-      <div class="orders-stamp">任命已蓋章</div>
-      <div class="orders-teacher-row">
-        <div class="orders-teacher-nameplate">Nelsen 老師</div>
-      </div>
-      <p id="orders-briefing-line">這一關一關玩完、你的電腦上就有一支真的 AI 艦隊。開課那天、帶著它來。</p>
-      <button class="back-btn" id="orders-continue-btn" type="button">出發</button>
-    </div>
-  </section>
-
   <!-- 艦橋 HUB -->
   <section id="scene-bridge" class="scene">
     <div class="bridge-layer" id="bridge-star-layer"></div>
@@ -65,8 +53,8 @@
 
     <div id="bridge-nav">
       <button class="nav-btn" id="nav-tasks-btn" type="button">任務板</button>
-      <button class="nav-btn nav-btn-locked" id="nav-briefing-btn" type="button">晨會 <span class="nav-lock-tag">開課後解鎖</span></button>
-      <button class="nav-btn nav-btn-locked" id="nav-archive-btn" type="button">檔案室 <span class="nav-lock-tag">開課後解鎖</span></button>
+      <button class="nav-btn" id="nav-briefing-btn" type="button">晨會</button>
+      <button class="nav-btn" id="nav-archive-btn" type="button">檔案室</button>
       <!-- 「觀測窗」「艦長室」入口暫時隱藏（2026-07-06）：功能尚未開放、避免玩家點進去只看到佔位頁。
            場景檔案（scene-placeholder）與 Placeholder.show 邏輯保留在 codebase，未來要重新啟用
            只需把下面兩顆按鈕的 HTML 加回來即可，data-placeholder-nav 機制不需要改。
@@ -88,19 +76,17 @@
     </div>
   </section>
 
-  <!-- 任務板：M0 裝備發放（真安裝主線） -->
+  <!-- 任務板 -->
   <section id="scene-tasks" class="scene">
     <div class="panel-inner">
-      <div class="panel-title">M0 · 裝備發放</div>
-      <div id="install-quest-notice">五個寶藏、五名艦員。每收下一個寶藏、對應的艦員就會甦醒——這不是勾格子，是真的裝好。</div>
-      <ol id="install-quest-list"></ol>
-
-      <div class="panel-title compact-panel-title">開課後解鎖</div>
-      <div id="task-demo-notice">這些是課程中的內容——現在先把艦隊裝起來。</div>
-      <ul id="task-list" class="locked-list"></ul>
+      <div class="panel-title">今日任務</div>
+      <div id="task-demo-notice"></div>
+      <ul id="task-list"></ul>
+      <div class="panel-title compact-panel-title">主線任務鏈</div>
       <div id="quest-demo-notice"></div>
-      <ol id="quest-list" class="locked-list"></ol>
-      <ul id="placeholder-boards-list" class="locked-list"></ul>
+      <ol id="quest-list"></ol>
+      <div class="panel-title compact-panel-title">其他艦內設施</div>
+      <ul id="placeholder-boards-list"></ul>
       <button class="back-btn" id="task-back-btn" type="button">回艦橋</button>
     </div>
   </section>

@@ -12,7 +12,6 @@
     briefingData: null,
     archiveData: null,
     questsData: null,
-    installQuestsData: null,
     archiveIndex: 0,
     celebrationAnimId: null,
     activeCrewId: null,
@@ -154,23 +153,6 @@
   };
 
   // ---------------------------------------------------------------
-  // 任命書：蓋章後 Nelsen 老師一句話講清楚這遊戲是幹嘛的
-  // ---------------------------------------------------------------
-  const TeacherOrders = {
-    async play() {
-      await window.SceneManager.transitionTo("orders", "任命書");
-      await new Promise((resolve) => {
-        const btn = document.getElementById("orders-continue-btn");
-        const onContinue = () => {
-          btn.removeEventListener("click", onContinue);
-          resolve();
-        };
-        btn.addEventListener("click", onContinue);
-      });
-    }
-  };
-
-  // ---------------------------------------------------------------
   // 艦橋 HUB
   // ---------------------------------------------------------------
   const Bridge = {
@@ -267,17 +249,13 @@
         window.SFX.unlock();
         TaskBoard.open();
       });
-      // 晨會／檔案室降級為支線（2026-07-06）：課前先把艦隊裝起來，
-      // 這兩個入口保留可見、但點了只顯示課後解鎖提示，不再打開真實場景。
-      // 完整場景邏輯（MorningBriefing / ArchiveRoom）保留在 codebase，
-      // 開課後只需把下面兩行改回 MorningBriefing.open() / ArchiveRoom.open() 即可。
       document.getElementById("nav-briefing-btn").addEventListener("click", () => {
         window.SFX.unlock();
-        Placeholder.show("晨會", "這些是課程中的內容——現在先把艦隊裝起來。");
+        MorningBriefing.open();
       });
       document.getElementById("nav-archive-btn").addEventListener("click", () => {
         window.SFX.unlock();
-        Placeholder.show("檔案室", "這些是課程中的內容——現在先把艦隊裝起來。");
+        ArchiveRoom.open();
       });
       document.querySelectorAll("[data-placeholder-nav]").forEach((el) => {
         el.addEventListener("click", () => {
@@ -482,243 +460,6 @@
   };
 
   // ---------------------------------------------------------------
-  // M0 裝備發放：真安裝主線（onboarding 五寶藏嵌進任務板）
-  // 白名單網域（維持不變）：claude.com / chatgpt.com / nodejs.org / developers.facebook.com
-  // 這裡只用到 claude.com、nodejs.org 兩個（codex 是複製指令、不開外連）。
-  // ---------------------------------------------------------------
-  const InstallQuests = {
-    _cache: null, // localStorage key: fleetInstallQuests.v1
-
-    STORAGE_KEY: "fleetInstallQuests.v1",
-
-    load() {
-      if (this._cache) return this._cache;
-      try {
-        const raw = localStorage.getItem(this.STORAGE_KEY);
-        this._cache = raw ? JSON.parse(raw) : { done: {}, copyStep2Done: {} };
-      } catch (e) {
-        this._cache = { done: {}, copyStep2Done: {} };
-      }
-      if (!this._cache.done) this._cache.done = {};
-      if (!this._cache.copyStep2Done) this._cache.copyStep2Done = {};
-      return this._cache;
-    },
-
-    persist() {
-      try {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this._cache));
-      } catch (e) {
-        /* 靜默略過，不擋流程 */
-      }
-    },
-
-    isDone(id) {
-      return !!this.load().done[id];
-    },
-
-    allDone() {
-      return state.installQuestsData.quests.every((q) => this.isDone(q.id));
-    },
-
-    doneCount() {
-      return state.installQuestsData.quests.filter((q) => this.isDone(q.id)).length;
-    },
-
-    render() {
-      const listEl = document.getElementById("install-quest-list");
-      listEl.innerHTML = "";
-      state.installQuestsData.quests.forEach((quest) => {
-        listEl.appendChild(this.renderQuestCard(quest));
-      });
-    },
-
-    renderQuestCard(quest) {
-      const done = this.isDone(quest.id);
-      const li = document.createElement("li");
-      li.className = "install-quest" + (done ? " install-quest-done" : "");
-      li.setAttribute("data-install-quest", quest.id);
-
-      const head = document.createElement("div");
-      head.className = "install-quest-head";
-      const title = document.createElement("div");
-      title.className = "install-quest-title";
-      title.textContent = quest.title;
-      const status = document.createElement("div");
-      status.className = "install-quest-status";
-      status.textContent = done ? "✓ 已收下" : "尚未收下";
-      head.append(title, status);
-      li.appendChild(head);
-
-      const desc = document.createElement("div");
-      desc.className = "install-quest-desc";
-      desc.textContent = quest.description;
-      li.appendChild(desc);
-
-      if (!done) {
-        li.appendChild(this.renderActions(quest));
-      }
-
-      return li;
-    },
-
-    renderActions(quest) {
-      const wrap = document.createElement("div");
-      wrap.className = "install-quest-actions";
-
-      if (quest.actionType === "download") {
-        const btn = document.createElement("button");
-        btn.className = "install-btn";
-        btn.textContent = quest.actionLabel;
-        btn.addEventListener("click", () => {
-          window.open(quest.url, "_blank", "noopener");
-        });
-        wrap.appendChild(btn);
-        wrap.appendChild(this.renderConfirmButton(quest));
-      } else if (quest.actionType === "copy") {
-        wrap.appendChild(this.renderCopyButton(quest.copyText, quest.actionLabel));
-        wrap.appendChild(this.renderConfirmButton(quest));
-      } else if (quest.actionType === "copy-double") {
-        wrap.appendChild(this.renderCopyButton(quest.copyText, quest.actionLabel));
-        wrap.appendChild(this.renderCopyButton(quest.copyText2, quest.actionLabel2));
-        wrap.appendChild(this.renderConfirmButton(quest));
-      } else if (quest.actionType === "unlock-code") {
-        wrap.appendChild(this.renderCopyButton(quest.copyText, quest.actionLabel));
-        wrap.appendChild(this.renderUnlockRow(quest));
-      }
-
-      return wrap;
-    },
-
-    renderCopyButton(text, label) {
-      const holder = document.createElement("span");
-      const btn = document.createElement("button");
-      btn.className = "install-btn";
-      btn.textContent = label;
-      const feedback = document.createElement("span");
-      feedback.className = "install-copy-feedback";
-      feedback.textContent = "已複製";
-      btn.addEventListener("click", () => {
-        const showFeedback = () => {
-          feedback.classList.add("show");
-          setTimeout(() => feedback.classList.remove("show"), 1800);
-        };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(showFeedback, showFeedback);
-        } else {
-          showFeedback();
-        }
-      });
-      holder.append(btn, feedback);
-      return holder;
-    },
-
-    renderConfirmButton(quest) {
-      const btn = document.createElement("button");
-      btn.className = "install-btn";
-      btn.textContent = quest.confirmLabel;
-      btn.addEventListener("click", () => {
-        this.complete(quest.id);
-      });
-      return btn;
-    },
-
-    renderUnlockRow(quest) {
-      const row = document.createElement("div");
-      row.className = "install-code-row";
-      const input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = "輸入通關碼";
-      const btn = document.createElement("button");
-      btn.className = "install-btn";
-      btn.textContent = "解鎖";
-      row.append(input, btn);
-
-      const hint = document.createElement("div");
-      hint.className = "install-hint";
-      hint.id = "install-unlock-hint";
-
-      const container = document.createElement("div");
-      container.append(row, hint);
-
-      const normalize = (s) => s.replace(/\s+/g, "");
-      btn.addEventListener("click", () => {
-        if (normalize(input.value.trim()) === normalize(state.installQuestsData.unlockCode)) {
-          hint.textContent = "通關碼正確";
-          hint.className = "install-hint ok";
-          this.complete(quest.id);
-        } else {
-          hint.textContent = "還不太對，確認有沒有多打空格";
-          hint.className = "install-hint error";
-        }
-      });
-
-      return container;
-    },
-
-    async complete(id) {
-      if (this.isDone(id)) return;
-      const s = this.load();
-      s.done[id] = true;
-      this.persist();
-
-      const quest = state.installQuestsData.quests.find((q) => q.id === id);
-      const isLast = this.allDone();
-
-      TaskBoard.render();
-
-      if (quest) {
-        const crew = state.crewData.crew.find((c) => c.id === quest.crewId);
-        if (crew) {
-          await this.playAwakening(crew, quest.awakenLine);
-        }
-      }
-
-      if (isLast) {
-        await FleetAwakenedCelebration.open();
-      } else {
-        await TaskBoard.open();
-      }
-    },
-
-    // 甦醒對話：既有對話樹的裁剪版，單一節點、按確認即回任務板
-    async playAwakening(crew, line) {
-      window.SFX.unlock();
-      const tree = {
-        start: "awaken",
-        nodes: {
-          awaken: {
-            speaker: crew.name,
-            expression: "neutral",
-            lines: [line],
-            choices: [{ text: "（回艦橋）", goto: "END" }]
-          },
-          END: { type: "end" }
-        }
-      };
-      state.activeCrewId = crew.id;
-      await window.SceneManager.transitionTo("dialogue", `${crew.name}甦醒`);
-      DialogueScene.setupPortrait(crew);
-      state.dialogueRuntime = { tree, crew };
-      DialogueScene.renderNode(tree, tree.start);
-    }
-  };
-
-  // ---------------------------------------------------------------
-  // 全艦甦醒慶祝（M0 全通關，沿用首航慶祝場景與 canvas 粒子）
-  // ---------------------------------------------------------------
-  const FleetAwakenedCelebration = {
-    async open() {
-      await window.SceneManager.transitionTo("celebration", "全艦甦醒");
-      document.querySelector("#scene-celebration .mode-badge").textContent = "M0 完成";
-      document.querySelector("#scene-celebration .panel-title").textContent = "全艦甦醒";
-      document.getElementById("celebration-message").textContent =
-        "五名艦員全部甦醒、裝備真的裝好了。開課見，艦長。";
-      CelebrationScene.renderCrew();
-      CelebrationScene.startParticles();
-    }
-  };
-
-  // ---------------------------------------------------------------
   // 任務板
   // ---------------------------------------------------------------
   const TaskBoard = {
@@ -728,13 +469,10 @@
     },
 
     render() {
-      InstallQuests.render();
-
       const listEl = document.getElementById("task-list");
       listEl.innerHTML = "";
 
-      document.getElementById("task-demo-notice").textContent =
-        "這些是課程中的內容——現在先把艦隊裝起來。";
+      document.getElementById("task-demo-notice").textContent = state.tasksData.demoNotice;
 
       state.tasksData.dailyTasks.forEach((task) => {
         const li = document.createElement("li");
@@ -1097,20 +835,18 @@
     window.SceneManager.init();
     IntroSequence.init();
 
-    const [crewData, tasksData, briefingData, archiveData, questsData, installQuestsData] = await Promise.all([
+    const [crewData, tasksData, briefingData, archiveData, questsData] = await Promise.all([
       fetch("data/crew.json").then((r) => r.json()),
       fetch("data/tasks.json").then((r) => r.json()),
       fetch("data/demo-briefing.json").then((r) => r.json()),
       fetch("data/archive-log.json").then((r) => r.json()),
-      fetch("data/quests.json").then((r) => r.json()),
-      fetch("data/install-quests.json").then((r) => r.json())
+      fetch("data/quests.json").then((r) => r.json())
     ]);
     state.crewData = crewData;
     state.tasksData = tasksData;
     state.briefingData = briefingData;
     state.archiveData = archiveData;
     state.questsData = questsData;
-    state.installQuestsData = installQuestsData;
 
     // 危機事件：示範模式下，每日登艦後隨機開放（示範用固定觸發，確保可驗收）
     state.crisisAvailableToday = !window.SaveSystem.isDailyTaskDone("daily_crisis");
@@ -1120,7 +856,6 @@
     const save = window.SaveSystem.load();
     if (!save.profile.hasSeenIntro) {
       await IntroSequence.play();
-      await TeacherOrders.play();
       window.SaveSystem.markIntroSeen();
     }
 
@@ -1137,8 +872,6 @@
   // debug/testing hook（供驗收時在 console 重播開場）
   window.__fleetDebug = {
     replayIntro: () => IntroSequence.play(),
-    replayOrders: () => TeacherOrders.play(),
-    completeInstallQuest: (id) => InstallQuests.complete(id),
     state
   };
 })();

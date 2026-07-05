@@ -24,8 +24,8 @@
     }
   ],
   "placeholderBoards": [
-    { "id": "morning_briefing", "label": "晨會", "note": "已開放——情報員主持示範資料晨會" },
-    { "id": "archive_room", "label": "檔案室", "note": "已開放——前任艦長日誌依連續登艦逐頁解鎖" },
+    { "id": "morning_briefing", "label": "晨會", "note": "開課後解鎖——情報員主持的示範資料晨會" },
+    { "id": "archive_room", "label": "檔案室", "note": "開課後解鎖——前任艦長日誌依連續登艦逐頁解鎖" },
     { "id": "observation_deck", "label": "觀測窗", "note": "訊號還在路上——成就牆與航程統計在 S2 開放" },
     { "id": "captain_quarters", "label": "艦長室", "note": "訊號還在路上——設定與聲線檔在 S2 開放" }
   ],

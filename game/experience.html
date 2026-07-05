@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Claude Code — 我的宇宙艦隊（畫面模擬）</title>
+<style>
+  :root{
+    --bg: #f5f5f4;
+    --panel: #ffffff;
+    --line: #dcdcda;
+    --line-soft: #e8e8e6;
+    --text: #1c1c1a;
+    --text-dim: #6b6b68;
+    --text-faint: #9a9a96;
+    --bubble-user: #efeee9;
+    --bubble-ai: #ffffff;
+    --accent: #1c1c1a;
+    --mono: "SF Mono", "Menlo", "Consolas", monospace;
+    --sans: -apple-system, "PingFang TC", "Noto Sans TC", "Helvetica Neue", Arial, sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    height:100%;
+    overflow-x:hidden;
+  }
+  body{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+    padding:24px 12px 40px;
+  }
+
+  /* ---------- 外層說明 ---------- */
+  .stage-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.06em;
+    color:var(--text-faint);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+
+  /* ---------- 手機殼容器 ---------- */
+  .phone{
+    width:390px;
+    max-width:100%;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    height:780px;
+    max-height:82vh;
+    position:relative;
+  }
+
+  /* ---------- 頂部標題列 ---------- */
+  .titlebar{
+    flex:0 0 auto;
+    padding:14px 16px 10px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .titlebar .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .titlebar h1{
+    font-size:14px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:0.01em;
+  }
+  .titlebar .sim-tag{
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--text-faint);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:1px 6px;
+    white-space:nowrap;
+  }
+  .titlebar .subtitle{
+    font-size:11px;
+    color:var(--text-faint);
+    font-family:var(--mono);
+  }
+
+  /* ---------- 章節字卡 ---------- */
+  .chapter-card{
+    flex:0 0 auto;
+    display:none;
+    align-items:center;
+    gap:10px;
+    padding:9px 16px;
+    border-bottom:1px solid var(--line-soft);
+    background:var(--bg);
+  }
+  .chapter-card.show{ display:flex; }
+  .chapter-num{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:1px 6px;
+  }
+  .chapter-title{
+    font-size:12px;
+    font-weight:600;
+    color:var(--text);
+  }
+
+  /* ---------- 訊息串 ---------- */
+  .thread{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding:16px 14px 12px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    scroll-behavior:smooth;
+  }
+  .thread::-webkit-scrollbar{ width:0; }
+
+  .msg{
+    display:flex;
+    flex-direction:column;
+    max-width:86%;
+    opacity:0;
+    transform:translateY(6px);
+    animation:msgIn 0.32s ease forwards;
+  }
+  @keyframes msgIn{
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .msg.user{ align-self:flex-end; align-items:flex-end; }
+  .msg.ai{ align-self:flex-start; align-items:flex-start; }
+
+  .msg .who{
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--text-faint);
+    margin-bottom:4px;
+    padding:0 2px;
+  }
+
+  .bubble{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 13px;
+    font-size:13.5px;
+    line-height:1.65;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+  .msg.user .bubble{
+    background:var(--bubble-user);
+  }
+  .msg.ai .bubble{
+    background:var(--bubble-ai);
+  }
+
+  /* 檔案卡樣式（fleet-config.md 產出） */
+  .filecard{
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#fafaf9;
+    padding:0;
+    overflow:hidden;
+    font-size:12.5px;
+    max-width:100%;
+  }
+  .filecard .fc-head{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 12px;
+    border-bottom:1px solid var(--line-soft);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+  }
+  .filecard .fc-dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--text-faint);
+    flex:0 0 auto;
+  }
+  .filecard .fc-body{
+    padding:10px 12px;
+    line-height:1.7;
+    color:var(--text);
+  }
+  .filecard .fc-body b{ font-weight:600; }
+  .filecard table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:6px;
+    font-size:12px;
+  }
+  .filecard td{
+    border-top:1px solid var(--line-soft);
+    padding:4px 2px;
+    vertical-align:top;
+  }
+  .filecard td:first-child{ color:var(--text-dim); width:38%; }
+
+  /* 守門員報告卡 */
+  .reportcard{
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#fafaf9;
+    padding:10px 12px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    line-height:1.85;
+    color:var(--text);
+    white-space:pre-wrap;
+  }
+  .reportcard .ok{ color:#2f5d3a; }
+  .reportcard .verdict{
+    margin-top:4px;
+    padding-top:6px;
+    border-top:1px solid var(--line-soft);
+    font-weight:600;
+  }
+
+  /* 打字中省略號 */
+  .typing-dots{
+    display:inline-flex;
+    gap:3px;
+    align-items:center;
+    padding:2px 4px;
+  }
+  .typing-dots span{
+    width:5px; height:5px; border-radius:50%;
+    background:var(--text-faint);
+    animation:blink 1.1s infinite ease-in-out;
+  }
+  .typing-dots span:nth-child(2){ animation-delay:0.15s; }
+  .typing-dots span:nth-child(3){ animation-delay:0.3s; }
+  @keyframes blink{
+    0%,80%,100%{ opacity:0.25; }
+    40%{ opacity:1; }
+  }
+
+  /* 游標 */
+  .caret{
+    display:inline-block;
+    width:2px;
+    height:1em;
+    background:var(--text);
+    vertical-align:text-bottom;
+    margin-left:1px;
+    animation:caretBlink 0.9s steps(1) infinite;
+  }
+  @keyframes caretBlink{
+    50%{ opacity:0; }
+  }
+
+  /* 發佈按鈕 / 確認鍵 */
+  .action-row{
+    display:flex;
+    gap:8px;
+    margin-top:2px;
+  }
+  .btn{
+    font-family:var(--sans);
+    font-size:12.5px;
+    font-weight:600;
+    padding:8px 16px;
+    border-radius:8px;
+    border:1px solid var(--text);
+    background:var(--text);
+    color:#fff;
+    cursor:pointer;
+    transition:opacity 0.15s;
+  }
+  .btn:hover{ opacity:0.85; }
+  .btn:disabled{
+    opacity:0.35;
+    cursor:default;
+  }
+  .btn.ghost{
+    background:transparent;
+    color:var(--text);
+  }
+  .published-tag{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:#2f5d3a;
+    border:1px solid #cfe0d2;
+    background:#f3f8f4;
+    border-radius:6px;
+    padding:5px 10px;
+    display:inline-block;
+  }
+
+  /* ---------- 底部輸入列 ---------- */
+  .inputbar{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 12px;
+    border-top:1px solid var(--line);
+    background:var(--panel);
+  }
+  .inputbar .fake-input{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 12px;
+    font-size:13px;
+    color:var(--text);
+    background:#fbfbfa;
+    min-height:18px;
+    line-height:1.4;
+  }
+  .inputbar .fake-input.placeholder{
+    color:var(--text-faint);
+  }
+  .inputbar .send-dot{
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+    color:var(--text-dim);
+    font-size:14px;
+  }
+
+  /* ---------- 播放控制條（demo 外殼、非聊天視窗本身） ---------- */
+  .controls{
+    width:390px;
+    max-width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:14px;
+    padding:10px 4px 0;
+    border-top:1px solid var(--line);
+  }
+  .controls .left{
+    display:flex;
+    gap:8px;
+  }
+  .ctrl-btn{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:6px 11px;
+    cursor:pointer;
+  }
+  .ctrl-btn:hover{ background:var(--bg); }
+  .progress-label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--text-faint);
+  }
+
+  .footnote{
+    width:390px;
+    max-width:100%;
+    text-align:center;
+    font-size:10.5px;
+    color:var(--text-faint);
+    margin-top:10px;
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+
+  <div class="stage-label">畫面模擬 · 非真實錄影</div>
+
+  <div class="phone">
+    <div class="titlebar">
+      <div class="row">
+        <h1>Claude Code — 我的宇宙艦隊</h1>
+        <span class="sim-tag">畫面模擬</span>
+      </div>
+      <div class="subtitle" id="subtitle-text">領航員 · 待命中</div>
+    </div>
+
+    <div class="chapter-card" id="chapter-card">
+      <span class="chapter-num" id="chapter-num">01</span>
+      <span class="chapter-title" id="chapter-title">訪談</span>
+    </div>
+
+    <div class="thread" id="thread"></div>
+
+    <div class="inputbar">
+      <div class="fake-input placeholder" id="fake-input">傳訊息給艦隊…</div>
+      <div class="send-dot">↑</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="left">
+      <button class="ctrl-btn" id="btn-replay">重播</button>
+      <button class="ctrl-btn" id="btn-skip">快轉</button>
+    </div>
+    <div class="progress-label" id="progress-label">00 / 04</div>
+  </div>
+
+  <div class="footnote">四段連續劇情、自動播放 · 全程約 90 秒<br>這是產品畫面模擬，實際體驗發生在你自己的 Claude Code 裡</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var thread = document.getElementById("thread");
+  var subtitleEl = document.getElementById("subtitle-text");
+  var chapterCard = document.getElementById("chapter-card");
+  var chapterNum = document.getElementById("chapter-num");
+  var chapterTitle = document.getElementById("chapter-title");
+  var fakeInput = document.getElementById("fake-input");
+  var progressLabel = document.getElementById("progress-label");
+  var btnReplay = document.getElementById("btn-replay");
+  var btnSkip = document.getElementById("btn-skip");
+
+  // ---------------------------------------------------------------
+  // 播放控制核心：一個 step queue，每個 step 是一個 function(done)
+  // skip 模式把逐字打字與等待時間全部壓縮到最短，但不跳過內容本身
+  // ---------------------------------------------------------------
+  var steps = [];
+  var stepIndex = 0;
+  var playToken = 0; // 每次 play() 遞增，讓舊的 setTimeout 失效
+  var fastMode = false;
+  var isPlaying = false;
+
+  function clearThread(){
+    thread.innerHTML = "";
+  }
+
+  function scrollToBottom(){
+    thread.scrollTop = thread.scrollHeight + 999;
+  }
+
+  function wait(ms, token, cb){
+    var t = fastMode ? Math.min(ms, 60) : ms;
+    setTimeout(function(){
+      if (token === playToken) cb();
+    }, t);
+  }
+
+  function setChapter(num, title){
+    chapterCard.classList.add("show");
+    chapterNum.textContent = num;
+    chapterTitle.textContent = title;
+    progressLabel.textContent = num + " / 04";
+  }
+
+  function setSubtitle(text){
+    subtitleEl.textContent = text;
+  }
+
+  function setFakeInput(text, isPlaceholder){
+    fakeInput.textContent = text;
+    if (isPlaceholder){
+      fakeInput.classList.add("placeholder");
+    } else {
+      fakeInput.classList.remove("placeholder");
+    }
+  }
+
+  // 使用者訊息：直接出現（模擬使用者已打完字送出）
+  function addUserMessage(text, token, cb){
+    var msg = document.createElement("div");
+    msg.className = "msg user";
+    msg.innerHTML = '<div class="who">你</div><div class="bubble"></div>';
+    thread.appendChild(msg);
+    var bubble = msg.querySelector(".bubble");
+    bubble.textContent = text;
+    scrollToBottom();
+    wait(fastMode ? 80 : 260, token, cb);
+  }
+
+  // AI 打字指示（三點跳動），接著換成逐字輸出文字
+  function addAiTypingThenText(text, token, cb, opts){
+    opts = opts || {};
+    var who = opts.who || "艦隊";
+    var msg = document.createElement("div");
+    msg.className = "msg ai";
+    msg.innerHTML = '<div class="who">' + who + '</div><div class="bubble"><span class="typing-dots"><span></span><span></span><span></span></span></div>';
+    thread.appendChild(msg);
+    scrollToBottom();
+
+    var bubble = msg.querySelector(".bubble");
+    var thinkMs = fastMode ? 90 : (opts.thinkMs || 900);
+
+    wait(thinkMs, token, function(){
+      bubble.innerHTML = '<span class="typed"></span><span class="caret"></span>';
+      var typedEl = bubble.querySelector(".typed");
+      var caretEl = bubble.querySelector(".caret");
+      typeOut(text, typedEl, caretEl, token, function(){
+        cb();
+      });
+    });
+  }
+
+  // 逐字打字機效果
+  function typeOut(text, el, caretEl, token, cb){
+    var i = 0;
+    var charDelay = fastMode ? 1 : 16;
+    var chunk = fastMode ? 6 : 1; // 快轉時一次吐多字
+
+    function step(){
+      if (token !== playToken) return;
+      if (i >= text.length){
+        if (caretEl && caretEl.parentNode) caretEl.parentNode.removeChild(caretEl);
+        scrollToBottom();
+        cb();
+        return;
+      }
+      var next = Math.min(i + chunk, text.length);
+      el.textContent += text.slice(i, next);
+      i = next;
+      scrollToBottom();
+      setTimeout(step, charDelay);
+    }
+    step();
+  }
+
+  // 純內容卡片（檔案卡 / 報告卡），淡入即可，不逐字
+  function addAiCard(innerHtml, token, cb, opts){
+    opts = opts || {};
+    var who = opts.who || "艦隊";
+    var msg = document.createElement("div");
+    msg.className = "msg ai";
+    msg.style.maxWidth = "94%";
+    msg.innerHTML = '<div class="who">' + who + '</div>';
+    var wrap = document.createElement("div");
+    wrap.innerHTML = innerHtml;
+    msg.appendChild(wrap.firstElementChild);
+    thread.appendChild(msg);
+    scrollToBottom();
+    wait(fastMode ? 100 : 500, token, cb);
+  }
+
+  function addPlainAiText(text, token, cb, opts){
+    // 已知內容、不需打字機效果的簡短 AI 訊息（例如收尾一句話），仍然淡入
+    opts = opts || {};
+    var who = opts.who || "艦隊";
+    var msg = document.createElement("div");
+    msg.className = "msg ai";
+    msg.innerHTML = '<div class="who">' + who + '</div><div class="bubble"></div>';
+    thread.appendChild(msg);
+    var bubble = msg.querySelector(".bubble");
+    bubble.textContent = text;
+    scrollToBottom();
+    wait(fastMode ? 100 : 400, token, cb);
+  }
+
+  function pause(ms, token, cb){
+    wait(ms, token, cb);
+  }
+
+  // ---------------------------------------------------------------
+  // 劇本內容
+  // ---------------------------------------------------------------
+
+  var fleetConfigCard =
+    '<div class="filecard">' +
+      '<div class="fc-head"><span class="fc-dot"></span>fleet-config.md · 已建立</div>' +
+      '<div class="fc-body">' +
+        '<b>定位一句話</b>：教中小企業主用白話搞懂 AI、不賣課只講真的能不能用。<br>' +
+        '<table>' +
+          '<tr><td>選題拍板</td><td>你（永遠不可讓渡）</td></tr>' +
+          '<tr><td>發佈鍵</td><td>你（永遠不可讓渡）</td></tr>' +
+          '<tr><td>草稿</td><td>艦隊先生、你改</td></tr>' +
+          '<tr><td>檢查</td><td>每篇自動先過一輪</td></tr>' +
+        '</table>' +
+      '</div>' +
+    '</div>';
+
+  var reportCardHtml =
+    '<div class="reportcard">' +
+    '<span class="ok">✅ 高風險罐頭句型：沒抓到，讀起來不會太「AI 腔」。</span>\n' +
+    '<span class="ok">✅ 字數：106 字，在 500 字上限內。</span>\n' +
+    '<span class="ok">✅ 禁詞清單：沒踩到。</span>\n' +
+    '<span class="ok">✅ 段落斷行：閱讀節奏可以。</span>\n' +
+    '<div class="verdict">結論：四項都過，可以發了。</div>' +
+    '</div>';
+
+  var draftText = "最近好多人問我要不要學 AI。\n\n老實說我的答案很無聊：先別急著挑工具，先想清楚你要解決什麼問題。\n\n工具三個月換一輪，問題意識不會。你連自己卡在哪都講不清楚，學再多技巧也是白搭。\n\n想清楚了，工具隨便選都能用。";
+
+  function buildScript(){
+    var s = [];
+
+    // ============ 章節 01：訪談 ============
+    s.push(function(token, next){
+      setChapter("01", "訪談");
+      setSubtitle("領航員 · 首次啟動");
+      setFakeInput("開始訪談", false);
+      next();
+    });
+    s.push(function(token, next){ addUserMessage("開始訪談", token, next); });
+    s.push(function(token, next){ setFakeInput("傳訊息給艦隊…", true); next(); });
+    s.push(function(token, next){
+      addAiTypingThenText(
+        "我是領航員。接下來聊大概 20 分鐘，聊完會幫你寫一份「艦隊藍圖」，之後每個艦員做事前都先看這份藍圖、照你的樣子做事。先問你：現在主要在哪個平台寫東西？大概多少粉絲、多久發一次？",
+        token, next, { who:"領航員", thinkMs:900 }
+      );
+    });
+    s.push(function(token, next){
+      addUserMessage("Threads 為主，兩千多個追蹤，大概一週發兩篇，斷斷續續的", token, next);
+    });
+    s.push(function(token, next){
+      addAiTypingThenText(
+        "收到。接下來這題比較重要：發佈鍵——貼文最後送出去那一下，這永遠是你按，艦隊不會幫你自動發。這一點沒有例外，你同意嗎？",
+        token, next, { who:"領航員", thinkMs:700 }
+      );
+    });
+    s.push(function(token, next){
+      addUserMessage("對，永遠在我手上", token, next);
+    });
+    s.push(function(token, next){
+      addAiTypingThenText(
+        "記下了。藍圖整理好了，你可以看一下：",
+        token, next, { who:"領航員", thinkMs:600 }
+      );
+    });
+    s.push(function(token, next){
+      addAiCard(fleetConfigCard, token, next, { who:"領航員" });
+    });
+    s.push(function(token, next){
+      pause(fastMode ? 150 : 1100, token, next);
+    });
+
+    // ============ 章節 02：出稿 ============
+    s.push(function(token, next){
+      setChapter("02", "出稿");
+      setSubtitle("寫手 · 待命中");
+      setFakeInput("幫我寫一篇：最近好多人問我要不要學 AI", false);
+      next();
+    });
+    s.push(function(token, next){
+      addUserMessage("幫我寫一篇：最近好多人問我要不要學 AI", token, next);
+    });
+    s.push(function(token, next){ setFakeInput("傳訊息給艦隊…", true); next(); });
+    s.push(function(token, next){
+      addAiTypingThenText(draftText, token, next, { who:"寫手", thinkMs:1000 });
+    });
+    s.push(function(token, next){
+      pause(fastMode ? 120 : 900, token, next);
+    });
+
+    // ============ 章節 03：把關 ============
+    s.push(function(token, next){
+      setChapter("03", "把關");
+      setSubtitle("守門員 · 自動接手檢查");
+      next();
+    });
+    s.push(function(token, next){
+      addAiTypingThenText(
+        "草稿我接手了，跑一輪檢查。",
+        token, next, { who:"守門員", thinkMs:500 }
+      );
+    });
+    s.push(function(token, next){
+      addAiCard(reportCardHtml, token, next, { who:"守門員" });
+    });
+    s.push(function(token, next){
+      addAiTypingThenText(
+        "這篇沒踩到任何雷，我這邊沒意見，剩下的交給你了。",
+        token, next, { who:"守門員", thinkMs:500 }
+      );
+    });
+    s.push(function(token, next){
+      pause(fastMode ? 120 : 900, token, next);
+    });
+
+    // ============ 章節 04：拍板 ============
+    s.push(function(token, next){
+      setChapter("04", "拍板");
+      setSubtitle("等你按下發佈");
+      next();
+    });
+    s.push(function(token, next){
+      addAiTypingThenText(
+        "要發嗎？",
+        token, next, { who:"艦隊", thinkMs:500 }
+      );
+    });
+    s.push(function(token, next){
+      // 插入一個「發佈」按鈕的假訊息，讓使用者感覺是自己按下去的
+      var msg = document.createElement("div");
+      msg.className = "msg ai";
+      msg.innerHTML = '<div class="who">你</div><div class="bubble"><div class="action-row"><button class="btn" id="publish-btn">發佈</button><button class="btn ghost">再改改</button></div></div>';
+      msg.style.alignSelf = "flex-end";
+      msg.querySelector(".who").style.textAlign = "right";
+      thread.appendChild(msg);
+      scrollToBottom();
+
+      var publishBtn = msg.querySelector("#publish-btn");
+      var advanced = false;
+
+      function proceed(){
+        if (advanced) return;
+        advanced = true;
+        publishBtn.disabled = true;
+        next();
+      }
+
+      publishBtn.addEventListener("click", proceed);
+      // 自動播放模式下，短暫展示按鈕後自動視為「已按下」，讓劇情繼續
+      wait(fastMode ? 200 : 1400, token, proceed);
+    });
+    s.push(function(token, next){
+      var msg = document.createElement("div");
+      msg.className = "msg ai";
+      msg.innerHTML = '<div class="who">艦隊</div><div class="bubble"><span class="published-tag">已發佈到 Threads ✓</span></div>';
+      thread.appendChild(msg);
+      scrollToBottom();
+      wait(fastMode ? 100 : 500, token, next);
+    });
+    s.push(function(token, next){
+      addAiTypingThenText(
+        "AI 備好一切，發佈的手永遠是你的。",
+        token, next, { who:"艦隊", thinkMs:500 }
+      );
+    });
+    s.push(function(token, next){
+      setSubtitle("劇情播放完畢");
+      progressLabel.textContent = "04 / 04 · 完";
+      next();
+    });
+
+    return s;
+  }
+
+  function runSteps(list, token){
+    stepIndex = 0;
+    function loop(){
+      if (token !== playToken) return;
+      if (stepIndex >= list.length){
+        isPlaying = false;
+        return;
+      }
+      var fn = list[stepIndex];
+      stepIndex++;
+      fn(token, loop);
+    }
+    loop();
+  }
+
+  function play(fromStart){
+    playToken++;
+    var token = playToken;
+    isPlaying = true;
+    if (fromStart){
+      clearThread();
+      chapterCard.classList.remove("show");
+      setFakeInput("傳訊息給艦隊…", true);
+      progressLabel.textContent = "00 / 04";
+    }
+    var script = buildScript();
+    runSteps(script, token);
+  }
+
+  btnReplay.addEventListener("click", function(){
+    fastMode = false;
+    btnSkip.textContent = "快轉";
+    play(true);
+  });
+
+  btnSkip.addEventListener("click", function(){
+    // 快轉＝從目前這輪劇本重新以壓縮時間常數跑一次
+    // （setTimeout 已排定的舊時間常數無法動態插隊，重播現有 token 才能保證每一步都吃到新的 fastMode）
+    fastMode = true;
+    btnSkip.textContent = "快轉中";
+    play(true);
+  });
+
+  // 首次自動播放
+  play(true);
+
+})();
+</script>
+
+</body>
+</html>

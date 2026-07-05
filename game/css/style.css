@@ -715,3 +715,155 @@ html, body {
     animation: none !important;
   }
 }
+
+/* ---------------- 任命書（開場後、Nelsen 老師任務宣告） ---------------- */
+#scene-orders {
+  background: var(--night);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.orders-shell {
+  max-width: 26rem;
+  padding: 2rem;
+  text-align: center;
+}
+.orders-stamp {
+  display: inline-block;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
+  padding: 0.3em 0.8em;
+  margin-bottom: 1.4rem;
+}
+.orders-teacher-row {
+  margin-bottom: 1rem;
+}
+.orders-teacher-nameplate {
+  display: inline-block;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.5rem;
+}
+#orders-briefing-line {
+  font-size: 1rem;
+  line-height: 2;
+  color: var(--paper);
+  margin: 0 0 1.8rem;
+}
+
+/* ---------------- 支線降級：晨會／檔案室鎖標 ---------------- */
+.nav-btn-locked {
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.4em 1em;
+}
+.nav-lock-tag {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+
+/* ---------------- M0 裝備發放：任務板內的真安裝關卡 ---------------- */
+#install-quest-notice {
+  font-size: 0.8rem;
+  color: var(--ink);
+  letter-spacing: 0.03em;
+  line-height: 1.7;
+  margin-bottom: 1.2rem;
+  border-left: 2px solid var(--ink);
+  padding-left: 0.6rem;
+}
+#install-quest-list {
+  list-style: none;
+  margin: 0 0 1.4rem;
+  padding: 0;
+}
+.install-quest {
+  border: 1px solid var(--line);
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.8rem;
+}
+.install-quest.install-quest-done {
+  border-color: var(--ink);
+}
+.install-quest-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+.install-quest-title {
+  font-size: 0.95rem;
+}
+.install-quest-status {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.install-quest-desc {
+  font-size: 0.78rem;
+  opacity: 0.82;
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
+}
+.install-quest-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.install-btn {
+  background: transparent;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 0.45em 0.9em;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  min-height: 40px;
+}
+.install-btn:hover {
+  background: var(--ink);
+  color: var(--night);
+}
+.install-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.install-code-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.3rem;
+}
+.install-code-row input[type="text"] {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0.4em 0.6em;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-deep);
+  min-width: 9rem;
+}
+.install-hint {
+  font-size: 0.72rem;
+  margin-top: 0.3rem;
+}
+.install-hint.error { color: #a33; }
+.install-hint.ok { color: var(--ink); }
+.install-copy-feedback {
+  font-size: 0.72rem;
+  color: var(--ink);
+  display: none;
+}
+.install-copy-feedback.show { display: inline; }
+
+.locked-list {
+  opacity: 0.55;
+}

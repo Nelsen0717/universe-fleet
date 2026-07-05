@@ -1,0 +1,61 @@
+{
+  "unlockCode": "首航準備完成",
+  "quests": [
+    {
+      "id": "claude-code",
+      "title": "🚢 主艦：Claude Code",
+      "description": "你整支艦隊的駕駛艙。按「收下」去官方頁面下載，裝好後回來按確認。",
+      "actionType": "download",
+      "url": "https://claude.com/download",
+      "actionLabel": "收下（開官方下載頁）",
+      "confirmLabel": "裝好了、確認收下",
+      "crewId": "scout",
+      "awakenLine": "艦長你一定要看這個——主艦剛通電，感應器全部亮了。第一件事：歡迎上艦。"
+    },
+    {
+      "id": "codex",
+      "title": "🛠️ 副艦：Codex",
+      "description": "複製安裝指令、貼進終端機執行。",
+      "actionType": "copy",
+      "copyText": "npm i -g @openai/codex",
+      "actionLabel": "複製安裝指令",
+      "confirmLabel": "指令跑完了、確認收下",
+      "crewId": "writer",
+      "awakenLine": "等等、這個字的重量不對——喔，是副艦上線的震動。行，我在。之後的稿子交給我們一起磨。"
+    },
+    {
+      "id": "node",
+      "title": "⛽ 燃料：Node.js（選配）",
+      "description": "部分外掛需要它。去官網下載 LTS 版，裝完用 node --version 驗證。",
+      "actionType": "download",
+      "url": "https://nodejs.org/en/download",
+      "actionLabel": "收下（開官方下載頁）",
+      "confirmLabel": "裝好了、確認收下",
+      "crewId": "analyst",
+      "awakenLine": "數字不會安慰你、但我可以——燃料量表滿了，這是好事，代表補給線通了。"
+    },
+    {
+      "id": "fleet",
+      "title": "🧲 艦隊入列",
+      "description": "把「宇宙艦隊」請進你的 Claude Code：複製兩行指令、貼進 Claude Code 輸入列、依序按 Enter。",
+      "actionType": "copy-double",
+      "copyText": "/plugin marketplace add Nelsen0717/universe-fleet",
+      "copyText2": "/plugin install universe-fleet@universe-fleet-marketplace",
+      "actionLabel": "複製第一行",
+      "actionLabel2": "複製第二行",
+      "confirmLabel": "兩行都貼完、按過 Enter 了",
+      "crewId": "publisher",
+      "awakenLine": "好了嗎？能發了嗎——喔、是入列確認。全員清單我收到了，發佈鍵留給你，我只負責把燈點亮。"
+    },
+    {
+      "id": "coach-checkin",
+      "title": "🎖️ 教練報到",
+      "description": "真正的驗證關。複製「教練、報到」貼進 Claude Code，教練會自檢你的環境並給你通關碼。",
+      "actionType": "unlock-code",
+      "copyText": "教練、報到",
+      "actionLabel": "複製「教練、報到」",
+      "crewId": "guard",
+      "awakenLine": "這句、AI 腔——不、是真的。你把每一關都走完了。這艘艦沉過一次，這次不會，因為你在。"
+    }
+  ]
+}
