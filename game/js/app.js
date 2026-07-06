@@ -1,13 +1,19 @@
-/* 課前裝備發放 v3 — 單檔邏輯
- * 單一狀態源：localStorage['fleetOnboard.v2'] = {name, currentQuest, done[], seenOpening}
- * 帶鎖轉場：transition token，轉場中鎖輸入、連點不壞
- * 計時器歸場景：每場景 teardown 清自己的 timers
+/* 課前裝備發放 v4 —「暗艦點燈」單檔邏輯
+ * 骨架繼承 v3（一字不動）：
+ *   單一狀態源 localStorage['fleetOnboard.v2']（新增 litSystems[]）
+ *   帶鎖轉場（transition token，轉場中鎖輸入、連點不壞）
+ *   計時器歸場景（每場景 teardown 清自己的 timers）
+ *   通關碼機制、白名單五連結、回訪續關
+ * 新增（v4 皮與血）：
+ *   艦橋點燈（litSystems）、通訊視窗打字機、聲音分層（環境嗡鳴疊層）、
+ *   星窗視差 canvas、完成儀式掃描動畫、卡關 90 秒鼓勵
  */
 (function () {
   "use strict";
 
   var STORAGE_KEY = "fleetOnboard.v2";
   var QUESTS_URL = "data/install-quests.json";
+  var REDUCE_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---------------- 狀態 ----------------
   var state = {
@@ -15,6 +21,7 @@
     currentQuest: 0, // 尚未完成的下一關 index
     done: [],
     seenOpening: false,
+    litSystems: [], // 已點亮的艦橋系統（quest id 清單）
   };
   var questData = null; // { unlockCode, quests: [...] }
 
@@ -28,6 +35,7 @@
         state.currentQuest = Number.isInteger(parsed.currentQuest) ? parsed.currentQuest : 0;
         state.done = Array.isArray(parsed.done) ? parsed.done : [];
         state.seenOpening = !!parsed.seenOpening;
+        state.litSystems = Array.isArray(parsed.litSystems) ? parsed.litSystems : [];
       }
     } catch (e) {
       // 壞資料當全新開始，不阻斷流程
@@ -73,7 +81,7 @@
       });
     }
 
-    // 顯示轉場字卡 → 切場景 → 隱藏字卡。帶 token，避免連點造成疊加轉場。
+    // 顯示轉場字卡（含無線電雜訊）→ 切場景 → 隱藏字卡。帶 token，避免連點造成疊加轉場。
     function goTo(sceneId, opts) {
       opts = opts || {};
       var myToken = ++transitionToken;
@@ -85,6 +93,8 @@
       var cardTextEl = el("transition-card-text");
       cardTextEl.textContent = cardText;
       card.classList.add("card-visible");
+      sfx.staticNoise();
+      playStaticVisual();
 
       var showDelay = cardText ? 550 : 200;
 
@@ -110,6 +120,8 @@
 
     function lockInput(locked) {
       document.body.style.pointerEvents = locked ? "none" : "";
+      var muteBtn = el("mute-btn");
+      if (muteBtn) muteBtn.style.pointerEvents = "all"; // 靜音鍵永遠可按
     }
 
     function isTransitioning() {
@@ -121,10 +133,16 @@
       return registerTimer(id);
     }
 
+    function setInterval_(fn, ms) {
+      var id = setInterval(fn, ms);
+      return registerTimer(id);
+    }
+
     return {
       goTo: goTo,
       isTransitioning: isTransitioning,
       setTimer: setTimer,
+      setInterval: setInterval_,
       el: el,
       currentScene: function () {
         return currentScene;
@@ -132,13 +150,14 @@
     };
   })();
 
-  // ---------------- 音效（三個合成音、預設開、可靜音） ----------------
+  // ---------------- 聲音（WebAudio 合成、無音檔、分層） ----------------
   var sfx = (function () {
     var muted = false;
     try {
       muted = localStorage.getItem("fleetOnboard.muted") === "1";
     } catch (e) {}
     var ctx = null;
+    var droneLayers = []; // 環境嗡鳴：每點亮一關疊一層
 
     function getCtx() {
       if (!ctx) {
@@ -149,11 +168,16 @@
       return ctx;
     }
 
+    function resume() {
+      var ac = getCtx();
+      if (ac && ac.state === "suspended") ac.resume();
+    }
+
     function tone(freqs, dur, type) {
       if (muted) return;
       var ac = getCtx();
       if (!ac) return;
-      if (ac.state === "suspended") ac.resume();
+      resume();
       var now = ac.currentTime;
       freqs.forEach(function (f, i) {
         var osc = ac.createOscillator();
@@ -169,15 +193,90 @@
       });
     }
 
+    // 環境層：低頻艦橋嗡鳴，常駐。每點亮一關疊厚一層（gain 疊加）。
+    function ensureDroneLayer(index, freq, targetGain) {
+      var ac = getCtx();
+      if (!ac) return;
+      if (droneLayers[index]) {
+        if (!muted) {
+          droneLayers[index].gain.gain.linearRampToValueAtTime(targetGain, ac.currentTime + 1.2);
+        }
+        return;
+      }
+      var osc = ac.createOscillator();
+      var gain = ac.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, ac.currentTime);
+      osc.connect(gain).connect(ac.destination);
+      osc.start();
+      droneLayers[index] = { osc: osc, gain: gain, target: targetGain };
+      if (!muted) {
+        gain.gain.linearRampToValueAtTime(targetGain, ac.currentTime + 1.6);
+      }
+    }
+
+    // 依已點亮系統數量（0-5）設定嗡鳴厚度：每層一個泛音、疊加更厚
+    function setDroneThickness(litCount) {
+      resume();
+      var baseFreqs = [55, 82.5, 110, 138, 165]; // A1 泛音列，越疊越厚但和諧
+      for (var i = 0; i < baseFreqs.length; i++) {
+        var shouldPlay = i <= litCount; // 至少一層常駐（待命嗡鳴）
+        ensureDroneLayer(i, baseFreqs[i], shouldPlay ? 0.02 + i * 0.006 : 0.0001);
+      }
+    }
+
+    function applyMuteToDrones() {
+      var ac = getCtx();
+      if (!ac) return;
+      droneLayers.forEach(function (layer) {
+        if (!layer) return;
+        var target = muted ? 0.0001 : layer.target;
+        layer.gain.gain.linearRampToValueAtTime(target, ac.currentTime + 0.3);
+      });
+    }
+
+    // 無線電雜訊過場：白噪音短爆
+    function staticNoise() {
+      if (muted) return;
+      var ac = getCtx();
+      if (!ac) return;
+      resume();
+      var dur = 0.4;
+      var bufferSize = Math.floor(ac.sampleRate * dur);
+      var buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+      var data = buffer.getChannelData(0);
+      for (var i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+      }
+      var src = ac.createBufferSource();
+      src.buffer = buffer;
+      var gain = ac.createGain();
+      var filter = ac.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.value = 1800;
+      gain.gain.setValueAtTime(0.06, ac.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
+      src.connect(filter).connect(gain).connect(ac.destination);
+      src.start();
+    }
+
     return {
       stamp: function () { tone([220, 110], 0.18, "square"); }, // 蓋章：低沉短音
-      complete: function () { tone([660, 880], 0.22, "sine"); }, // 完成叮：清亮兩音
+      key: function () { tone([740], 0.05, "square"); }, // 按鍵短嗶
+      copy: function () { tone([520, 780], 0.1, "square"); }, // 複製「喀」
+      complete: function () { tone([523, 659, 784], 0.45, "sine"); }, // 系統點亮：上升和弦
+      relay: function () { tone([300], 0.12, "square"); }, // 繼電器「咚」
       fleetAwaken: function () { tone([392, 494, 587, 659], 0.9, "sine"); }, // 全艦甦醒：和弦
+      commOpen: function () { tone([880, 660], 0.1, "sine"); }, // 通訊開頭音
+      staticNoise: staticNoise,
+      setDroneThickness: setDroneThickness,
       toggleMute: function () {
         muted = !muted;
         try {
           localStorage.setItem("fleetOnboard.muted", muted ? "1" : "0");
         } catch (e) {}
+        applyMuteToDrones();
         return muted;
       },
       isMuted: function () {
@@ -185,6 +284,168 @@
       },
     };
   })();
+
+  // 轉場雜訊視覺（canvas 短暫閃噪點）
+  function playStaticVisual() {
+    var canvas = sceneManager.el("static-noise");
+    if (!canvas) return;
+    canvas.classList.remove("noise-visible");
+    void canvas.offsetWidth; // 強制 reflow 讓動畫重播
+    canvas.classList.add("noise-visible");
+    if (REDUCE_MOTION) return;
+    var ctx2d = canvas.getContext("2d");
+    if (!ctx2d) return;
+    canvas.width = window.innerWidth || document.documentElement.clientWidth || 1;
+    canvas.height = window.innerHeight || document.documentElement.clientHeight || 1;
+    if (!canvas.width || !canvas.height) return; // 防禦：極早期佈局未就緒時直接跳過這次雜訊視覺
+    var frames = 0;
+    var maxFrames = 6;
+    function drawFrame() {
+      frames++;
+      var imgData = ctx2d.createImageData(canvas.width, canvas.height);
+      for (var i = 0; i < imgData.data.length; i += 4) {
+        var v = Math.random() * 255;
+        imgData.data[i] = v;
+        imgData.data[i + 1] = v;
+        imgData.data[i + 2] = v;
+        imgData.data[i + 3] = 255;
+      }
+      ctx2d.putImageData(imgData, 0, 0);
+      if (frames < maxFrames) {
+        setTimeout(drawFrame, 80);
+      } else {
+        ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    drawFrame();
+  }
+
+  // ---------------- 靜音鍵 ----------------
+  function initMuteButton() {
+    var btn = sceneManager.el("mute-btn");
+    if (!btn) return;
+    function render() {
+      btn.textContent = sfx.isMuted() ? "🔇" : "🔊";
+    }
+    render();
+    btn.onclick = function () {
+      sfx.toggleMute();
+      render();
+    };
+  }
+
+  // ---------------- 星窗深空視差（常駐背景） ----------------
+  function initStarfield() {
+    var canvas = sceneManager.el("starfield");
+    if (!canvas || !canvas.getContext) return;
+    var ctx2d = canvas.getContext("2d");
+    var stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function makeStars() {
+      var count = Math.round((canvas.width * canvas.height) / 6000);
+      stars = [];
+      for (var i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.3 + 0.3,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.0005 + Math.random() * 0.0007,
+          driftSpeed: 0.004 + Math.random() * 0.008,
+          hueAmber: Math.random() < 0.12, // 少數星點帶琥珀色，呼應儀表光
+        });
+      }
+    }
+
+    function draw(t) {
+      ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(function (s) {
+        var twinkle = 0.3 + 0.4 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
+        ctx2d.globalAlpha = twinkle;
+        ctx2d.fillStyle = s.hueAmber ? "#e8a34c" : "#cfe0f0";
+        ctx2d.beginPath();
+        ctx2d.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx2d.fill();
+        // 極緩慢視差飄移
+        s.y += s.driftSpeed * 0.02;
+        if (s.y > canvas.height) s.y = 0;
+      });
+      ctx2d.globalAlpha = 1;
+      if (!REDUCE_MOTION) requestAnimationFrame(draw);
+    }
+
+    resize();
+    makeStars();
+    window.addEventListener("resize", function () {
+      resize();
+      makeStars();
+    });
+
+    if (REDUCE_MOTION) {
+      draw(0);
+    } else {
+      requestAnimationFrame(draw);
+    }
+  }
+
+  // ---------------- 艦橋系統點燈渲染 ----------------
+  var SYSTEM_COUNT = 5;
+
+  function renderBridgeSystems(containerId) {
+    var wrap = sceneManager.el(containerId);
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    for (var i = 0; i < SYSTEM_COUNT; i++) {
+      var dot = document.createElement("div");
+      dot.className = "bridge-system-dot" + (i < state.litSystems.length ? " lit" : "");
+      wrap.appendChild(dot);
+    }
+  }
+
+  function litCaption(containerParent) {
+    var caption = containerParent.querySelector(".bridge-caption");
+    if (!caption) return;
+    if (state.litSystems.length === 0) {
+      caption.textContent = "艦橋系統：待命中";
+    } else if (state.litSystems.length >= SYSTEM_COUNT) {
+      caption.textContent = "艦橋系統：全部就位";
+    } else {
+      caption.textContent = "艦橋系統：" + state.litSystems.length + "／" + SYSTEM_COUNT + " 已點亮";
+    }
+  }
+
+  function refreshCoverBridge() {
+    renderBridgeSystems("bridge-systems-cover");
+    var panorama = sceneManager.el("scene-cover").querySelector(".bridge-panorama");
+    if (panorama) litCaption(panorama);
+  }
+
+  // ---------------- 通訊視窗打字機 ----------------
+  function typeInto(el, text, opts) {
+    opts = opts || {};
+    el.textContent = "";
+    var caret = document.createElement("span");
+    caret.className = "caret";
+    el.appendChild(caret);
+    var i = 0;
+    var speed = opts.speed || 26;
+    function step() {
+      if (i >= text.length) {
+        caret.remove();
+        if (typeof opts.onDone === "function") opts.onDone();
+        return;
+      }
+      caret.insertAdjacentText("beforebegin", text.charAt(i));
+      i++;
+      sceneManager.setTimer(step, speed);
+    }
+    step();
+  }
 
   // ---------------- 老師三句開場 ----------------
   var MENTOR_INTRO_LINES = [
@@ -238,6 +499,8 @@
   function showCover() {
     sceneManager.goTo("scene-cover", {
       onEnter: function () {
+        refreshCoverBridge();
+        sfx.setDroneThickness(state.litSystems.length);
         // 注意：計時器必須在 onEnter（進場完成後）才註冊，
         // 否則會被 goTo 自己轉場流程的 clearSceneTimers() 提前清掉。
         sceneManager.setTimer(function () {
@@ -267,6 +530,8 @@
         stamp.textContent = "未蓋章";
         stamp.classList.add("orders-stamp-pending");
 
+        input.oninput = function () { sfx.key(); };
+
         btn.onclick = function () {
           var name = input.value.trim().replace(/艦長/g, "").trim();
           if (!name) {
@@ -291,10 +556,12 @@
       onEnter: function () {
         var lineEl = sceneManager.el("mentor-intro-line");
         var btn = sceneManager.el("mentor-intro-next-btn");
-        lineEl.textContent = MENTOR_INTRO_LINES[lineIndex];
+        sfx.commOpen();
+        typeInto(lineEl, MENTOR_INTRO_LINES[lineIndex]);
         btn.textContent = lineIndex < MENTOR_INTRO_LINES.length - 1 ? "繼續" : "開始裝備發放";
         btn.onclick = function () {
           if (sceneManager.isTransitioning()) return;
+          sfx.key();
           if (lineIndex < MENTOR_INTRO_LINES.length - 1) {
             showMentorIntro(lineIndex + 1);
           } else {
@@ -318,8 +585,11 @@
         var lineEl = sceneManager.el("mentor-intro-line");
         var btn = sceneManager.el("mentor-intro-next-btn");
         var q = questData.quests[state.currentQuest];
-        lineEl.textContent =
-          "艦長" + state.name + "，上次到第 " + (state.currentQuest + 1) + " 關・" + stripEmoji(q.title) + "，繼續？";
+        sfx.commOpen();
+        typeInto(
+          lineEl,
+          "艦長" + state.name + "，上次到第 " + (state.currentQuest + 1) + " 關・" + stripEmoji(q.title) + "，繼續？"
+        );
         btn.textContent = "繼續";
         btn.onclick = function () {
           if (sceneManager.isTransitioning()) return;
@@ -329,37 +599,114 @@
     });
   }
 
-  // 依 actionType 產生三件套內容
+  // 依 actionType 產生三件套「畫面模擬」DOM（高擬真 os-window）
+  function renderSimDom(q, container) {
+    container.innerHTML = "";
+    if (q.actionType === "download") {
+      var browserWin = document.createElement("div");
+      browserWin.className = "os-window browser-window";
+      browserWin.innerHTML =
+        '<div class="os-titlebar">' +
+        '<span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>' +
+        '<span class="browser-addressbar"><span class="lock">🔒</span>' + escapeHtml(hostFromUrl(q.url)) + "</span>" +
+        "</div>" +
+        '<div class="browser-body">' +
+        '<div class="browser-body-title">' + escapeHtml(stripEmoji(q.title)) + "</div>" +
+        '<div class="browser-body-sub">官方下載頁 · 畫面模擬</div>' +
+        "</div>";
+      container.appendChild(browserWin);
+    } else if (q.actionType === "unlock-code") {
+      var ccWin1 = document.createElement("div");
+      ccWin1.className = "os-window cc-window";
+      ccWin1.innerHTML =
+        '<div class="os-titlebar">' +
+        '<span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>' +
+        '<span class="os-titlebar-name">Claude Code</span>' +
+        "</div>" +
+        '<div class="cc-body">' +
+        '<div class="cc-msg cc-msg-system">教練頻道已連線</div>' +
+        '<div class="cc-inputbar cc-inputbar-target">' +
+        '<span class="cc-input-text mono">' + escapeHtml(q.copyText) + "</span>" +
+        '<span class="cc-send-btn">➤</span>' +
+        "</div>" +
+        "</div>";
+      container.appendChild(ccWin1);
+    } else if (q.actionType === "copy-double") {
+      var ccWin2 = document.createElement("div");
+      ccWin2.className = "os-window cc-window";
+      ccWin2.innerHTML =
+        '<div class="os-titlebar">' +
+        '<span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>' +
+        '<span class="os-titlebar-name">Claude Code</span>' +
+        "</div>" +
+        '<div class="cc-body">' +
+        '<div class="cc-inputbar">' +
+        '<span class="cc-input-text mono">' + escapeHtml(q.copyText) + "</span>" +
+        "</div>" +
+        '<div class="cc-inputbar" style="margin-top:6px;">' +
+        '<span class="cc-input-text mono">' + escapeHtml(q.copyText2) + "</span>" +
+        "</div>" +
+        "</div>";
+      container.appendChild(ccWin2);
+    } else {
+      // copy：終端機殼
+      var termWin = document.createElement("div");
+      termWin.className = "os-window";
+      termWin.innerHTML =
+        '<div class="os-titlebar">' +
+        '<span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>' +
+        '<span class="os-titlebar-name">terminal — zsh</span>' +
+        "</div>" +
+        '<div class="term-body">' +
+        '<div><span class="term-prompt"></span><span class="term-cmd">' + escapeHtml(q.copyText || "") + "</span></div>" +
+        '<div style="margin-top:4px;"><span class="term-prompt"></span><span class="term-cursor"></span></div>' +
+        "</div>";
+      container.appendChild(termWin);
+    }
+  }
+
+  function hostFromUrl(url) {
+    try {
+      return new URL(url).host;
+    } catch (e) {
+      return url || "";
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // 依 actionType 產生三件套文字內容（動作／預期）
   function questTrio(q) {
-    var sim, action, expect;
+    var action, expect;
     switch (q.actionType) {
       case "download":
-        sim = "畫面會跳出官方下載頁。";
         action = "按「" + q.actionLabel + "」，跳頁後照指示下載安裝。";
         expect = "安裝完成、桌面或應用程式清單出現對應程式。";
         break;
       case "copy":
-        sim = "指令已複製到剪貼簿。";
         action = "打開終端機、貼上（Cmd+V）、按 Enter 執行。";
         expect = "終端機跑完沒有紅字錯誤。";
         break;
       case "copy-double":
-        sim = "兩行指令分別複製、貼進 Claude Code 輸入列。";
         action = "先複製第一行貼上按 Enter，再複製第二行貼上按 Enter。";
         expect = "兩行都執行完、Claude Code 沒有顯示錯誤訊息。";
         break;
       case "unlock-code":
-        sim = "指令已複製，貼進 Claude Code 後教練會給你一組通關碼。";
         action = "貼上指令執行、把教練回覆的通關碼填進下面欄位。";
         expect = "通關碼驗證通過，本關關閉。";
         break;
       default:
-        sim = "";
         action = "";
         expect = "";
     }
-    return { sim: sim, action: action, expect: expect };
+    return { action: action, expect: expect };
   }
+
+  var STALL_ENCOURAGE_MS = 90000;
 
   function goToQuest(index) {
     if (index >= questData.quests.length) {
@@ -378,10 +725,13 @@
 
   function renderQuest(q, index) {
     var trio = questTrio(q);
-    sceneManager.el("quest-mentor-line").textContent =
-      "艦長，這一關：" + stripEmoji(q.title) + "。跟著三步走，卡住隨時可以休息。";
+    var mentorLineEl = sceneManager.el("quest-mentor-line");
+    sfx.commOpen();
+    typeInto(mentorLineEl, "艦長，這一關：" + stripEmoji(q.title) + "。跟著三步走，卡住隨時可以休息。");
+
     sceneManager.el("quest-title").textContent = q.title;
-    sceneManager.el("quest-sim").textContent = trio.sim;
+    sceneManager.el("quest-panel-index").textContent = "SYS.0" + (index + 1) + "／0" + questData.quests.length;
+    renderSimDom(q, sceneManager.el("quest-sim"));
     sceneManager.el("quest-action-desc").textContent = q.description + "（" + trio.action + "）";
     sceneManager.el("quest-expect").textContent = trio.expect;
 
@@ -391,12 +741,17 @@
     hintEl.textContent = "";
     hintEl.className = "quest-hint";
 
+    // 卡關 90 秒鼓勵（僅一次、老師主動說話）
+    sceneManager.setTimer(function () {
+      typeInto(mentorLineEl, "還在嗎？卡住很正常，慢慢來，我在。");
+    }, STALL_ENCOURAGE_MS);
+
     function completeQuest() {
       if (state.done.indexOf(q.id) === -1) state.done.push(q.id);
       state.currentQuest = index + 1;
+      if (state.litSystems.indexOf(q.id) === -1) state.litSystems.push(q.id);
       saveState();
-      sfx.complete();
-      showAwaken(q, index);
+      runCompletionRitual(q, index);
     }
 
     if (q.actionType === "download") {
@@ -405,6 +760,7 @@
       openBtn.className = "quest-btn";
       openBtn.textContent = q.actionLabel;
       openBtn.onclick = function () {
+        sfx.key();
         window.open(q.url, "_blank", "noopener");
         confirmBtn.disabled = false;
       };
@@ -425,6 +781,7 @@
       feedback.className = "quest-copy-feedback";
       feedback.textContent = "已複製";
       copyBtn.onclick = function () {
+        sfx.copy();
         copyToClipboard(q.copyText);
         feedback.classList.add("show");
         confirmBtn2.disabled = false;
@@ -448,10 +805,12 @@
       copy2.className = "quest-btn";
       copy2.textContent = q.actionLabel2;
       copy1.onclick = function () {
+        sfx.copy();
         copyToClipboard(q.copyText);
         confirmBtn3.disabled = false;
       };
       copy2.onclick = function () {
+        sfx.copy();
         copyToClipboard(q.copyText2);
         confirmBtn3.disabled = false;
       };
@@ -470,6 +829,7 @@
       copyBtn3.className = "quest-btn";
       copyBtn3.textContent = q.actionLabel;
       copyBtn3.onclick = function () {
+        sfx.copy();
         copyToClipboard(q.copyText);
       };
       actionsEl.appendChild(copyBtn3);
@@ -479,6 +839,7 @@
       var codeInput = document.createElement("input");
       codeInput.type = "text";
       codeInput.placeholder = "貼上教練給的通關碼";
+      codeInput.oninput = function () { sfx.key(); };
       var verifyBtn = document.createElement("button");
       verifyBtn.type = "button";
       verifyBtn.className = "quest-btn quest-btn-complete";
@@ -498,6 +859,20 @@
       codeRow.appendChild(verifyBtn);
       actionsEl.appendChild(codeRow);
     }
+  }
+
+  // 完成儀式：面板跑 1.5 秒「訊號偵測」掃描動畫 → 系統亮起 → 艦員甦醒
+  function runCompletionRitual(q, index) {
+    sfx.complete();
+    sfx.setDroneThickness(state.litSystems.length);
+    var overlay = sceneManager.el("scan-overlay");
+    overlay.classList.add("scan-active");
+    var scanDur = REDUCE_MOTION ? 200 : 1500;
+    sceneManager.setTimer(function () {
+      overlay.classList.remove("scan-active");
+      sfx.relay();
+      showAwaken(q, index);
+    }, scanDur);
   }
 
   function copyToClipboard(text) {
@@ -552,8 +927,6 @@
           if (sceneManager.isTransitioning()) return;
           proceedAfterAwaken(q, index);
         };
-
-        // 自動進下一關（保留手動按鈕以防玩家想細看小卡，兩者皆可）
       },
     });
   }
@@ -583,15 +956,17 @@
 
   function showCelebrationOrCertificate() {
     sceneManager.goTo("scene-celebration", {
-      cardText: "全艦甦醒",
+      cardText: "全艦點燈",
       onEnter: function () {
         sfx.fleetAwaken();
+        sfx.setDroneThickness(SYSTEM_COUNT);
         var wrap = sceneManager.el("celebration-crew");
         wrap.innerHTML = "";
-        (window.__crewData ? window.__crewData.crew : []).forEach(function (c) {
+        (window.__crewData ? window.__crewData.crew : []).forEach(function (c, i) {
           var img = document.createElement("img");
           img.src = c.portraitNeutral;
           img.alt = c.name;
+          img.style.animationDelay = REDUCE_MOTION ? "0s" : i * 0.12 + "s";
           wrap.appendChild(img);
         });
         sceneManager.el("celebration-message").textContent =
@@ -633,6 +1008,8 @@
 
   function boot() {
     loadState();
+    initMuteButton();
+    initStarfield();
     loadCrewData(function () {
       loadQuestData(function () {
         showCover();

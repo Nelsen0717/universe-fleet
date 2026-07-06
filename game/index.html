@@ -8,6 +8,11 @@
 </head>
 <body>
 
+<canvas id="starfield"></canvas>
+
+<!-- 靜音鍵（常駐） -->
+<button id="mute-btn" type="button" title="靜音">🔊</button>
+
 <!-- 常駐嚮導列：老師頭像縮圖｜第 X／5 關・關名｜繼續 -->
 <div id="guide-bar" class="guide-bar-hidden">
   <img id="guide-bar-avatar" src="assets/mentor-portrait.png" alt="Nelsen 老師">
@@ -17,60 +22,95 @@
 
 <div id="scene-root">
 
-  <!-- 0. 開場字卡 -->
+  <!-- 0. 開場字卡：艦橋全景、燈全暗 -->
   <section id="scene-cover" class="scene">
-    <div class="cover-inner">
-      <h1 id="cover-title">課前裝備發放</h1>
-      <p id="cover-subtitle">跟著 Nelsen 老師、把你的 AI 團隊裝上艦</p>
+    <div class="bridge-panorama">
+      <div class="cover-inner">
+        <h1 id="cover-title">課前裝備發放</h1>
+        <p id="cover-subtitle">跟著 Nelsen 老師、把你的 AI 團隊裝上艦</p>
+      </div>
+      <div class="bridge-systems" id="bridge-systems-cover"></div>
+      <div class="bridge-caption">艦橋系統：待命中</div>
     </div>
   </section>
 
   <!-- 1. 任命書 -->
   <section id="scene-orders" class="scene">
-    <div class="orders-shell">
-      <div class="orders-stamp orders-stamp-pending" id="orders-stamp">未蓋章</div>
-      <p id="orders-naming-line">艦長，請留下你的名字：</p>
-      <input id="orders-name-input" type="text" placeholder="輸入你的名字" maxlength="20">
-      <div>
-        <button id="orders-stamp-btn" type="button" class="btn-primary">蓋章</button>
+    <div class="bridge-panorama">
+      <div class="orders-shell">
+        <div class="console-frame grain">
+          <div class="orders-stamp orders-stamp-pending" id="orders-stamp">未蓋章</div>
+          <p id="orders-naming-line">艦長，請留下你的名字：</p>
+          <input id="orders-name-input" type="text" placeholder="輸入你的名字" maxlength="20">
+          <div>
+            <button id="orders-stamp-btn" type="button" class="btn-primary">蓋章</button>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 2. 老師開場（三句、逐句點按） -->
+  <!-- 2. 老師開場（三句、逐句點按）＝通訊視窗 -->
   <section id="scene-mentor-intro" class="scene">
-    <div class="orders-shell">
-      <div class="mentor-row">
-        <img id="mentor-avatar" src="assets/mentor-portrait.png" alt="Nelsen 老師">
-        <span class="mentor-nameplate">Nelsen 老師</span>
+    <div class="bridge-panorama">
+      <div class="orders-shell">
+        <div class="comm-window grain">
+          <div class="comm-row">
+            <div class="comm-avatar-wrap speaking" id="mentor-avatar-wrap">
+              <img id="mentor-avatar" src="assets/mentor-portrait.png" alt="Nelsen 老師">
+            </div>
+            <span class="comm-nameplate">Nelsen 老師</span>
+          </div>
+          <p id="mentor-intro-line" class="comm-line"></p>
+        </div>
+        <button id="mentor-intro-next-btn" type="button" class="btn-primary">繼續</button>
       </div>
-      <p id="mentor-intro-line" class="mentor-line"></p>
-      <button id="mentor-intro-next-btn" type="button" class="btn-primary">繼續</button>
     </div>
   </section>
 
-  <!-- 3. 關卡頁（單一容器、內容由 JS 動態換） -->
+  <!-- 3. 關卡頁＝控制台面板（單一容器、內容由 JS 動態換） -->
   <section id="scene-quest" class="scene">
     <div class="quest-shell">
-      <p id="quest-mentor-line" class="quest-mentor-line"></p>
-      <div class="quest-card">
-        <div class="quest-card-title" id="quest-title"></div>
+
+      <!-- 老師通訊窗（小、同步關卡目標） -->
+      <div class="comm-window grain" id="quest-comm-window">
+        <div class="comm-row">
+          <div class="comm-avatar-wrap speaking" id="quest-mentor-avatar-wrap">
+            <img src="assets/mentor-portrait.png" alt="Nelsen 老師">
+          </div>
+          <span class="comm-nameplate">Nelsen 老師</span>
+        </div>
+        <p id="quest-mentor-line" class="comm-line"></p>
+      </div>
+
+      <!-- 控制台面板本體 -->
+      <div class="quest-panel grain scanlines" id="quest-panel">
+        <div class="quest-panel-head">
+          <div class="quest-card-title" id="quest-title"></div>
+          <div class="quest-panel-index" id="quest-panel-index"></div>
+        </div>
         <div class="quest-trio">
           <div class="quest-trio-block">
-            <div class="quest-trio-label">畫面模擬</div>
+            <div class="quest-trio-label">畫面模擬 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
             <div id="quest-sim"></div>
           </div>
           <div class="quest-trio-block">
             <div class="quest-trio-label">你做的動作</div>
-            <div id="quest-action-desc"></div>
+            <div id="quest-action-desc" class="quest-trio-block-text"></div>
           </div>
           <div class="quest-trio-block">
             <div class="quest-trio-label">你應該看到</div>
-            <div id="quest-expect"></div>
+            <div id="quest-expect" class="quest-trio-block-text"></div>
           </div>
         </div>
         <div class="quest-actions" id="quest-actions"></div>
         <div class="quest-hint" id="quest-hint"></div>
+
+        <!-- 完成儀式：訊號偵測掃描疊層 -->
+        <div class="scan-overlay" id="scan-overlay">
+          <div class="scan-ring"></div>
+          <div class="scan-label">訊號偵測中…</div>
+        </div>
       </div>
     </div>
   </section>
@@ -78,7 +118,9 @@
   <!-- 4. 艦員甦醒小卡 -->
   <section id="scene-awaken" class="scene">
     <div class="awaken-shell">
-      <img id="awaken-portrait" class="awaken-portrait" src="" alt="">
+      <div class="awaken-portrait-wrap">
+        <img id="awaken-portrait" class="awaken-portrait" src="" alt="">
+      </div>
       <div id="awaken-name" class="awaken-name"></div>
       <div id="awaken-role" class="awaken-role"></div>
       <p id="awaken-line" class="awaken-line"></p>
@@ -92,7 +134,7 @@
       <div class="celebration-title">全艦甦醒</div>
       <div id="celebration-crew"></div>
       <p class="celebration-message" id="celebration-message">五位艦員全部就位，艦長。</p>
-      <button id="celebration-continue-btn" type="button" class="btn-primary btn-on-paper">收尾</button>
+      <button id="celebration-continue-btn" type="button" class="btn-primary">收尾</button>
     </div>
   </section>
 
@@ -108,8 +150,9 @@
 
 </div>
 
-<!-- 轉場字卡 -->
+<!-- 轉場字卡（含無線電雜訊過場） -->
 <div id="transition-card">
+  <canvas id="static-noise"></canvas>
   <div id="transition-card-text"></div>
 </div>
 
