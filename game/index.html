@@ -1,200 +1,118 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>拓荒者號 — 艦橋</title>
-<link rel="icon" href="data:," />
-<link rel="stylesheet" href="css/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>課前裝備發放 — 宇宙艦隊</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div id="demo-version-banner" style="position:fixed; top:0; left:0; right:0; z-index:9999; display:flex; align-items:center; justify-content:center; gap:16px; padding:8px 16px; background:rgba(20,14,10,0.92); border-bottom:1px solid rgba(138,74,42,0.5); color:#e8ded6; font-family:'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif; font-size:12.5px; line-height:1.6; text-align:center;">
-  <span>這是體驗版——感受學員視角用。實際課程中、這一切發生在你自己的電腦上、由你的 AI 艦隊真實執行。</span>
-  <button type="button" onclick="document.getElementById('demo-version-banner').style.display='none'; document.getElementById('guide-bar').style.top='0';" style="flex-shrink:0; background:none; border:1px solid rgba(232,222,214,0.5); color:#e8ded6; font-size:11px; line-height:1; padding:4px 8px; cursor:pointer; border-radius:2px;" aria-label="關閉提示">關閉</button>
-</div>
-
-<!-- 常駐嚮導列：Nelsen 老師進度提示，主線場景（艦橋／任務板）都看得到 -->
+<!-- 常駐嚮導列：老師頭像縮圖｜第 X／5 關・關名｜繼續 -->
 <div id="guide-bar" class="guide-bar-hidden">
-  <span id="guide-bar-label">Nelsen 老師</span>
-  <span id="guide-bar-text">目前第 1／5 關</span>
-  <button type="button" id="guide-bar-continue-btn">繼續</button>
+  <img id="guide-bar-avatar" src="assets/mentor-portrait.png" alt="Nelsen 老師">
+  <span id="guide-bar-label">第 1／5 關</span>
+  <button id="guide-bar-continue-btn" type="button">繼續</button>
 </div>
 
 <div id="scene-root">
 
-  <!-- 開場劇情 -->
-  <section id="scene-intro" class="scene">
-    <canvas id="intro-canvas"></canvas>
-    <div id="intro-title-card">
-      <h1>拓荒者號</h1>
-      <p>「艦員都還在、他們只是睡著了。把他們一個一個叫醒、這艘艦會記得怎麼飛。」</p>
+  <!-- 0. 開場字卡 -->
+  <section id="scene-cover" class="scene">
+    <div class="cover-inner">
+      <h1 id="cover-title">課前裝備發放</h1>
+      <p id="cover-subtitle">跟著 Nelsen 老師、把你的 AI 團隊裝上艦</p>
     </div>
-    <div id="intro-static-fallback">
-      <div>
-        <h1 style="letter-spacing:0.3em;">拓荒者號</h1>
-        <p style="color:var(--ink); max-width:24em; line-height:1.8;">
-          「艦員都還在、他們只是睡著了。把他們一個一個叫醒、這艘艦會記得怎麼飛。」
-        </p>
-      </div>
-    </div>
-    <button id="intro-skip-btn" type="button">跳過</button>
   </section>
 
-  <!-- 任命書：輸入名字蓋章 → Nelsen 老師三句開場、講清楚這遊戲是幹嘛的 -->
+  <!-- 1. 任命書 -->
   <section id="scene-orders" class="scene">
     <div class="orders-shell">
-
-      <!-- Step 1：輸入名字、蓋章 -->
-      <div id="orders-naming-step">
-        <div class="orders-stamp orders-stamp-pending">任命書</div>
-        <p id="orders-naming-line">報上你的名字、艦長。</p>
-        <input type="text" id="orders-name-input" placeholder="輸入你的名字" maxlength="12" autocomplete="off" />
-        <button class="back-btn" id="orders-stamp-btn" type="button">蓋章任命</button>
+      <div class="orders-stamp orders-stamp-pending" id="orders-stamp">未蓋章</div>
+      <p id="orders-naming-line">艦長，請留下你的名字：</p>
+      <input id="orders-name-input" type="text" placeholder="輸入你的名字" maxlength="20">
+      <div>
+        <button id="orders-stamp-btn" type="button" class="btn-primary">蓋章</button>
       </div>
+    </div>
+  </section>
 
-      <!-- Step 2：蓋章後、Nelsen 老師三句開場 -->
-      <div id="orders-teacher-step" class="orders-step-hidden">
-        <div class="orders-stamp">任命已蓋章</div>
-        <div class="orders-teacher-row">
-          <div id="mentor-avatar" aria-hidden="true"></div>
-          <div class="orders-teacher-nameplate">Nelsen 老師</div>
+  <!-- 2. 老師開場（三句、逐句點按） -->
+  <section id="scene-mentor-intro" class="scene">
+    <div class="orders-shell">
+      <div class="mentor-row">
+        <img id="mentor-avatar" src="assets/mentor-portrait.png" alt="Nelsen 老師">
+        <span class="mentor-nameplate">Nelsen 老師</span>
+      </div>
+      <p id="mentor-intro-line" class="mentor-line"></p>
+      <button id="mentor-intro-next-btn" type="button" class="btn-primary">繼續</button>
+    </div>
+  </section>
+
+  <!-- 3. 關卡頁（單一容器、內容由 JS 動態換） -->
+  <section id="scene-quest" class="scene">
+    <div class="quest-shell">
+      <p id="quest-mentor-line" class="quest-mentor-line"></p>
+      <div class="quest-card">
+        <div class="quest-card-title" id="quest-title"></div>
+        <div class="quest-trio">
+          <div class="quest-trio-block">
+            <div class="quest-trio-label">畫面模擬</div>
+            <div id="quest-sim"></div>
+          </div>
+          <div class="quest-trio-block">
+            <div class="quest-trio-label">你做的動作</div>
+            <div id="quest-action-desc"></div>
+          </div>
+          <div class="quest-trio-block">
+            <div class="quest-trio-label">你應該看到</div>
+            <div id="quest-expect"></div>
+          </div>
         </div>
-        <p id="orders-briefing-line">歡迎上艦、艦長。</p>
-        <button class="back-btn" id="orders-continue-btn" type="button">繼續</button>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- 艦橋 HUB -->
-  <section id="scene-bridge" class="scene">
-    <div class="bridge-layer" id="bridge-star-layer"></div>
-    <div class="bridge-layer" id="bridge-mid-layer"></div>
-
-    <div id="bridge-hud">
-      <div class="hud-group">
-        <span><span class="hud-label">階級</span><span id="hud-rank">見習</span></span>
-        <span><span class="hud-label">連續登艦</span><span id="hud-streak">0</span></span>
-        <span><span class="hud-label">航程</span><span id="hud-xp">0</span> 光年</span>
+        <div class="quest-actions" id="quest-actions"></div>
+        <div class="quest-hint" id="quest-hint"></div>
       </div>
     </div>
-    <div id="bridge-title">艦橋 — 拓荒者號</div>
-    <div id="bridge-subtitle">這裡的每個任務、都對應你內容事業的一件真事。</div>
+  </section>
 
-    <div id="crew-row"></div>
-
-    <div id="bridge-nav">
-      <button class="nav-btn nav-btn-primary" id="nav-tasks-btn" type="button">裝備任務</button>
-      <button class="nav-btn nav-btn-locked" id="nav-briefing-btn" type="button">晨會 <span class="nav-lock-tag">開課後解鎖</span></button>
-      <button class="nav-btn nav-btn-locked" id="nav-archive-btn" type="button">檔案室 <span class="nav-lock-tag">開課後解鎖</span></button>
-      <!-- 「觀測窗」「艦長室」入口暫時隱藏（2026-07-06）：功能尚未開放、避免玩家點進去只看到佔位頁。
-           場景檔案（scene-placeholder）與 Placeholder.show 邏輯保留在 codebase，未來要重新啟用
-           只需把下面兩顆按鈕的 HTML 加回來即可，data-placeholder-nav 機制不需要改。
-      <button class="nav-btn" data-placeholder-nav="觀測窗" data-placeholder-note="訊號還在路上——成就牆與航程統計即將開放">觀測窗</button>
-      <button class="nav-btn" data-placeholder-nav="艦長室" data-placeholder-note="訊號還在路上——設定與聲線檔即將開放">艦長室</button>
-      -->
+  <!-- 4. 艦員甦醒小卡 -->
+  <section id="scene-awaken" class="scene">
+    <div class="awaken-shell">
+      <img id="awaken-portrait" class="awaken-portrait" src="" alt="">
+      <div id="awaken-name" class="awaken-name"></div>
+      <div id="awaken-role" class="awaken-role"></div>
+      <p id="awaken-line" class="awaken-line"></p>
+      <button id="awaken-continue-btn" type="button" class="btn-primary">繼續</button>
     </div>
   </section>
 
-  <!-- 對話場景 -->
-  <section id="scene-dialogue" class="scene">
-    <div id="dialogue-portrait-wrap">
-      <img id="dialogue-portrait" src="" alt="" />
-    </div>
-    <div id="dialogue-box">
-      <div id="dialogue-speaker-name">——</div>
-      <div id="dialogue-text"></div>
-      <div id="dialogue-choices"></div>
-    </div>
-  </section>
-
-  <!-- 任務板：M0 裝備發放（真安裝主線） -->
-  <section id="scene-tasks" class="scene">
-    <div class="panel-inner">
-      <div class="panel-title">M0 · 裝備發放</div>
-      <div id="install-quest-notice">五個寶藏、五名艦員。每收下一個寶藏、對應的艦員就會甦醒——這不是勾格子，是真的裝好。</div>
-      <ol id="install-quest-list"></ol>
-
-      <div class="panel-title compact-panel-title">開課後解鎖</div>
-      <div id="task-demo-notice">這些是課程中的內容——現在先把艦隊裝起來。</div>
-      <ul id="task-list" class="locked-list"></ul>
-      <div id="quest-demo-notice"></div>
-      <ol id="quest-list" class="locked-list"></ol>
-      <ul id="placeholder-boards-list" class="locked-list"></ul>
-      <button class="back-btn back-btn-pause" id="task-back-btn" type="button">暫停回艦橋</button>
-    </div>
-  </section>
-
-  <!-- 晨會 -->
-  <section id="scene-briefing" class="scene">
-    <div class="panel-inner">
-      <div class="mode-badge" id="briefing-mode-badge">示範資料</div>
-      <div class="panel-title" id="briefing-title">晨會</div>
-      <div class="briefing-host">
-        <img id="briefing-host-portrait" src="assets/crew-scout.png" alt="情報員" />
-        <div>
-          <div id="briefing-host-name">情報員</div>
-          <p id="briefing-summary"></p>
-        </div>
-      </div>
-      <div id="briefing-signals"></div>
-      <div id="briefing-daily-task"></div>
-      <button class="back-btn" id="briefing-back-btn" type="button">回艦橋</button>
-    </div>
-  </section>
-
-  <!-- 檔案室 -->
-  <section id="scene-archive" class="scene">
-    <div id="archive-bg"></div>
-    <div class="archive-shell">
-      <div class="mode-badge" id="archive-mode-badge">示範資料</div>
-      <div class="panel-title" id="archive-title">前任艦長日誌</div>
-      <div id="archive-unlock-note"></div>
-      <article id="archive-book">
-        <div id="archive-page-number"></div>
-        <h2 id="archive-page-title"></h2>
-        <p id="archive-page-body"></p>
-      </article>
-      <div id="archive-controls">
-        <button class="back-btn" id="archive-prev-btn" type="button">上一頁</button>
-        <button class="back-btn" id="archive-next-btn" type="button">下一頁</button>
-      </div>
-      <button class="back-btn" id="archive-back-btn" type="button">回艦橋</button>
-    </div>
-  </section>
-
-  <!-- 首航慶祝 -->
+  <!-- 5. 全艦甦醒慶祝 -->
   <section id="scene-celebration" class="scene">
-    <canvas id="celebration-canvas"></canvas>
     <div class="celebration-inner">
-      <div class="mode-badge">示範資料</div>
-      <div class="panel-title">首航完成</div>
+      <div class="celebration-title">全艦甦醒</div>
       <div id="celebration-crew"></div>
-      <p id="celebration-message">五名艦員在艦橋集合。這次不是彩排，是第一篇真的出航。</p>
-      <button class="back-btn" id="celebration-back-btn" type="button">回艦橋</button>
+      <p class="celebration-message" id="celebration-message">五位艦員全部就位，艦長。</p>
+      <button id="celebration-continue-btn" type="button" class="btn-primary btn-on-paper">收尾</button>
     </div>
   </section>
 
-  <!-- 佔位頁（範圍外功能誠實標示） -->
-  <section id="scene-placeholder" class="scene">
-    <div class="placeholder-inner">
-      <div id="placeholder-title">——</div>
-      <div id="placeholder-note">——</div>
-      <button class="back-btn" id="placeholder-back-btn" type="button">回艦橋</button>
+  <!-- 6. 證書 -->
+  <section id="scene-certificate" class="scene">
+    <div class="certificate-shell">
+      <div class="certificate-eyebrow">裝備完成證書</div>
+      <div class="certificate-name" id="certificate-name"></div>
+      <p class="certificate-body">你已完成課前裝備發放，你的 AI 團隊已經在艦上待命。開課那天，帶著它來。</p>
+      <div class="certificate-mentor">— Nelsen 老師</div>
     </div>
   </section>
 
 </div>
 
+<!-- 轉場字卡 -->
 <div id="transition-card">
   <div id="transition-card-text"></div>
 </div>
 
-<script src="js/save.js"></script>
-<script src="js/sfx.js"></script>
-<script src="js/scene-manager.js"></script>
-<script src="js/dialogue-engine.js"></script>
-<script src="js/main.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

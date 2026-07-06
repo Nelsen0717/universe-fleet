@@ -4,3 +4,4 @@ __pycache__/
 skills/brand-guard/config/banned-words.json
 *.bak-*
 *.bak
+game-v2-frozen/

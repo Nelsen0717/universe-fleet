@@ -1,5 +1,5 @@
-/* 拓荒者號 — S1 垂直切片
-   視覺語彙：白底墨線 #8a4a2a、全螢幕構圖、黑幕字卡轉場
+/* 課前裝備發放 v3 — 乾淨重建
+   視覺語彙：白底墨線 #8a4a2a、黑幕字卡轉場、一次一關
    禁：漸層俗套、emoji UI；不禁：氣氛與鏡頭緩推
 */
 
@@ -20,17 +20,20 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   background: var(--night);
   color: var(--paper);
   font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-  overflow: hidden;
+}
+
+body {
+  overflow-x: hidden;
 }
 
 #scene-root {
   position: relative;
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
 }
 
 .scene {
@@ -38,7 +41,7 @@ html, body {
   inset: 0;
   display: none;
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
 }
 
 .scene-active {
@@ -63,662 +66,53 @@ html, body {
   pointer-events: all;
 }
 #transition-card-text {
-  font-size: 1.4rem;
-  letter-spacing: 0.4em;
-  color: var(--ink);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  padding: 0.8em 0;
-}
-
-/* ---------------- 開場劇情 ---------------- */
-#scene-intro {
-  background: var(--night);
-}
-#intro-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-#intro-title-card {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) scale(1.03);
-  text-align: center;
-  opacity: 0;
-  transition: opacity 1.2s ease, transform 1.2s ease;
-}
-#intro-title-card.visible {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-#intro-title-card h1 {
-  font-size: 2rem;
-  letter-spacing: 0.3em;
-  margin: 0 0 0.6em;
-  color: var(--paper);
-}
-#intro-title-card p {
-  font-size: 0.95rem;
-  color: var(--ink);
-  letter-spacing: 0.1em;
-  max-width: 24em;
-  margin: 0 auto;
-  line-height: 1.8;
-}
-#intro-skip-btn {
-  position: absolute;
-  right: 1.5rem;
-  bottom: 1.5rem;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--paper);
-  padding: 0.5em 1.2em;
-  font-size: 0.85rem;
-  letter-spacing: 0.2em;
-  cursor: pointer;
-  z-index: 10;
-}
-#intro-skip-btn:hover {
-  border-color: var(--ink);
-}
-#intro-static-fallback {
-  position: absolute;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 2rem;
-}
-#intro-static-fallback.visible {
-  display: flex;
-}
-
-/* ---------------- 艦橋 HUB ---------------- */
-#scene-bridge {
-  background: linear-gradient(#0a0806, #0a0806); /* 純色夜空，非漸層裝飾（避免俗套漸層 hero） */
-  background: var(--night);
-}
-.bridge-layer {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-}
-#bridge-star-layer {
-  background: radial-gradient(1px 1px at 10% 20%, #fff, transparent),
-    radial-gradient(1px 1px at 80% 40%, #fff, transparent),
-    radial-gradient(1px 1px at 40% 70%, #fff, transparent),
-    radial-gradient(1px 1px at 60% 15%, #fff, transparent),
-    radial-gradient(1px 1px at 25% 85%, #fff, transparent),
-    radial-gradient(1px 1px at 90% 80%, #fff, transparent);
-  animation: star-drift 90s linear infinite;
-  opacity: 0.7;
-}
-@keyframes star-drift {
-  from { background-position: 0 0; }
-  to { background-position: -400px 200px; }
-}
-#bridge-mid-layer {
-  background-image: var(--bridge-image, none);
-  background-position: center bottom;
-  background-size: cover;
-  opacity: 0.55;
-  transition: opacity 1.2s ease;
-}
-
-#bridge-hud {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  right: 1rem;
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  letter-spacing: 0.15em;
-  color: var(--paper);
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 0.5rem;
-  z-index: 20;
-}
-#bridge-hud .hud-group {
-  display: flex;
-  gap: 1.2rem;
-}
-#bridge-hud .hud-label {
-  color: var(--ink);
-  margin-right: 0.3em;
-}
-
-#bridge-title {
-  position: absolute;
-  top: 3.2rem;
-  left: 1rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.3em;
-  color: var(--ink);
-}
-
-#bridge-subtitle {
-  position: absolute;
-  top: 4.6rem;
-  left: 1rem;
-  right: 1rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.05em;
-  color: var(--paper);
-  opacity: 0.55;
-  z-index: 20;
-}
-
-#crew-row {
-  position: absolute;
-  bottom: 6rem;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  gap: 1.6rem;
-  flex-wrap: wrap;
-  padding: 0 1rem;
-  z-index: 20;
-}
-.crew-icon-btn {
-  position: relative;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-  color: var(--paper);
-  padding: 0;
-}
-.crew-icon-btn img {
-  width: 4.6rem;
-  height: 4.6rem;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: var(--paper-dim);
-}
-.crew-label {
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
-}
-.idle-bob {
-  animation: idle-bob 3.4s ease-in-out infinite;
-}
-@keyframes idle-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-.exclaim-badge {
-  position: absolute;
-  top: -0.3rem;
-  right: 0.2rem;
-  background: var(--ink);
-  color: var(--paper);
-  border-radius: 50%;
-  width: 1.2rem;
-  height: 1.2rem;
-  font-size: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: exclaim-pulse 1.6s ease-in-out infinite;
-}
-@keyframes exclaim-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.25); }
-}
-
-#bridge-nav {
-  position: absolute;
-  bottom: 1.2rem;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-  z-index: 20;
-}
-.nav-btn {
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--paper);
-  padding: 0.5em 1em;
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
-  cursor: pointer;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.nav-btn:hover {
-  border-color: var(--ink);
-  color: var(--ink);
-}
-
-/* ---------------- 對話場景 ---------------- */
-#scene-dialogue {
-  background: var(--night);
-  display: none;
-}
-#scene-dialogue.scene-active {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-#dialogue-portrait-wrap {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-#dialogue-portrait {
-  max-height: 68vh;
-  max-width: 80vw;
-  object-fit: contain;
-  animation: portrait-in 0.5s ease;
-}
-@keyframes portrait-in {
-  from { opacity: 0; transform: translateY(12px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-#dialogue-box {
-  border-top: 1px solid var(--line);
-  background: var(--paper);
-  color: var(--ink-deep);
-  padding: 1.2rem 1.4rem 1.6rem;
-  min-height: 9rem;
-}
-#dialogue-speaker-name {
-  font-size: 0.85rem;
-  letter-spacing: 0.2em;
-  color: var(--ink);
-  margin-bottom: 0.5rem;
-  border-bottom: 1px solid var(--line);
-  display: inline-block;
-  padding-bottom: 0.2rem;
-}
-#dialogue-text {
-  font-size: 1.05rem;
-  line-height: 1.9;
-  min-height: 3.4em;
-  cursor: pointer;
-}
-#dialogue-choices {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-.dialogue-choice-btn {
-  text-align: left;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--ink-deep);
-  padding: 0.6em 0.9em;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-.dialogue-choice-btn:hover {
-  border-color: var(--ink);
-  background: var(--paper-dim);
-}
-
-/* ---------------- 任務板 ---------------- */
-#scene-tasks {
-  background: var(--paper);
-  color: var(--ink-deep);
-  overflow-y: auto;
-}
-#scene-briefing, #scene-archive {
-  background: var(--paper);
-  color: var(--ink-deep);
-  overflow-y: auto;
-}
-.panel-inner {
-  max-width: 34rem;
-  margin: 0 auto;
-  padding: 3rem 1.4rem 2rem;
-}
-.panel-title {
   font-size: 1.2rem;
   letter-spacing: 0.3em;
+  color: var(--ink);
+  border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  padding-bottom: 0.6rem;
-  margin-bottom: 1rem;
-}
-.compact-panel-title {
-  margin-top: 2rem;
-  font-size: 1rem;
-}
-.mode-badge {
-  display: inline-block;
-  border: 1px solid var(--ink);
-  color: var(--ink);
-  padding: 0.25em 0.55em;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  margin-bottom: 0.9rem;
-}
-#task-demo-notice {
-  font-size: 0.75rem;
-  color: var(--ink);
-  letter-spacing: 0.05em;
-  margin-bottom: 1.4rem;
-  border-left: 2px solid var(--ink);
-  padding-left: 0.6rem;
-}
-#quest-demo-notice {
-  font-size: 0.75rem;
-  color: var(--ink);
-  letter-spacing: 0.05em;
-  margin-bottom: 1rem;
-  border-left: 2px solid var(--ink);
-  padding-left: 0.6rem;
-}
-#task-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-#quest-list {
-  margin: 0;
-  padding-left: 1.3rem;
-}
-.task-item {
-  border-bottom: 1px solid var(--line);
-  padding: 0.9rem 0;
-}
-.quest-item {
-  border-bottom: 1px solid var(--line);
-  padding: 0.9rem 0 0.9rem 0.2rem;
-}
-.quest-done .task-title {
-  color: var(--ink);
-}
-.quest-meta {
-  color: var(--ink);
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  margin-bottom: 0.25rem;
-}
-.task-title {
-  font-size: 1rem;
-  margin-bottom: 0.2rem;
-}
-.task-done .task-title {
-  color: var(--ink);
-}
-.task-desc {
-  font-size: 0.82rem;
-  opacity: 0.8;
-  margin-bottom: 0.4rem;
-}
-.quest-real-outcome {
-  font-size: 0.75rem;
-  opacity: 0.6;
-  margin-bottom: 0.4rem;
-}
-.task-xp {
-  font-family: "SF Mono", Menlo, monospace;
-  font-size: 0.75rem;
-  color: var(--ink);
-}
-.task-action-btn {
-  margin-top: 0.5rem;
-  background: transparent;
-  border: 1px solid var(--ink);
-  color: var(--ink-deep);
-  padding: 0.4em 1em;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-.task-action-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-#placeholder-boards-list {
-  margin-top: 1.6rem;
-  list-style: none;
-  padding: 0;
-  font-size: 0.78rem;
-  color: var(--ink);
-  line-height: 2;
-}
-.back-btn {
-  margin-top: 1.6rem;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--ink-deep);
-  padding: 0.5em 1.2em;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-.back-btn:disabled {
-  opacity: 0.38;
-  cursor: default;
-}
-
-/* ---------------- 晨會 ---------------- */
-.briefing-host {
-  display: grid;
-  grid-template-columns: 4.8rem 1fr;
-  gap: 1rem;
-  align-items: center;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-}
-.briefing-host img {
-  width: 4.8rem;
-  height: 4.8rem;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: var(--paper-dim);
-}
-#briefing-host-name {
-  color: var(--ink);
-  font-size: 0.82rem;
-  letter-spacing: 0.16em;
-  margin-bottom: 0.3rem;
-}
-#briefing-summary {
-  margin: 0;
-  line-height: 1.75;
-  font-size: 0.88rem;
-}
-.briefing-signal {
-  border-bottom: 1px solid var(--line);
-  padding: 1rem 0;
-}
-.briefing-signal-label {
-  color: var(--ink);
-  font-size: 0.8rem;
-  letter-spacing: 0.16em;
-  margin-bottom: 0.35rem;
-}
-.briefing-signal p {
-  margin: 0 0 0.6rem;
-  line-height: 1.75;
-}
-.briefing-signal blockquote {
-  margin: 0;
-  padding-left: 0.8rem;
-  border-left: 2px solid var(--ink);
-  font-size: 0.82rem;
-  line-height: 1.7;
-  color: var(--ink);
-}
-#briefing-daily-task {
-  margin-top: 1.2rem;
-  padding: 0.9rem;
-  border: 1px solid var(--line);
-  background: rgba(236, 228, 214, 0.55);
-}
-
-/* ---------------- 檔案室 ---------------- */
-#scene-archive {
-  position: relative;
-}
-#archive-bg {
-  position: fixed;
-  inset: 0;
-  background-image: url("../assets/archive-room.png");
-  background-size: cover;
-  background-position: center;
-  opacity: 0.16;
-  pointer-events: none;
-}
-.archive-shell {
-  position: relative;
-  max-width: 34rem;
-  margin: 0 auto;
-  padding: 3rem 1.4rem 2rem;
-}
-#archive-unlock-note {
-  color: var(--ink);
-  font-size: 0.8rem;
-  line-height: 1.7;
-  margin-bottom: 1rem;
-}
-#archive-book {
-  background: rgba(247, 243, 236, 0.92);
-  border: 1px solid var(--line);
-  padding: 1.2rem;
-  min-height: 18rem;
-  transform-origin: left center;
-}
-#archive-book.page-turn {
-  animation: page-turn 0.42s ease;
-}
-@keyframes page-turn {
-  from { opacity: 0.35; transform: rotateY(-8deg) translateX(-4px); }
-  to { opacity: 1; transform: rotateY(0) translateX(0); }
-}
-#archive-page-number {
-  color: var(--ink);
-  font-size: 0.76rem;
-  letter-spacing: 0.16em;
-}
-#archive-page-title {
-  font-size: 1.1rem;
-  letter-spacing: 0.08em;
-  margin: 0.8rem 0;
-}
-#archive-page-body {
-  line-height: 1.95;
-  margin: 0;
-}
-#archive-controls {
-  display: flex;
-  gap: 0.7rem;
-  justify-content: space-between;
-}
-
-/* ---------------- 佔位頁 ---------------- */
-#scene-placeholder {
-  background: var(--paper);
-  color: var(--ink-deep);
-}
-
-/* ---------------- 首航慶祝 ---------------- */
-#scene-celebration {
-  background: var(--paper);
-  color: var(--ink-deep);
-  overflow: hidden;
-}
-#scene-celebration.scene-active {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#celebration-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.celebration-inner {
-  position: relative;
-  z-index: 2;
-  width: min(36rem, calc(100vw - 2rem));
+  padding: 0.8em 1em;
   text-align: center;
-  padding: 2rem 1rem;
-}
-#celebration-crew {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(3.1rem, 1fr));
-  gap: 0.55rem;
-  margin: 1rem 0;
-}
-#celebration-crew img {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: var(--paper-dim);
-}
-#celebration-message {
+  max-width: 22rem;
   line-height: 1.8;
-  color: var(--ink);
-}
-#scene-placeholder.scene-active {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.placeholder-inner {
-  text-align: center;
-  max-width: 26rem;
-  padding: 2rem;
-}
-#placeholder-title {
-  font-size: 1.1rem;
-  letter-spacing: 0.3em;
-  margin-bottom: 0.8rem;
-  border-bottom: 1px solid var(--line);
-  display: inline-block;
-  padding-bottom: 0.4rem;
-}
-#placeholder-note {
-  font-size: 0.88rem;
-  line-height: 1.8;
-  color: var(--ink);
-  margin-bottom: 1.4rem;
 }
 
-/* ---------------- 手機直式優先 ---------------- */
-@media (min-width: 700px) {
-  #dialogue-portrait {
-    max-height: 60vh;
-  }
-  .panel-inner {
-    padding-top: 4rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .idle-bob, .exclaim-badge, #bridge-star-layer, #dialogue-portrait, #archive-book.page-turn {
-    animation: none !important;
-  }
-}
-
-/* ---------------- 任命書（開場後、Nelsen 老師任務宣告） ---------------- */
-#scene-orders {
+/* ---------------- 開場字卡 ---------------- */
+#scene-cover {
   background: var(--night);
+}
+#scene-cover.scene-active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cover-inner {
+  text-align: center;
+  padding: 2rem;
+  max-width: 26rem;
+}
+#cover-title {
+  font-size: 1.5rem;
+  letter-spacing: 0.25em;
+  margin: 0 0 1rem;
+  color: var(--paper);
+  line-height: 1.6;
+}
+#cover-subtitle {
+  font-size: 0.85rem;
+  color: var(--ink);
+  letter-spacing: 0.08em;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* ---------------- 任命書 ---------------- */
+#scene-orders,
+#scene-mentor-intro {
+  background: var(--night);
+}
+#scene-orders.scene-active,
+#scene-mentor-intro.scene-active {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -767,36 +161,44 @@ html, body {
   outline: none;
   border-bottom-color: var(--ink);
 }
-.orders-teacher-row {
+
+/* ---------------- 老師開場／過場（含真頭像） ---------------- */
+.mentor-row {
   margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.7rem;
 }
+.mentor-row img,
 #mentor-avatar {
-  width: 3.4rem;
-  height: 3.4rem;
+  width: 4.4rem;
+  height: 4.4rem;
   border-radius: 50%;
+  object-fit: cover;
   background: var(--ink-deep);
   border: 1px solid var(--line);
 }
-.orders-teacher-nameplate {
+.mentor-nameplate {
   display: inline-block;
   font-size: 1rem;
   letter-spacing: 0.2em;
   border-bottom: 1px solid var(--line);
   padding-bottom: 0.5rem;
 }
-#orders-briefing-line {
+#orders-briefing-line,
+.mentor-line {
   font-size: 1rem;
   line-height: 2;
   color: var(--paper);
-  margin: 0 0 1.8rem;
+  margin: 0 0 1rem;
   min-height: 3.2em;
 }
+#orders-continue-btn {
+  margin-top: 0.6rem;
+}
 
-/* ---------------- 常駐嚮導列（Nelsen 老師進度提示） ---------------- */
+/* ---------------- 常駐嚮導列 ---------------- */
 #guide-bar {
   position: fixed;
   top: 0;
@@ -806,22 +208,35 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.9rem;
+  gap: 0.7rem;
   padding: 0.5rem 1rem;
   background: rgba(10, 8, 6, 0.92);
   border-bottom: 1px solid var(--line);
   color: var(--paper);
-  font-size: 0.78rem;
-  letter-spacing: 0.05em;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
   text-align: center;
 }
 #guide-bar.guide-bar-hidden {
   display: none;
 }
-#guide-bar-label {
-  color: var(--ink);
-  letter-spacing: 0.15em;
+#guide-bar-avatar {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--line);
   flex-shrink: 0;
+}
+#guide-bar-label {
+  color: var(--paper);
+  letter-spacing: 0.06em;
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 #guide-bar-continue-btn {
   flex-shrink: 0;
@@ -831,153 +246,276 @@ html, body {
   font-size: 0.72rem;
   padding: 0.3em 0.9em;
   cursor: pointer;
+  min-height: 32px;
 }
 
-/* ---------------- 主線 CTA／暫停鍵 視覺分級 ---------------- */
-.nav-btn-primary {
-  border-color: var(--ink);
+/* ---------------- 關卡頁 ---------------- */
+#scene-quest {
+  background: var(--paper);
   color: var(--ink-deep);
-  font-weight: 600;
+  padding-top: 2.6rem;
 }
-.back-btn-pause {
-  opacity: 0.65;
-  font-size: 0.72rem;
+.quest-shell {
+  max-width: 30rem;
+  margin: 0 auto;
+  padding: 1.6rem 1.2rem 3rem;
 }
-
-/* ---------------- 艦員鎖態（對應裝備關卡未完成） ---------------- */
-.crew-icon-btn.crew-locked img {
-  filter: grayscale(1);
-  opacity: 0.45;
-}
-.crew-icon-btn.crew-locked .crew-label {
-  opacity: 0.5;
-}
-.crew-lock-badge {
-  position: absolute;
-  top: -0.3rem;
-  right: 0.2rem;
-  background: var(--night);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  width: 1.2rem;
-  height: 1.2rem;
-  font-size: 0.7rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ---------------- 支線降級：晨會／檔案室鎖標 ---------------- */
-.nav-btn-locked {
-  flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.4em 1em;
-}
-.nav-lock-tag {
-  font-size: 0.6rem;
-  letter-spacing: 0.1em;
-  opacity: 0.6;
-}
-
-/* ---------------- M0 裝備發放：任務板內的真安裝關卡 ---------------- */
-#install-quest-notice {
-  font-size: 0.8rem;
-  color: var(--ink);
-  letter-spacing: 0.03em;
-  line-height: 1.7;
-  margin-bottom: 1.2rem;
+.quest-mentor-line {
+  font-size: 0.92rem;
+  line-height: 1.8;
+  color: var(--ink-deep);
   border-left: 2px solid var(--ink);
-  padding-left: 0.6rem;
+  padding-left: 0.8rem;
+  margin-bottom: 1.6rem;
 }
-#install-quest-list {
-  list-style: none;
-  margin: 0 0 1.4rem;
-  padding: 0;
-}
-.install-quest {
+.quest-card {
   border: 1px solid var(--line);
-  padding: 0.9rem 1rem;
+  padding: 1.1rem 1.2rem;
+}
+.quest-card-title {
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
   margin-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--line);
 }
-.install-quest.install-quest-done {
-  border-color: var(--ink);
-}
-.install-quest-head {
+.quest-trio {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.6rem;
-  margin-bottom: 0.4rem;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 1.1rem;
 }
-.install-quest-title {
-  font-size: 0.95rem;
+.quest-trio-block {
+  font-size: 0.82rem;
+  line-height: 1.7;
 }
-.install-quest-status {
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
+.quest-trio-label {
   color: var(--ink);
-  white-space: nowrap;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.3rem;
 }
-.install-quest-desc {
-  font-size: 0.78rem;
-  opacity: 0.82;
-  margin-bottom: 0.6rem;
-  line-height: 1.6;
-}
-.install-quest-actions {
+.quest-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
 }
-.install-btn {
+.quest-btn {
   background: transparent;
   border: 1px solid var(--ink);
   color: var(--ink);
-  padding: 0.45em 0.9em;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
+  padding: 0.5em 1em;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  min-height: 40px;
+  min-height: 44px;
 }
-.install-btn:hover {
+.quest-btn:hover {
   background: var(--ink);
   color: var(--night);
 }
-.install-btn:disabled {
+.quest-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
-.install-code-row {
+.quest-btn-complete {
+  border-color: var(--ink-deep);
+  font-weight: 600;
+}
+.quest-code-row {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
   align-items: center;
-  margin-top: 0.3rem;
+  margin-top: 0.4rem;
+  width: 100%;
 }
-.install-code-row input[type="text"] {
+.quest-code-row input[type="text"] {
   font-family: inherit;
-  font-size: 0.85rem;
-  padding: 0.4em 0.6em;
+  font-size: 0.9rem;
+  padding: 0.5em 0.6em;
   border: 1px solid var(--line);
   background: var(--paper);
   color: var(--ink-deep);
   min-width: 9rem;
+  flex: 1;
 }
-.install-hint {
-  font-size: 0.72rem;
-  margin-top: 0.3rem;
+.quest-hint {
+  font-size: 0.74rem;
+  margin-top: 0.4rem;
+  min-height: 1.2em;
 }
-.install-hint.error { color: #a33; }
-.install-hint.ok { color: var(--ink); }
-.install-copy-feedback {
-  font-size: 0.72rem;
+.quest-hint.error { color: #a33; }
+.quest-hint.ok { color: var(--ink); }
+.quest-copy-feedback {
+  font-size: 0.74rem;
   color: var(--ink);
   display: none;
 }
-.install-copy-feedback.show { display: inline; }
+.quest-copy-feedback.show { display: inline; }
 
-.locked-list {
-  opacity: 0.55;
+/* ---------------- 艦員甦醒小卡 ---------------- */
+#scene-awaken {
+  background: var(--night);
+}
+#scene-awaken.scene-active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.awaken-shell {
+  max-width: 24rem;
+  padding: 2rem;
+  text-align: center;
+}
+.awaken-portrait {
+  width: 7rem;
+  height: 7rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: var(--paper-dim);
+  margin: 0 auto 1.2rem;
+  animation: awaken-in 0.5s ease;
+}
+@keyframes awaken-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.awaken-name {
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
+  color: var(--paper);
+  margin-bottom: 0.2rem;
+}
+.awaken-role {
+  font-size: 0.75rem;
+  color: var(--ink);
+  letter-spacing: 0.1em;
+  margin-bottom: 1.2rem;
+}
+.awaken-line {
+  font-size: 0.95rem;
+  line-height: 1.9;
+  color: var(--paper);
+  margin-bottom: 1.6rem;
+}
+
+/* ---------------- 主線按鈕 ---------------- */
+.btn-primary {
+  background: transparent;
+  border: 1px solid var(--ink);
+  color: var(--paper);
+  padding: 0.6em 1.4em;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  min-height: 44px;
+}
+.btn-primary:hover {
+  background: var(--ink);
+  color: var(--night);
+}
+.btn-on-paper {
+  color: var(--ink-deep);
+}
+
+/* ---------------- 全艦甦醒慶祝 ---------------- */
+#scene-celebration {
+  background: var(--paper);
+  color: var(--ink-deep);
+}
+#scene-celebration.scene-active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.celebration-inner {
+  width: min(30rem, calc(100vw - 2rem));
+  text-align: center;
+  padding: 2rem 1rem;
+}
+.celebration-title {
+  font-size: 1.2rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--line);
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+#celebration-crew {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(3.1rem, 1fr));
+  gap: 0.55rem;
+  margin: 1rem 0 1.4rem;
+}
+#celebration-crew img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--paper-dim);
+  animation: awaken-in 0.5s ease;
+}
+.celebration-message {
+  line-height: 1.8;
+  color: var(--ink);
+  margin-bottom: 1.4rem;
+}
+
+/* ---------------- 證書 ---------------- */
+#scene-certificate {
+  background: var(--paper);
+  color: var(--ink-deep);
+}
+#scene-certificate.scene-active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.certificate-shell {
+  width: min(26rem, calc(100vw - 2rem));
+  border: 1px solid var(--ink);
+  padding: 2.2rem 1.6rem;
+  text-align: center;
+}
+.certificate-eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+.certificate-name {
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.8rem;
+  display: inline-block;
+}
+.certificate-body {
+  font-size: 0.88rem;
+  line-height: 1.9;
+  color: var(--ink-deep);
+  margin-bottom: 1.6rem;
+}
+.certificate-mentor {
+  font-size: 0.78rem;
+  color: var(--ink);
+  letter-spacing: 0.06em;
+}
+
+/* ---------------- 手機直式優先 ---------------- */
+@media (min-width: 700px) {
+  .quest-shell {
+    padding-top: 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .awaken-portrait, #celebration-crew img {
+    animation: none !important;
+  }
 }
