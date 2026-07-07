@@ -24,7 +24,7 @@
 <details>
 <summary>進階：終端機版 Claude Code 的指令安裝</summary>
 
-如果你用的是**終端機版（CLI）**的 Claude Code，可以改用 plugin 指令：
+如果你用的是**終端機版（CLI）**的 Claude Code、或之前用過 `/plugin` 指令，可以改用 plugin 指令：
 
 ```
 /plugin marketplace add Nelsen0717/universe-fleet
