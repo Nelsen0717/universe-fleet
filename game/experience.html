@@ -584,7 +584,7 @@
           '<tr><td>選題拍板</td><td>你（永遠不可讓渡）</td></tr>' +
           '<tr><td>發佈鍵</td><td>你（永遠不可讓渡）</td></tr>' +
           '<tr><td>草稿</td><td>艦隊先生、你改</td></tr>' +
-          '<tr><td>檢查</td><td>每篇自動先過一輪</td></tr>' +
+          '<tr><td>檢查</td><td>每篇發前都先過一輪</td></tr>' +
         '</table>' +
       '</div>' +
     '</div>';
@@ -664,7 +664,7 @@
     // ============ 章節 03：把關 ============
     s.push(function(token, next){
       setChapter("03", "把關");
-      setSubtitle("守門員 · 自動接手檢查");
+      setSubtitle("守門員 · 接手檢查");
       next();
     });
     s.push(function(token, next){

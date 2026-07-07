@@ -4,58 +4,74 @@
     {
       "id": "claude-code",
       "title": "🚢 主艦：Claude Code",
-      "description": "你整支艦隊的駕駛艙。按「收下」去官方頁面下載，裝好後回來按確認。",
+      "description": "你整支艦隊的駕駛艙。這是唯一一定要裝的主程式。",
       "actionType": "download",
       "url": "https://claude.com/download",
       "actionLabel": "收下（開官方下載頁）",
       "confirmLabel": "裝好了、確認收下",
       "crewId": "scout",
+      "steps": [
+        "按下面的鍵，開啟官方下載頁 claude.com/download",
+        "選你的系統（Mac 或 Windows）下載、雙擊安裝",
+        "訂閱方案：選 Pro（約 US$20/月）起步就夠，先別急著上 Max",
+        "Windows 第一次用會被提示要另外裝一個 Git for Windows，跟著裝即可"
+      ],
+      "seeNote": "你會看到一個像瀏覽器的官方下載頁，網址列是 claude.com。裝完後電腦上就多了 Claude Code 這個程式。",
       "awakenLine": "艦長你一定要看這個——主艦剛通電，感應器全部亮了。第一件事：歡迎上艦。"
-    },
-    {
-      "id": "codex",
-      "title": "🛠️ 副艦：Codex",
-      "description": "複製安裝指令、貼進終端機執行。",
-      "actionType": "copy",
-      "copyText": "npm i -g @openai/codex",
-      "actionLabel": "複製安裝指令",
-      "confirmLabel": "指令跑完了、確認收下",
-      "crewId": "writer",
-      "awakenLine": "等等、這個字的重量不對——喔，是副艦上線的震動。行，我在。之後的稿子交給我們一起磨。"
-    },
-    {
-      "id": "node",
-      "title": "⛽ 燃料：Node.js（選配）",
-      "description": "部分外掛需要它。去官網下載 LTS 版，裝完用 node --version 驗證。",
-      "actionType": "download",
-      "url": "https://nodejs.org/en/download",
-      "actionLabel": "收下（開官方下載頁）",
-      "confirmLabel": "裝好了、確認收下",
-      "crewId": "analyst",
-      "awakenLine": "燃料量表滿了、補給線通了。數字很漂亮——難得、我也想笑一下。"
     },
     {
       "id": "fleet",
       "title": "🧲 艦隊入列",
-      "description": "把「宇宙艦隊」請進你的 Claude Code：複製兩行指令、貼進 Claude Code 輸入列、依序按 Enter。",
-      "actionType": "copy-double",
-      "copyText": "/plugin marketplace add Nelsen0717/universe-fleet",
-      "copyText2": "/plugin install universe-fleet@universe-fleet-marketplace",
-      "actionLabel": "複製第一行",
-      "actionLabel2": "複製第二行",
-      "confirmLabel": "兩行都貼完、按過 Enter 了",
+      "description": "把「宇宙艦隊」的五名艦員請進 Claude Code——不用打任何指令、不用開終端機，用「拖資料夾」就好。",
+      "actionType": "folder-drop",
+      "url": "https://nelsen0717.github.io/universe-fleet/dist/universe-fleet-skills.zip",
+      "copyText": "~/.claude/skills",
+      "actionLabel": "① 下載艦隊（zip）",
+      "copyLabel": "② 複製存放位置",
+      "confirmLabel": "五個資料夾都拖進去了",
       "crewId": "publisher",
+      "steps": [
+        "按「① 下載艦隊」，下載一個 zip 檔，在下載資料夾裡雙擊解壓縮",
+        "會得到五個艦員資料夾：coach、navigator、ghostwriter、brand-guard、threads-setup",
+        "按「② 複製存放位置」，複製這個路徑：~/.claude/skills",
+        "打開 Finder，按 Cmd+Shift+G，貼上剛剛複製的路徑、按 Enter（這是艦隊的家）",
+        "把那五個資料夾全選，一起拖進這個資料夾",
+        "完全關掉 Claude Code 再重開，讓它重新認人"
+      ],
+      "seeNote": "拖完後，~/.claude/skills 底下會直接多出那五個資料夾（不是再包一層）。這就是「艦隊入列」——沒有任何指令、桌面版就直接認得。為什麼不是打 /plugin？因為那個指令只有終端機版吃、桌面版聊天視窗打了會說不認得。",
       "awakenLine": "好了嗎？能發了嗎——喔、是入列確認。全員清單我收到了，發佈鍵留給你，我只負責把燈點亮。"
     },
     {
       "id": "coach-checkin",
       "title": "🎖️ 教練報到",
-      "description": "真正的驗證關。複製「教練、報到」貼進 Claude Code，教練會自檢你的環境並給你通關碼。",
+      "description": "真正的驗證關。重開 Claude Code 後，複製「教練、報到」貼進去，教練會自檢你的環境並給你通關碼。",
       "actionType": "unlock-code",
       "copyText": "教練、報到",
       "actionLabel": "複製「教練、報到」",
       "crewId": "guard",
+      "steps": [
+        "確認 Claude Code 已經完全關掉、重開過一次",
+        "按下面的鍵，複製「教練、報到」",
+        "貼進 Claude Code 送出——教練會檢查艦隊有沒有真的入列",
+        "把教練回給你的通關碼，填進下面的欄位"
+      ],
+      "seeNote": "教練會回你話、做一段自檢對話。通過了，它會給你通關碼（也就是這一頁要的那組字）。",
       "awakenLine": "每一關、你都自己走完了。這艘艦沉過一次——這次不會。因為這次、艦上有你。"
+    }
+  ],
+  "optionalQuests": [
+    {
+      "id": "node",
+      "title": "⛽ Node.js（選配）",
+      "description": "只有之後要讓 AI 生大頭貼／圖卡時才需要。發第一篇文字帖用不到它。",
+      "url": "https://nodejs.org/en/download",
+      "note": "去 nodejs.org 下載 GUI 安裝包（.pkg / .msi）、選 LTS 版、雙擊安裝，全程不用碰終端機。"
+    },
+    {
+      "id": "codex",
+      "title": "🛠️ Codex（選配）",
+      "description": "生大頭貼／圖卡才要，且要先裝 Node.js。發第一篇文字帖用不到它。",
+      "note": "在 Claude Code 裡按 Ctrl+` 打開內建終端機，貼上 npm i -g @openai/codex 按 Enter，跑完再打 codex login 登入。用內建終端機就好、不用另外開程式。"
     }
   ]
 }

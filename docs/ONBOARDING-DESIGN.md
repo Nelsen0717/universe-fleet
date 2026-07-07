@@ -17,7 +17,7 @@
 1. 🚢 主艦「Claude Code」：先選平台（Mac／Windows 分頁、內容各自寫）→ 收下 → 官方下載頁 → 裝好後自答清單（「打開後看得到輸入框嗎？」「登入了嗎？」附帳號註冊指引與方案說明一行——照官方現況寫、不誇大）
 2. 🛠️ 副艦「Codex」：ChatGPT 帳號＋Codex 取得（官方頁、實查現況）→ 自答清單
 3. ⛽ 燃料「Node.js LTS」：標「選配寶藏」——建置時實查 plugin 安裝是否需要它、需要才列必做、不需要就明寫「教練說需要時再回來拿」
-4. 🧲 艦隊入列：複製鍵①「/plugin marketplace add Nelsen0717/universe-fleet」→ 圖解貼進 Claude Code 輸入列 → 複製鍵②「/plugin install universe-fleet@universe-fleet-marketplace」→ 自答「看到艦隊安裝成功訊息了嗎」
+4. 🧲 艦隊入列（folder-drop、桌面版免指令）：下載艦隊 zip（`dist/universe-fleet-skills.zip`）→ 解壓得五個艦員資料夾 → 複製鍵「~/.claude/skills」→ Finder `Cmd+Shift+G` 貼路徑 → 把五個資料夾拖進去 → 重開 Claude Code → 自答「五個資料夾都在裡面了嗎 / 重開了嗎」。**不走 `/plugin` 指令**——桌面版聊天視窗不吃、只有終端機版 CLI 才有（進階路徑留 README）。Codex/Node 降為「生圖才要」的選配。
 5. 🎖️ 教練報到（真驗證關）：複製「教練、報到」→ 貼進 Claude Code → 教練自檢 → 拿通關碼回來輸入 →「裝備完成證書」（含學員名字＋日期）＋預告：「開課見、艦長。」
 
 **第二章｜船籍登記（Meta 開發者、對應接入精靈前兩關）**：官方 developers.facebook.com 註冊＋建 App、步驟與 `skills/threads-setup/SKILL.md` 前兩關一致（引用它、不要兩處各寫一套）、完成自答＋「審核等待期」說明。

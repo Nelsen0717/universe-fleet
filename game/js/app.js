@@ -671,6 +671,26 @@
         "</div>" +
         "</div>";
       container.appendChild(ccWin2);
+    } else if (q.actionType === "folder-drop") {
+      var finderWin = document.createElement("div");
+      finderWin.className = "os-window finder-window";
+      finderWin.innerHTML =
+        '<div class="os-titlebar">' +
+        '<span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>' +
+        '<span class="os-titlebar-name">Finder — skills</span>' +
+        "</div>" +
+        '<div class="finder-body">' +
+        '<div class="finder-path mono">' + escapeHtml(q.copyText || "~/.claude/skills") + "</div>" +
+        '<div class="finder-grid">' +
+        '<span class="finder-folder">📁 coach</span>' +
+        '<span class="finder-folder">📁 navigator</span>' +
+        '<span class="finder-folder">📁 ghostwriter</span>' +
+        '<span class="finder-folder finder-drop">📁 brand-guard</span>' +
+        '<span class="finder-folder finder-drop">📁 threads-setup</span>' +
+        "</div>" +
+        '<div class="finder-hint">把五個艦員資料夾拖進來</div>' +
+        "</div>";
+      container.appendChild(finderWin);
     } else {
       // copy：終端機殼
       var termWin = document.createElement("div");
@@ -722,6 +742,10 @@
         action = "貼上指令執行、把教練回覆的通關碼填進下面欄位。";
         expect = "通關碼驗證通過，本關關閉。";
         break;
+      case "folder-drop":
+        action = "下載 zip → 解壓 → Cmd+Shift+G 貼上路徑 → 把五個資料夾拖進去 → 重開 Claude Code。";
+        expect = "~/.claude/skills 底下直接多出五個艦員資料夾。";
+        break;
       default:
         action = "";
         expect = "";
@@ -755,8 +779,21 @@
     sceneManager.el("quest-title").textContent = q.title;
     sceneManager.el("quest-panel-index").textContent = "SYS.0" + (index + 1) + "／0" + questData.quests.length;
     renderSimDom(q, sceneManager.el("quest-sim"));
-    sceneManager.el("quest-action-desc").textContent = q.description + "（" + trio.action + "）";
-    sceneManager.el("quest-expect").textContent = trio.expect;
+    var actionDescEl = sceneManager.el("quest-action-desc");
+    if (q.steps && q.steps.length) {
+      actionDescEl.innerHTML = "";
+      var ol = document.createElement("ol");
+      ol.className = "quest-steps";
+      q.steps.forEach(function (s) {
+        var li = document.createElement("li");
+        li.textContent = s;
+        ol.appendChild(li);
+      });
+      actionDescEl.appendChild(ol);
+    } else {
+      actionDescEl.textContent = q.description + "（" + trio.action + "）";
+    }
+    sceneManager.el("quest-expect").textContent = q.seeNote || trio.expect;
 
     var actionsEl = sceneManager.el("quest-actions");
     var hintEl = sceneManager.el("quest-hint");
@@ -881,6 +918,39 @@
       codeRow.appendChild(codeInput);
       codeRow.appendChild(verifyBtn);
       actionsEl.appendChild(codeRow);
+    } else if (q.actionType === "folder-drop") {
+      var dlBtn = document.createElement("button");
+      dlBtn.type = "button";
+      dlBtn.className = "quest-btn";
+      dlBtn.textContent = q.actionLabel;
+      dlBtn.onclick = function () {
+        sfx.key();
+        window.open(q.url, "_blank", "noopener");
+        fdConfirm.disabled = false;
+      };
+      var copyPathBtn = document.createElement("button");
+      copyPathBtn.type = "button";
+      copyPathBtn.className = "quest-btn";
+      copyPathBtn.textContent = q.copyLabel || "複製存放位置";
+      var fdFeedback = document.createElement("span");
+      fdFeedback.className = "quest-copy-feedback";
+      fdFeedback.textContent = "已複製路徑";
+      copyPathBtn.onclick = function () {
+        sfx.copy();
+        copyToClipboard(q.copyText);
+        fdFeedback.classList.add("show");
+        fdConfirm.disabled = false;
+      };
+      var fdConfirm = document.createElement("button");
+      fdConfirm.type = "button";
+      fdConfirm.className = "quest-btn quest-btn-complete";
+      fdConfirm.textContent = q.confirmLabel;
+      fdConfirm.disabled = true;
+      fdConfirm.onclick = completeQuest;
+      actionsEl.appendChild(dlBtn);
+      actionsEl.appendChild(copyPathBtn);
+      actionsEl.appendChild(fdFeedback);
+      actionsEl.appendChild(fdConfirm);
     }
   }
 
@@ -1007,6 +1077,20 @@
       cardText: "裝備完成證書",
       onEnter: function () {
         sceneManager.el("certificate-name").textContent = state.name + " 艦長";
+        var optEl = sceneManager.el("certificate-optional");
+        if (optEl) {
+          var opts = (questData && questData.optionalQuests) || [];
+          if (opts.length) {
+            var html = '<div class="cert-opt-label">選配（發第一篇文字帖不用、之後想生大頭貼／圖卡再回來裝）</div>';
+            opts.forEach(function (o) {
+              html += '<div class="cert-opt-item"><strong>' + escapeHtml(o.title) + "</strong>" +
+                '<span>' + escapeHtml(o.note || o.description || "") + "</span></div>";
+            });
+            optEl.innerHTML = html;
+          } else {
+            optEl.innerHTML = "";
+          }
+        }
         renderGuideBar(); // 全通關後把嚮導列收掉（不重整的一路通關路徑）
       },
     });

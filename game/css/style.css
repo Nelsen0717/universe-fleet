@@ -703,6 +703,81 @@ body {
   color: var(--text-dim);
 }
 
+/* ---- Finder 拖放模擬（folder-drop） ---- */
+.finder-body {
+  background: #0e1219;
+  padding: 12px 14px 14px;
+}
+.finder-path {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  background: #171e2c;
+  border: 1px solid rgba(154, 165, 184, 0.25);
+  border-radius: 6px;
+  padding: 5px 10px;
+  margin-bottom: 10px;
+  word-break: break-all;
+}
+.finder-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.finder-folder {
+  font-size: 11.5px;
+  color: var(--text);
+  background: rgba(154, 165, 184, 0.08);
+  border: 1px solid rgba(154, 165, 184, 0.18);
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-family: -apple-system, "PingFang TC", sans-serif;
+}
+.finder-folder.finder-drop {
+  border: 1px dashed var(--amber);
+  background: rgba(232, 163, 76, 0.09);
+  color: var(--amber);
+}
+.finder-hint {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--amber);
+  text-align: center;
+}
+
+/* ---- 關卡細步驟清單（steps） ---- */
+ol.quest-steps {
+  margin: 0;
+  padding-left: 1.3em;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+ol.quest-steps li {
+  line-height: 1.55;
+}
+
+/* ---- 證書選配工具 ---- */
+.certificate-optional {
+  margin: 14px 0 4px;
+  text-align: left;
+}
+.cert-opt-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.cert-opt-item {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.cert-opt-item strong {
+  color: var(--text);
+  margin-right: 6px;
+}
+.cert-opt-item span { display: block; }
+
 .quest-actions {
   display: flex;
   flex-wrap: wrap;

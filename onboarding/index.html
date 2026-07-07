@@ -932,11 +932,11 @@ Claude Code installed successfully ✓</div>
   <!-- 寶藏 2：Codex -->
   <div class="quest" data-quest="codex">
     <div class="quest-head">
-      <div class="quest-title">🛠️ 副艦：Codex</div>
+      <div class="quest-title">🛠️ 副艦：Codex <span class="quest-optional-tag">選配寶藏</span></div>
       <div class="quest-status">尚未收下</div>
     </div>
     <div class="quest-body">
-      <p>Codex 是 OpenAI 的副艦，需要 ChatGPT 帳號（Plus / Pro / Business 以上方案才有 Codex，免費版沒有）。先去 ChatGPT 官方頁確認方案，再回來裝 CLI。</p>
+      <p><strong>這關是選配——只有要讓 AI 生大頭貼／圖卡時才需要，發第一篇文字帖用不到它。</strong>Codex 是 OpenAI 的副艦，需要 ChatGPT 帳號（Plus / Pro / Business 以上方案才有 Codex，免費版沒有），也需要先裝好 Node.js（下一關）。先去 ChatGPT 官方頁確認方案，再回來裝。</p>
 
       <div class="step-action"><span class="step-num">1</span> 按一下「開 ChatGPT 官方頁」按鈕，確認你的方案是 Plus 以上</div>
       <div class="step-frame">
@@ -968,7 +968,7 @@ Claude Code installed successfully ✓</div>
         <textarea rows="1" readonly onclick="this.select()">npm i -g @openai/codex</textarea>
       </div>
 
-      <div class="step-action"><span class="step-num">3</span> 切到終端機視窗、貼上、按 <code>Enter</code></div>
+      <div class="step-action"><span class="step-num">3</span> 在 Claude Code 裡按 <code>Ctrl+`</code> 打開內建終端機（不用另外開系統終端機）、貼上、按 <code>Enter</code>；跑完再打 <code>codex login</code> 登入</div>
       <div class="step-frame">
         <div class="step-frame-label">畫面模擬 · 終端機 <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
         <div class="os-window">
@@ -1016,7 +1016,7 @@ codex@0.x.x</div>
       <div class="quest-status">尚未收下</div>
     </div>
     <div class="quest-body">
-      <p>本頁的艦隊入列指令（<code>/plugin marketplace add</code>）本身不需要 Node.js。但如果你要裝 Codex（上面那關）、或未來遇到某些外掛要求，就需要它——教練說需要時再回來拿也不遲。</p>
+      <p>艦隊入列（拖資料夾）本身<strong>不需要</strong> Node.js。只有你要裝 Codex 生大頭貼／圖卡時才需要它——發第一篇文字帖用不到，教練說需要時再回來拿也不遲。</p>
 
       <div class="step-action"><span class="step-num">1</span> 按一下下面按鈕，去官網下載 LTS 版</div>
       <div class="step-frame">
@@ -1079,96 +1079,76 @@ codex@0.x.x</div>
       <div class="quest-status">尚未收下</div>
     </div>
     <div class="quest-body">
-      <p>把「宇宙艦隊」這支團隊請進你的 Claude Code。複製下面兩行指令，貼進 Claude Code 的輸入列，一行一行按 Enter。</p>
+      <p>把「宇宙艦隊」這支團隊請進你的 Claude Code——<strong>不用打任何指令、不用開終端機</strong>，用「拖資料夾」就好。桌面版 Claude Code 每次開啟都會自動掃 <code>~/.claude/skills</code> 這個資料夾，所以只要把艦隊放進去，它就認得。</p>
 
-      <p><strong>第一步</strong>：加入艦隊倉庫</p>
+      <p><strong>第一步</strong>：下載艦隊、解壓縮</p>
+      <div class="step-action"><span class="step-num">1</span> 按「下載艦隊」，存到電腦後，在下載資料夾裡雙擊 zip 解壓縮</div>
+      <div class="btn-row">
+        <a class="btn" href="https://nelsen0717.github.io/universe-fleet/dist/universe-fleet-skills.zip">下載艦隊（zip）</a>
+      </div>
+      <div class="step-result">
+        <span class="step-result-mark">你應該看到：</span>
+        <span>解壓後得到五個艦員資料夾：<span class="mono">coach</span>、<span class="mono">navigator</span>、<span class="mono">ghostwriter</span>、<span class="mono">brand-guard</span>、<span class="mono">threads-setup</span>。</span>
+      </div>
+
+      <p style="margin-top:20px;"><strong>第二步</strong>：複製艦隊的家（存放路徑）</p>
       <div class="step-action"><span class="step-num">1</span> 按一下「複製」</div>
       <div class="copy-block">
-        <code>/plugin marketplace add Nelsen0717/universe-fleet</code>
-        <button class="btn secondary copy-btn" data-copy="/plugin marketplace add Nelsen0717/universe-fleet">複製</button>
+        <code>~/.claude/skills</code>
+        <button class="btn secondary copy-btn" data-copy="~/.claude/skills">複製</button>
         <span class="copy-feedback">已複製</span>
       </div>
-      <div class="fallback-box" data-fallback-for="fleet-1">
+      <div class="fallback-box" data-fallback-for="fleet-path">
         <p>剪貼簿權限被擋了？手動全選這段：</p>
-        <textarea rows="1" readonly onclick="this.select()">/plugin marketplace add Nelsen0717/universe-fleet</textarea>
+        <textarea rows="1" readonly onclick="this.select()">~/.claude/skills</textarea>
       </div>
 
-      <div class="step-action"><span class="step-num">2</span> 切到 Claude Code 視窗、按 <code>cmd+V</code>（Windows 為 <code>ctrl+V</code>）貼上、按 <code>Enter</code></div>
+      <p style="margin-top:20px;"><strong>第三步</strong>：打開資料夾、把五個艦員拖進去</p>
+      <div class="step-action"><span class="step-num">1</span> 打開 Finder，按 <code>Cmd+Shift+G</code>（Windows 用檔案總管網址列），貼上剛剛複製的路徑、按 <code>Enter</code></div>
+      <div class="step-action"><span class="step-num">2</span> 把那五個資料夾<strong>全選、一起拖進</strong>這個資料夾</div>
       <div class="step-frame">
-        <div class="step-frame-label">畫面模擬 · Claude Code <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-        <div class="os-window cc-window">
+        <div class="step-frame-label">畫面模擬 · Finder <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
+        <div class="os-window">
           <div class="os-titlebar">
             <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="os-titlebar-name">Claude Code</span>
+            <span class="os-titlebar-name">Finder — skills</span>
           </div>
           <div class="cc-body">
-            <div class="cc-msg cc-msg-system">Claude Code 已啟動……</div>
-            <div class="cc-inputbar cc-inputbar-target">
-              <span class="cc-input-text">/plugin marketplace add Nelsen0717/universe-fleet</span>
-              <span class="cc-send-btn">↑</span>
+            <div class="cc-inputbar" style="margin-bottom:10px;"><span class="cc-input-text">~/.claude/skills</span></div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <span class="mono" style="border:1px solid rgba(154,165,184,0.25);border-radius:6px;padding:4px 8px;font-size:12px;">📁 coach</span>
+              <span class="mono" style="border:1px solid rgba(154,165,184,0.25);border-radius:6px;padding:4px 8px;font-size:12px;">📁 navigator</span>
+              <span class="mono" style="border:1px solid rgba(154,165,184,0.25);border-radius:6px;padding:4px 8px;font-size:12px;">📁 ghostwriter</span>
+              <span class="mono" style="border:1px dashed #e8a34c;color:#e8a34c;border-radius:6px;padding:4px 8px;font-size:12px;">📁 brand-guard</span>
+              <span class="mono" style="border:1px dashed #e8a34c;color:#e8a34c;border-radius:6px;padding:4px 8px;font-size:12px;">📁 threads-setup</span>
             </div>
-            <div class="cc-inputbar-note">← 貼在這裡、按 Enter</div>
           </div>
         </div>
       </div>
 
-      <div class="step-result">
-        <span class="step-result-mark">你應該看到：</span>
-        <span>Claude Code 回覆已加入 marketplace（<span class="mono">Nelsen0717/universe-fleet</span> 出現在清單裡）。</span>
-      </div>
-
-      <p style="margin-top:20px;"><strong>第二步</strong>：安裝艦隊</p>
-      <div class="step-action"><span class="step-num">1</span> 按一下「複製」</div>
-      <div class="copy-block">
-        <code>/plugin install universe-fleet@universe-fleet-marketplace</code>
-        <button class="btn secondary copy-btn" data-copy="/plugin install universe-fleet@universe-fleet-marketplace">複製</button>
-        <span class="copy-feedback">已複製</span>
-      </div>
-      <div class="fallback-box" data-fallback-for="fleet-2">
-        <p>剪貼簿權限被擋了？手動全選這段：</p>
-        <textarea rows="1" readonly onclick="this.select()">/plugin install universe-fleet@universe-fleet-marketplace</textarea>
-      </div>
-
-      <div class="step-action"><span class="step-num">2</span> 切回 Claude Code 視窗、貼上、按 <code>Enter</code></div>
-      <div class="step-frame">
-        <div class="step-frame-label">畫面模擬 · Claude Code <span class="mockup-tag">（畫面模擬，非真實截圖）</span></div>
-        <div class="os-window cc-window">
-          <div class="os-titlebar">
-            <span class="os-dot red"></span><span class="os-dot yellow"></span><span class="os-dot green"></span>
-            <span class="os-titlebar-name">Claude Code</span>
-          </div>
-          <div class="cc-body">
-            <div class="cc-msg cc-msg-reply">✓ 已加入 marketplace：Nelsen0717/universe-fleet</div>
-            <div class="cc-inputbar cc-inputbar-target">
-              <span class="cc-input-text">/plugin install universe-fleet@universe-fleet-marketplace</span>
-              <span class="cc-send-btn">↑</span>
-            </div>
-            <div class="cc-inputbar-note">← 貼在這裡、按 Enter</div>
-          </div>
-        </div>
-      </div>
+      <p style="margin-top:20px;"><strong>第四步</strong>：完全關掉 Claude Code 再重開，讓它重新認人</p>
 
       <div class="step-result">
         <span class="step-result-mark">你應該看到：</span>
-        <span>Claude Code 回「<strong>安裝成功</strong>」的訊息（兩行都跑完後才算數）。</span>
+        <span><code>~/.claude/skills</code> 底下<strong>直接</strong>多出那五個資料夾（不是再包一層）。重開 Claude Code 後、打「教練、報到」它就會回話。</span>
       </div>
 
       <div class="btn-row">
-        <button class="btn" id="fleet-done-btn">兩行都貼完、按過 Enter 了</button>
+        <button class="btn" id="fleet-done-btn">五個資料夾都拖進去了</button>
       </div>
 
       <div class="self-check" data-selfcheck="fleet">
-        <div class="self-check-q"><input type="checkbox"> 看到艦隊安裝成功的訊息了嗎？</div>
-        <div class="self-check-q"><input type="checkbox"> 打 <code>/plugin list</code> 有看到 universe-fleet 嗎？</div>
+        <div class="self-check-q"><input type="checkbox"> <code>~/.claude/skills</code> 裡直接看得到那五個資料夾了嗎？</div>
+        <div class="self-check-q"><input type="checkbox"> 完全關掉 Claude Code、再重開過一次了嗎？</div>
       </div>
 
       <details class="stuck">
         <summary>卡住了？</summary>
         <table>
           <tr><th>現象</th><th>解法</th></tr>
-          <tr><td>貼上去沒反應</td><td>確認游標真的在 Claude Code 的輸入列，不是終端機外面</td></tr>
-          <tr><td>說找不到 marketplace</td><td>確認網路連線、再跑一次第一步</td></tr>
-          <tr><td>裝完 <code>/plugin list</code> 沒看到</td><td>把兩行指令重新照順序跑一次，中間不要插別的指令</td></tr>
+          <tr><td>打 <code>/plugin</code> 說不認得</td><td>桌面版聊天視窗不吃 <code>/plugin</code>（那是終端機版才有）。不要打指令，改用這頁的拖資料夾法</td></tr>
+          <tr><td>找不到 <code>~/.claude/skills</code></td><td>它是隱藏資料夾，Finder 按 <code>Cmd+Shift+G</code> 貼路徑直接跳過去；若整個 <code>.claude</code> 都沒有，先開一次 Claude Code 讓它自己建</td></tr>
+          <tr><td>拖了、Claude Code 還是不認得</td><td>確認底下<strong>直接</strong>就是那五個資料夾（不是再包一層），然後<strong>完全關掉</strong> Claude Code 再開</td></tr>
         </table>
         <div class="escalate">還是卡住？截圖傳給助教。</div>
       </details>

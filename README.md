@@ -10,20 +10,33 @@
 - 艦橋：https://nelsen0717.github.io/universe-fleet/game/
 - 裝備發放：https://nelsen0717.github.io/universe-fleet/onboarding/
 
-## 兩步安裝
+## 安裝（桌面版 Claude Code、不用打指令）
 
-在 Claude Code 裡打：
+桌面版 Claude Code 的聊天視窗**不吃 `/plugin` 指令**——所以用「拖資料夾」裝，全程不碰終端機：
+
+1. 下載艦隊 zip：https://nelsen0717.github.io/universe-fleet/dist/universe-fleet-skills.zip ，在下載資料夾裡解壓縮
+2. 打開 Finder，按 `Cmd+Shift+G`，貼上 `~/.claude/skills` 按 Enter
+3. 把解壓出來的五個艦員資料夾（`coach`、`navigator`、`ghostwriter`、`brand-guard`、`threads-setup`）全選、一起拖進去
+4. 完全關掉 Claude Code 再重開——它會自動掃 `~/.claude/skills`、認得艦隊
+
+裝完之後，跟教練打聲招呼：「教練、報到」——它會帶你認識整支團隊。
+
+<details>
+<summary>進階：終端機版 Claude Code 的指令安裝</summary>
+
+如果你用的是**終端機版（CLI）**的 Claude Code，可以改用 plugin 指令：
 
 ```
-/plugin marketplace add ~/Projects/universe-fleet
+/plugin marketplace add Nelsen0717/universe-fleet
 /plugin install universe-fleet@universe-fleet-marketplace
 ```
 
-裝完之後，跟教練打聲招呼：「我不知道從哪開始」——它會帶你認識整支團隊。
+⚠️ 這兩個指令**只在終端機版有效**；桌面版聊天視窗打了會回「不認得這個指令」，桌面版請用上面的拖資料夾法。
+</details>
 
 ## 課前裝備發放
 
-第一次接觸這支艦隊、還沒裝任何東西？打開 `onboarding/index.html`（用瀏覽器直接開這個檔案），跟著「裝備發放」引導遊戲走一輪——每個按鈕都是真動作：真下載官方安裝頁、真複製指令進剪貼簿，最後跟教練說「教練、報到」讓它真的驗證你的環境，拿到通關碼解鎖證書。玩完這頁，環境就真的裝好了，不是勾格子假裝完成。
+第一次接觸這支艦隊、還沒裝任何東西？打開 `onboarding/index.html`（用瀏覽器直接開這個檔案），跟著「裝備發放」引導遊戲走一輪——每個按鈕都是真動作：真下載官方安裝頁與艦隊 zip、真複製存放路徑進剪貼簿，最後跟教練說「教練、報到」讓它真的驗證你的環境，拿到通關碼解鎖證書。玩完這頁，環境就真的裝好了，不是勾格子假裝完成。
 
 ## 艦員名冊
 

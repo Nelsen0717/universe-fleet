@@ -2,7 +2,6 @@ __pycache__/
 *.pyc
 .DS_Store
 skills/brand-guard/config/banned-words.json
-*.bak-*
-*.bak
+*.bak*
 game-v2-frozen/
 game-*-frozen/
