@@ -455,8 +455,25 @@
   ];
 
   // ---------------- 資料載入 ----------------
+  // 呼叫載入完成 callback 的統一包裝：cb 內部（showCover / sceneManager.goTo /
+  // playStaticVisual …）若同步拋例外，必須自成一格、附獨立標籤並重拋，
+  // 絕不能被上游 fetch 的 .catch 誤吞成「讀取失敗」、掩蓋真正的錯誤來源。
+  function invokeLoadCallback(label, run) {
+    try {
+      run();
+    } catch (e) {
+      console.error("[fleet] " + label + "就緒、但初始化畫面時發生例外（非讀取失敗）", e);
+      throw e; // 保留原始 stack、讓真正的錯誤來源浮上來
+    }
+  }
+
   function loadQuestData(cb) {
-    if (questData) return cb(questData);
+    if (questData) {
+      invokeLoadCallback("關卡資料", function () {
+        cb(questData);
+      });
+      return;
+    }
     fetch(QUESTS_URL, { cache: "no-store" })
       .then(function (r) {
         if (!r.ok) throw new Error("quest data fetch failed: " + r.status);
@@ -464,13 +481,19 @@
       })
       .then(function (data) {
         questData = data;
-        cb(data);
+        return data;
       })
       .catch(function (err) {
         console.error("[fleet] 讀取關卡資料失敗", err);
         // 降級：給空清單，至少不讓畫面整個死掉
         questData = { unlockCode: "", quests: [] };
-        cb(questData);
+        return questData;
+      })
+      .then(function (data) {
+        // cb 的例外走 invokeLoadCallback、不被上面 fetch 的 .catch 誤吞
+        invokeLoadCallback("關卡資料", function () {
+          cb(data);
+        });
       });
   }
 
@@ -997,12 +1020,16 @@
       })
       .then(function (d) {
         window.__crewData = d;
-        cb();
       })
       .catch(function (err) {
         console.error("[fleet] 讀取艦員資料失敗", err);
         window.__crewData = { crew: [] };
-        cb();
+      })
+      .then(function () {
+        // cb 的例外走 invokeLoadCallback、不被上面 fetch 的 .catch 誤吞
+        invokeLoadCallback("艦員資料", function () {
+          cb();
+        });
       });
   }
 
