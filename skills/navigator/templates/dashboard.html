@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社群儀表板</title>
+<style>
+  :root {
+    --ink: #111;
+    --muted: #666;
+    --line: #ddd;
+    --bg: #fff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 24px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 32px;
+  }
+  .section {
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    margin-top: 32px;
+  }
+  .section h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  .picker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 14px;
+    border: 1px solid var(--ink);
+    background: var(--bg);
+    color: var(--ink);
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  button:hover { background: #f2f2f2; }
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  th {
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .status {
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .empty {
+    color: var(--muted);
+    font-size: 13px;
+    padding: 24px 0;
+  }
+  .stat-row {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 8px;
+  }
+  .stat {
+    font-size: 24px;
+    font-weight: 600;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .avatar-preview {
+    max-width: 96px;
+    max-height: 96px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    display: block;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>社群儀表板</h1>
+  <p class="sub">本地開、不需要伺服器。選一次你的專案資料夾（例如 <span class="mono">~/我的社群/{社群名}/</span>），瀏覽器會記住你這次選的檔案，往下掃 Content 資料夾。</p>
+
+  <div class="section">
+    <h2>選取資料夾</h2>
+    <div class="picker">
+      <button id="pick-btn">選擇專案資料夾</button>
+      <span class="hint" id="pick-hint">尚未選取——多數瀏覽器需要 Chrome / Edge，Safari 不支援資料夾選取。</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>概況</h2>
+    <div class="stat-row">
+      <div>
+        <div class="stat" id="stat-total">–</div>
+        <div class="stat-label">已排篇數</div>
+      </div>
+      <div>
+        <div class="stat" id="stat-published">–</div>
+        <div class="stat-label">已發</div>
+      </div>
+      <div>
+        <div class="stat" id="stat-draft">–</div>
+        <div class="stat-label">草稿 / 待發</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>大頭貼</h2>
+    <img id="avatar-preview" class="avatar-preview" style="display:none;">
+    <p class="hint" id="avatar-hint">Assets/avatar/ 底下第一張圖片會顯示在這裡。</p>
+  </div>
+
+  <div class="section">
+    <h2>內容清單</h2>
+    <table id="content-table" style="display:none;">
+      <thead>
+        <tr>
+          <th>檔名</th>
+          <th>狀態</th>
+          <th>支柱</th>
+          <th>字數</th>
+        </tr>
+      </thead>
+      <tbody id="content-tbody"></tbody>
+    </table>
+    <p class="empty" id="content-empty">還沒選資料夾，或 Content/ 底下還沒有任何稿件。</p>
+  </div>
+
+  <div class="section">
+    <h2>策略摘要</h2>
+    <div id="strategy-summary" class="hint">尚未讀到 Config/strategy.md。</div>
+  </div>
+</div>
+
+<script>
+// 純前端、原生 JS，讀本地資料夾（File System Access API，Chrome/Edge 支援）。
+// Safari / Firefox 不支援 showDirectoryPicker，會顯示提示改用支援的瀏覽器。
+
+const pickBtn = document.getElementById('pick-btn');
+const pickHint = document.getElementById('pick-hint');
+
+function parseFrontmatter(text) {
+  // 抓 --- 包起來的簡易 frontmatter：status: xxx / pillar: xxx
+  const m = text.match(/^---\s*([\s\S]*?)\s*---/);
+  const meta = {};
+  if (m) {
+    m[1].split('\n').forEach(line => {
+      const kv = line.match(/^(\w[\w_]*)\s*:\s*(.*)$/);
+      if (kv) meta[kv[1]] = kv[2].trim();
+    });
+  }
+  return meta;
+}
+
+async function readAllFiles(dirHandle, path = '') {
+  const results = [];
+  for await (const [name, handle] of dirHandle.entries()) {
+    const fullPath = path ? `${path}/${name}` : name;
+    if (handle.kind === 'file') {
+      results.push({ path: fullPath, handle });
+    } else if (handle.kind === 'directory') {
+      const sub = await readAllFiles(handle, fullPath);
+      results.push(...sub);
+    }
+  }
+  return results;
+}
+
+async function loadProject(dirHandle) {
+  const allFiles = await readAllFiles(dirHandle);
+
+  // 內容清單：Content/ 底下的 .md 檔
+  const contentFiles = allFiles.filter(f => f.path.startsWith('Content/') && f.path.endsWith('.md'));
+  const tbody = document.getElementById('content-tbody');
+  const table = document.getElementById('content-table');
+  const empty = document.getElementById('content-empty');
+  tbody.innerHTML = '';
+
+  let published = 0, draft = 0;
+
+  if (contentFiles.length === 0) {
+    table.style.display = 'none';
+    empty.style.display = 'block';
+  } else {
+    table.style.display = '';
+    empty.style.display = 'none';
+    for (const f of contentFiles) {
+      const file = await f.handle.getFile();
+      const text = await file.text();
+      const meta = parseFrontmatter(text);
+      const status = meta.status || '未標記';
+      if (status.includes('發') || status.toLowerCase().includes('published')) published++;
+      else draft++;
+      const body = text.replace(/^---[\s\S]*?---/, '').trim();
+      const wordCount = body.length;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="mono">${f.path}</td>
+        <td class="status">${status}</td>
+        <td>${meta.pillar || '–'}</td>
+        <td>${wordCount}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  document.getElementById('stat-total').textContent = contentFiles.length;
+  document.getElementById('stat-published').textContent = published;
+  document.getElementById('stat-draft').textContent = draft;
+
+  // 大頭貼：Assets/avatar/ 底下第一張圖
+  const avatarFile = allFiles.find(f => f.path.startsWith('Assets/avatar/') && /\.(png|jpg|jpeg|webp)$/i.test(f.path));
+  const avatarImg = document.getElementById('avatar-preview');
+  const avatarHint = document.getElementById('avatar-hint');
+  if (avatarFile) {
+    const file = await avatarFile.handle.getFile();
+    avatarImg.src = URL.createObjectURL(file);
+    avatarImg.style.display = 'block';
+    avatarHint.textContent = avatarFile.path;
+  } else {
+    avatarImg.style.display = 'none';
+    avatarHint.textContent = 'Assets/avatar/ 底下還沒有圖片。';
+  }
+
+  // 策略摘要：Config/strategy.md
+  const strategyFile = allFiles.find(f => f.path === 'Config/strategy.md');
+  const summaryEl = document.getElementById('strategy-summary');
+  if (strategyFile) {
+    const file = await strategyFile.handle.getFile();
+    const text = await file.text();
+    const posMatch = text.match(/## 一句話定位\s*\n(.+)/);
+    const goalMatch = text.match(/## 三個月目標\s*\n(.+)/);
+    summaryEl.innerHTML = `
+      <div><strong>定位：</strong>${posMatch ? posMatch[1].trim() : '（尚未填寫）'}</div>
+      <div><strong>三個月目標：</strong>${goalMatch ? goalMatch[1].trim() : '（尚未填寫）'}</div>
+    `;
+  } else {
+    summaryEl.textContent = '尚未找到 Config/strategy.md。';
+  }
+}
+
+pickBtn.addEventListener('click', async () => {
+  if (!window.showDirectoryPicker) {
+    pickHint.textContent = '這個瀏覽器不支援資料夾選取（File System Access API）。請改用 Chrome 或 Edge 開這個檔案。';
+    return;
+  }
+  try {
+    const dirHandle = await window.showDirectoryPicker();
+    pickHint.textContent = `已選取：${dirHandle.name}`;
+    await loadProject(dirHandle);
+  } catch (e) {
+    // 使用者取消選取，不用特別處理
+    if (e.name !== 'AbortError') {
+      pickHint.textContent = '讀取失敗：' + e.message;
+    }
+  }
+});
+</script>
+</body>
+</html>
