@@ -418,7 +418,7 @@
     <div class="progress-label" id="progress-label">00 / 04</div>
   </div>
 
-  <div class="footnote">四段連續劇情、自動播放 · 全程約 90 秒<br>這是產品畫面模擬，實際體驗發生在你自己的 Claude Code 裡</div>
+  <div class="footnote">完整一圈：健檢→出文→出圖→發佈→看數據→下一批 · 自動播放約 2 分鐘<br>這是產品畫面模擬，實際體驗發生在你自己的 Claude Code 裡</div>
 
 <script>
 (function(){
@@ -463,7 +463,7 @@
     chapterCard.classList.add("show");
     chapterNum.textContent = num;
     chapterTitle.textContent = title;
-    progressLabel.textContent = num + " / 04";
+    progressLabel.textContent = num + " / 07";
   }
 
   function setSubtitle(text){
@@ -686,9 +686,31 @@
       pause(fastMode ? 120 : 900, token, next);
     });
 
-    // ============ 章節 04：拍板 ============
+    // ============ 章節 04：出圖 ============
     s.push(function(token, next){
-      setChapter("04", "拍板");
+      setChapter("04", "出圖");
+      setSubtitle("美術 · 照你的品牌做圖");
+      setFakeInput("幫這篇配一張金句卡", false);
+      next();
+    });
+    s.push(function(token, next){ addUserMessage("幫這篇配一張金句卡", token, next); });
+    s.push(function(token, next){ setFakeInput("傳訊息給艦隊…", true); next(); });
+    s.push(function(token, next){
+      addAiTypingThenText(
+        "挑你這篇最想被記住的一句——「工具三個月換一輪，問題意識不會」，照你的品牌做成一張卡。這不是通用 AI 圖、是你這個帳號的圖：",
+        token, next, { who:"美術", thinkMs:900 }
+      );
+    });
+    s.push(function(token, next){
+      addAiCard('<div style="border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;background:#fff;"><img src="assets/demo-card.png" alt="金句卡" style="width:100%;display:block;"></div>', token, next, { who:"美術" });
+    });
+    s.push(function(token, next){
+      pause(fastMode ? 120 : 900, token, next);
+    });
+
+    // ============ 章節 05：拍板 ============
+    s.push(function(token, next){
+      setChapter("05", "拍板");
       setSubtitle("等你按下發佈");
       next();
     });
@@ -731,14 +753,57 @@
       wait(fastMode ? 100 : 500, token, next);
     });
     s.push(function(token, next){
+      pause(fastMode ? 120 : 800, token, next);
+    });
+
+    // ============ 章節 06：看數據 ============
+    s.push(function(token, next){
+      setChapter("06", "看數據");
+      setSubtitle("隔天 · 分析師");
+      next();
+    });
+    s.push(function(token, next){
       addAiTypingThenText(
-        "AI 備好一切，發佈的手永遠是你的。",
-        token, next, { who:"艦隊", thinkMs:500 }
+        "昨天那篇的成績出來了，我幫你翻成白話——GPT 不會記得你上一篇發了什麼，我會。",
+        token, next, { who:"分析師", thinkMs:800 }
+      );
+    });
+    s.push(function(token, next){
+      addAiCard('<div style="border:1px solid rgba(255,255,255,0.12);border-radius:10px;background:#0f1420;color:#cdd3df;padding:14px 16px;font-size:12.5px;line-height:1.75;"><div style="color:#e8a34c;font-weight:600;margin-bottom:8px;">白話週報 · 昨天那篇</div>觸及 1,240 · 留言 18 · 轉發 9<br>留言率比你的平均高——「先想問題、再挑工具」這種戳到痛點的，比純講工具的更多人回。<br><span style="color:#8fd48f;">→ 下週往「問題意識」這根支柱加碼。</span></div>', token, next, { who:"分析師" });
+    });
+    s.push(function(token, next){
+      pause(fastMode ? 120 : 900, token, next);
+    });
+
+    // ============ 章節 07：下一批 ============
+    s.push(function(token, next){
+      setChapter("07", "下一批");
+      setSubtitle("企劃 · 依數據排選題");
+      next();
+    });
+    s.push(function(token, next){
+      addAiTypingThenText(
+        "照昨天的成績，我先幫你排好下一批——你不用從零想題目，坐下來挑一張就好：",
+        token, next, { who:"企劃", thinkMs:800 }
+      );
+    });
+    s.push(function(token, next){
+      addAiCard('<div style="border:1px solid rgba(255,255,255,0.12);border-radius:10px;background:#0f1420;color:#cdd3df;padding:14px 16px;font-size:12.5px;line-height:1.8;"><div style="color:#e8a34c;font-weight:600;margin-bottom:8px;">下一批選題 · 3 張</div>1. 你的 AI 工具清單、其實可以砍一半<br>2. 我每天只花 15 分鐘管一個帳號，靠的是這套流程<br>3. 學 AI 學到焦慮？先問自己這一題<br><span style="color:#7c8393;">每張都指回你的真實經驗，不是憑空生的題目。</span></div>', token, next, { who:"企劃" });
+    });
+    s.push(function(token, next){
+      pause(fastMode ? 120 : 900, token, next);
+    });
+
+    // ============ 收尾 ============
+    s.push(function(token, next){
+      addAiTypingThenText(
+        "這就是一整圈——健檢、出文、出圖、發佈、看數據、排下一批。每轉一圈，這套系統就更懂你的讀者。AI 備好一切，發佈的手永遠是你的。",
+        token, next, { who:"艦隊", thinkMs:600 }
       );
     });
     s.push(function(token, next){
       setSubtitle("劇情播放完畢");
-      progressLabel.textContent = "04 / 04 · 完";
+      progressLabel.textContent = "07 / 07 · 完";
       next();
     });
 
