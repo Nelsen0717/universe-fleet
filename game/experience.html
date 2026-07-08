@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Claude Code — 我的宇宙艦隊（畫面模擬）</title>
+<title>Claude Code — 我的宇宙艦隊（互動體驗）</title>
 <style>
   :root{
     --bg: #f5f5f4;
@@ -305,6 +305,46 @@
     display:inline-block;
   }
 
+  /* 互動選擇按鈕（對話框裡真的能點） */
+  .choice-wrap{ display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+  .choice-row{ display:flex; flex-direction:column; gap:8px; align-items:stretch; }
+  .choice-btn{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:600;
+    padding:10px 15px;
+    border-radius:9px;
+    border:1px solid var(--text);
+    background:#fff;
+    color:var(--text);
+    cursor:pointer;
+    text-align:right;
+    transition:background 0.15s, color 0.15s;
+  }
+  .choice-btn:hover{ background:var(--text); color:#fff; }
+  .choice-btn.ghost{ border-color:var(--line); color:var(--text-dim); font-weight:500; }
+  .choice-btn.ghost:hover{ background:var(--text-dim); color:#fff; border-color:var(--text-dim); }
+  .choice-hint{
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--text-faint);
+    text-align:right;
+  }
+  .picked-choice{ font-size:13.5px; }
+  .replay-inline{ display:flex; justify-content:center; width:100%; }
+  .replay-inline-btn{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:600;
+    padding:10px 20px;
+    border-radius:9px;
+    border:1px solid var(--text);
+    background:transparent;
+    color:var(--text);
+    cursor:pointer;
+  }
+  .replay-inline-btn:hover{ background:var(--text); color:#fff; }
+
   /* ---------- 底部輸入列 ---------- */
   .inputbar{
     flex:0 0 auto;
@@ -386,20 +426,20 @@
 </head>
 <body>
 
-  <div class="stage-label">畫面模擬 · 非真實錄影</div>
+  <div class="stage-label">畫面模擬 · 你可以點著玩</div>
 
   <div class="phone">
     <div class="titlebar">
       <div class="row">
         <h1>Claude Code — 我的宇宙艦隊</h1>
-        <span class="sim-tag">畫面模擬</span>
+        <span class="sim-tag">互動體驗</span>
       </div>
       <div class="subtitle" id="subtitle-text">領航員 · 待命中</div>
     </div>
 
     <div class="chapter-card" id="chapter-card">
-      <span class="chapter-num" id="chapter-num">01</span>
-      <span class="chapter-title" id="chapter-title">訪談</span>
+      <span class="chapter-num" id="chapter-num">●</span>
+      <span class="chapter-title" id="chapter-title">開始</span>
     </div>
 
     <div class="thread" id="thread"></div>
@@ -412,13 +452,13 @@
 
   <div class="controls">
     <div class="left">
-      <button class="ctrl-btn" id="btn-replay">重播</button>
-      <button class="ctrl-btn" id="btn-skip">快轉</button>
+      <button class="ctrl-btn" id="btn-replay">重玩</button>
+      <button class="ctrl-btn" id="btn-skip">快轉打字</button>
     </div>
-    <div class="progress-label" id="progress-label">00 / 04</div>
+    <div class="progress-label" id="progress-label">互動體驗</div>
   </div>
 
-  <div class="footnote">完整一圈：健檢→出文→出圖→發佈→看數據→下一批 · 自動播放約 2 分鐘<br>這是產品畫面模擬，實際體驗發生在你自己的 Claude Code 裡</div>
+  <div class="footnote">點著走、會分支：先問你有沒有帳號 → 掃描或訪談，一路到出圖、發佈、看數據、排下一批 · 隨時可重玩<br>這是產品畫面模擬，實際體驗發生在你自己的 Claude Code 裡</div>
 
 <script>
 (function(){
@@ -434,64 +474,61 @@
   var btnReplay = document.getElementById("btn-replay");
   var btnSkip = document.getElementById("btn-skip");
 
-  // ---------------------------------------------------------------
-  // 播放控制核心：一個 step queue，每個 step 是一個 function(done)
-  // skip 模式把逐字打字與等待時間全部壓縮到最短，但不跳過內容本身
-  // ---------------------------------------------------------------
-  var steps = [];
-  var stepIndex = 0;
-  var playToken = 0; // 每次 play() 遞增，讓舊的 setTimeout 失效
+  var playToken = 0;
   var fastMode = false;
   var isPlaying = false;
+  var queue = [];
 
-  function clearThread(){
-    thread.innerHTML = "";
-  }
-
-  function scrollToBottom(){
-    thread.scrollTop = thread.scrollHeight + 999;
-  }
-
+  // ---------------- 基礎工具 ----------------
+  function clearThread(){ thread.innerHTML = ""; }
+  function scrollToBottom(){ thread.scrollTop = thread.scrollHeight + 999; }
   function wait(ms, token, cb){
     var t = fastMode ? Math.min(ms, 60) : ms;
-    setTimeout(function(){
-      if (token === playToken) cb();
-    }, t);
+    setTimeout(function(){ if (token === playToken) cb(); }, t);
   }
+  function pause(ms, token, cb){ wait(ms, token, cb); }
 
-  function setChapter(num, title){
+  function setPhase(phase, sub){
     chapterCard.classList.add("show");
-    chapterNum.textContent = num;
-    chapterTitle.textContent = title;
-    progressLabel.textContent = num + " / 07";
+    chapterNum.textContent = "●";
+    chapterTitle.textContent = phase;
+    progressLabel.textContent = phase;
+    if (sub) subtitleEl.textContent = sub;
   }
-
-  function setSubtitle(text){
-    subtitleEl.textContent = text;
-  }
-
   function setFakeInput(text, isPlaceholder){
     fakeInput.textContent = text;
-    if (isPlaceholder){
-      fakeInput.classList.add("placeholder");
-    } else {
-      fakeInput.classList.remove("placeholder");
-    }
+    if (isPlaceholder) fakeInput.classList.add("placeholder");
+    else fakeInput.classList.remove("placeholder");
   }
 
-  // 使用者訊息：直接出現（模擬使用者已打完字送出）
   function addUserMessage(text, token, cb){
     var msg = document.createElement("div");
     msg.className = "msg user";
     msg.innerHTML = '<div class="who">你</div><div class="bubble"></div>';
     thread.appendChild(msg);
-    var bubble = msg.querySelector(".bubble");
-    bubble.textContent = text;
+    msg.querySelector(".bubble").textContent = text;
     scrollToBottom();
     wait(fastMode ? 80 : 260, token, cb);
   }
 
-  // AI 打字指示（三點跳動），接著換成逐字輸出文字
+  function typeOut(text, el, caretEl, token, cb){
+    var i = 0;
+    var charDelay = fastMode ? 1 : 16;
+    var chunk = fastMode ? 6 : 1;
+    function step(){
+      if (token !== playToken) return;
+      if (i >= text.length){
+        if (caretEl && caretEl.parentNode) caretEl.parentNode.removeChild(caretEl);
+        scrollToBottom(); cb(); return;
+      }
+      var n = Math.min(i + chunk, text.length);
+      el.textContent += text.slice(i, n);
+      i = n; scrollToBottom();
+      setTimeout(step, charDelay);
+    }
+    step();
+  }
+
   function addAiTypingThenText(text, token, cb, opts){
     opts = opts || {};
     var who = opts.who || "艦隊";
@@ -500,44 +537,14 @@
     msg.innerHTML = '<div class="who">' + who + '</div><div class="bubble"><span class="typing-dots"><span></span><span></span><span></span></span></div>';
     thread.appendChild(msg);
     scrollToBottom();
-
     var bubble = msg.querySelector(".bubble");
     var thinkMs = fastMode ? 90 : (opts.thinkMs || 900);
-
     wait(thinkMs, token, function(){
       bubble.innerHTML = '<span class="typed"></span><span class="caret"></span>';
-      var typedEl = bubble.querySelector(".typed");
-      var caretEl = bubble.querySelector(".caret");
-      typeOut(text, typedEl, caretEl, token, function(){
-        cb();
-      });
+      typeOut(text, bubble.querySelector(".typed"), bubble.querySelector(".caret"), token, cb);
     });
   }
 
-  // 逐字打字機效果
-  function typeOut(text, el, caretEl, token, cb){
-    var i = 0;
-    var charDelay = fastMode ? 1 : 16;
-    var chunk = fastMode ? 6 : 1; // 快轉時一次吐多字
-
-    function step(){
-      if (token !== playToken) return;
-      if (i >= text.length){
-        if (caretEl && caretEl.parentNode) caretEl.parentNode.removeChild(caretEl);
-        scrollToBottom();
-        cb();
-        return;
-      }
-      var next = Math.min(i + chunk, text.length);
-      el.textContent += text.slice(i, next);
-      i = next;
-      scrollToBottom();
-      setTimeout(step, charDelay);
-    }
-    step();
-  }
-
-  // 純內容卡片（檔案卡 / 報告卡），淡入即可，不逐字
   function addAiCard(innerHtml, token, cb, opts){
     opts = opts || {};
     var who = opts.who || "艦隊";
@@ -553,41 +560,59 @@
     wait(fastMode ? 100 : 500, token, cb);
   }
 
-  function addPlainAiText(text, token, cb, opts){
-    // 已知內容、不需打字機效果的簡短 AI 訊息（例如收尾一句話），仍然淡入
-    opts = opts || {};
-    var who = opts.who || "艦隊";
+  // ---------------- 互動：選擇按鈕（要點才會走） ----------------
+  function addChoice(options, token, cb){
     var msg = document.createElement("div");
-    msg.className = "msg ai";
-    msg.innerHTML = '<div class="who">' + who + '</div><div class="bubble"></div>';
+    msg.className = "msg user";
+    msg.innerHTML = '<div class="who">你</div>';
+    var holder = document.createElement("div");
+    holder.className = "choice-wrap";
+    var row = document.createElement("div");
+    row.className = "choice-row";
+    var hint = document.createElement("div");
+    hint.className = "choice-hint";
+    hint.textContent = "👆 選一個往下走";
+    options.forEach(function(opt){
+      var b = document.createElement("button");
+      b.className = "choice-btn" + (opt.ghost ? " ghost" : "");
+      b.textContent = opt.label;
+      b.addEventListener("click", function(){
+        if (msg._picked) return;
+        msg._picked = true;
+        var bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.innerHTML = '<span class="picked-choice">' + opt.label + '</span>';
+        msg.innerHTML = '<div class="who">你</div>';
+        msg.appendChild(bubble);
+        scrollToBottom();
+        if (opt.steps && opt.steps.length) playFront(opt.steps);
+        cb();
+      });
+      row.appendChild(b);
+    });
+    holder.appendChild(row);
+    holder.appendChild(hint);
+    msg.appendChild(holder);
     thread.appendChild(msg);
-    var bubble = msg.querySelector(".bubble");
-    bubble.textContent = text;
     scrollToBottom();
-    wait(fastMode ? 100 : 400, token, cb);
+    // 刻意不 auto-advance：互動的重點是使用者自己點
   }
 
-  function pause(ms, token, cb){
-    wait(ms, token, cb);
-  }
-
-  // ---------------------------------------------------------------
-  // 劇本內容
-  // ---------------------------------------------------------------
-
+  // ---------------- 卡片內容（全淺色、配合白底聊天） ----------------
   var fleetConfigCard =
-    '<div class="filecard">' +
-      '<div class="fc-head"><span class="fc-dot"></span>fleet-config.md · 已建立</div>' +
-      '<div class="fc-body">' +
-        '<b>定位一句話</b>：教中小企業主用白話搞懂 AI、不賣課只講真的能不能用。<br>' +
-        '<table>' +
-          '<tr><td>選題拍板</td><td>你（永遠不可讓渡）</td></tr>' +
-          '<tr><td>發佈鍵</td><td>你（永遠不可讓渡）</td></tr>' +
-          '<tr><td>草稿</td><td>艦隊先生、你改</td></tr>' +
-          '<tr><td>檢查</td><td>每篇發前都先過一輪</td></tr>' +
-        '</table>' +
-      '</div>' +
-    '</div>';
+    '<div class="filecard"><div class="fc-head"><span class="fc-dot"></span>fleet-config.md · 已建立</div>' +
+    '<div class="fc-body"><b>定位一句話</b>：用白話帶大家搞懂 AI、只講真的能不能用。' +
+    '<table><tr><td>選題拍板</td><td>你（永遠不可讓渡）</td></tr>' +
+    '<tr><td>發佈鍵</td><td>你（永遠不可讓渡）</td></tr>' +
+    '<tr><td>草稿</td><td>艦隊先生、你改</td></tr>' +
+    '<tr><td>檢查</td><td>每篇發前都先過一輪</td></tr></table></div></div>';
+
+  var healthCard =
+    '<div class="filecard"><div class="fc-head"><span class="fc-dot"></span>health-check.md · 已建立</div>' +
+    '<div class="fc-body"><b>你的聲線</b>：短句、愛用反問、少用形容詞。<br>' +
+    '<b>三個做得好</b>：選題貼近讀者、開場有鉤子、敢給判斷。<br>' +
+    '<b>三個可以修</b>：發文太不規律、有幾篇太像新聞轉述、金句可以收更緊。<br>' +
+    '<span style="color:var(--text-dim);">→ 先補「發文節奏」這一個就好。</span></div></div>';
 
   var reportCardHtml =
     '<div class="reportcard">' +
@@ -595,266 +620,194 @@
     '<span class="ok">✅ 字數：106 字，在 500 字上限內。</span>\n' +
     '<span class="ok">✅ 禁詞清單：沒踩到。</span>\n' +
     '<span class="ok">✅ 段落斷行：閱讀節奏可以。</span>\n' +
-    '<div class="verdict">結論：四項都過，可以發了。</div>' +
-    '</div>';
+    '<div class="verdict">結論：四項都過，可以發了。</div></div>';
+
+  var reportDataCard =
+    '<div class="filecard"><div class="fc-head"><span class="fc-dot"></span>白話週報 · 昨天那篇</div>' +
+    '<div class="fc-body">觸及 1,240 · 留言 18 · 轉發 9<br>' +
+    '留言率比你的平均高——「先想問題、再挑工具」這種戳到痛點的，比純講工具的更多人回。<br>' +
+    '<span style="color:#2f5d3a;">→ 下週往「問題意識」這根支柱加碼。</span></div></div>';
+
+  var topicsCard =
+    '<div class="filecard"><div class="fc-head"><span class="fc-dot"></span>下一批選題 · 3 張</div>' +
+    '<div class="fc-body">1. 你的 AI 工具清單、其實可以砍一半<br>' +
+    '2. 我每天只花 15 分鐘管一個帳號、靠的是這套流程<br>' +
+    '3. 學 AI 學到焦慮？先問自己這一題<br>' +
+    '<span style="color:var(--text-faint);">每張都指回你的真實經驗，不是憑空生的題目。</span></div></div>';
 
   var draftText = "最近好多人問我要不要學 AI。\n\n老實說我的答案很無聊：先別急著挑工具，先想清楚你要解決什麼問題。\n\n工具三個月換一輪，問題意識不會。你連自己卡在哪都講不清楚，學再多技巧也是白搭。\n\n想清楚了，工具隨便選都能用。";
 
-  function buildScript(){
+  // ---------------- 分支內容 ----------------
+  function branchScan(){
+    return [
+      function(t,n){ setPhase("健檢", "領航員 · 掃描你的帳號"); n(); },
+      function(t,n){ addAiTypingThenText("好，那先幫你健檢。把你最近幾篇貼文貼給我看看——複製貼上就行。", t, n, {who:"領航員", thinkMs:700}); },
+      function(t,n){ addUserMessage("（貼上最近 8 篇貼文）", t, n); },
+      function(t,n){ addAiTypingThenText("讀完了。你的聲線我抓到了，也標了三個可以修的地方：", t, n, {who:"領航員", thinkMs:1000}); },
+      function(t,n){ addAiCard(healthCard, t, n, {who:"領航員"}); },
+      function(t,n){ addAiTypingThenText("這份健檢會存起來、當你的聲線種子——之後每個艦員都照它做事，你不用再貼一次。", t, n, {who:"領航員", thinkMs:600}); },
+      function(t,n){ pause(fastMode?120:800, t, n); }
+    ];
+  }
+
+  function branchInterview(){
+    return [
+      function(t,n){ setPhase("訪談", "領航員 · 首次啟動"); n(); },
+      function(t,n){ addAiTypingThenText("好，那我們從頭聊。你主要想在哪個平台寫？大概多久發一次？", t, n, {who:"領航員", thinkMs:800}); },
+      function(t,n){ addUserMessage("Threads 為主，一週想發個兩三篇", t, n); },
+      function(t,n){ addAiTypingThenText("收到。接下來這題最重要——發佈鍵，貼文送出去那一下，永遠是你按，艦隊不會自動發。", t, n, {who:"領航員", thinkMs:800}); },
+      function(t,n){
+        addChoice([
+          { label:"我同意，發佈鍵永遠我按", steps:[] },
+          { label:"為什麼不能自動發？", ghost:true, steps:[
+            function(t2,n2){ addAiTypingThenText("因為那是你的名字、你的信任。AI 會把稿備到最好，但按下去代表「我認可」——這一下只能是你。這也是這套系統跟隨便一個自動發文工具最大的差別。", t2, n2, {who:"領航員", thinkMs:900}); }
+          ]}
+        ], t, n);
+      },
+      function(t,n){ addAiTypingThenText("記下了。藍圖整理好了，你看一下：", t, n, {who:"領航員", thinkMs:600}); },
+      function(t,n){ addAiCard(fleetConfigCard, t, n, {who:"領航員"}); },
+      function(t,n){ pause(fastMode?120:800, t, n); }
+    ];
+  }
+
+  function branchWithImage(){
+    return [
+      function(t,n){ setPhase("出圖", "美術 · 照你的品牌做圖"); n(); },
+      function(t,n){ addAiTypingThenText("挑你這篇最想被記住的一句——「工具三個月換一輪，問題意識不會」，照你的品牌做成一張卡。不是通用 AI 圖、是你這個帳號的圖：", t, n, {who:"美術", thinkMs:900}); },
+      function(t,n){ addAiCard('<div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;"><img src="assets/demo-card.png" alt="金句卡" style="width:100%;display:block;"></div>', t, n, {who:"美術"}); },
+      function(t,n){ pause(fastMode?120:800, t, n); }
+    ];
+  }
+
+  function branchTextOnly(){
+    return [
+      function(t,n){ addAiTypingThenText("好，這篇就走純文字帖——一樣能發，圖之後想配再說。", t, n, {who:"美術", thinkMs:600}); },
+      function(t,n){ pause(fastMode?100:500, t, n); }
+    ];
+  }
+
+  // 發佈選擇（可重複改稿的小迴圈）
+  function publishChoice(t, n){
+    addChoice([
+      { label:"發佈", steps:[] },
+      { label:"再改一版", ghost:true, steps:[
+        function(t2,n2){ addAiTypingThenText("好，最後一句我收得更淡一點：「想清楚了，工具隨便選都能用。」", t2, n2, {who:"寫手", thinkMs:700}); },
+        function(t2,n2){ publishChoice(t2, n2); }
+      ]}
+    ], t, n);
+  }
+
+  // ---------------- 主流程 ----------------
+  function buildFlow(){
     var s = [];
-
-    // ============ 章節 01：訪談 ============
-    s.push(function(token, next){
-      setChapter("01", "訪談");
-      setSubtitle("領航員 · 首次啟動");
-      setFakeInput("開始訪談", false);
-      next();
+    s.push(function(t,n){ setPhase("開始", "領航員 · 待命中"); n(); });
+    s.push(function(t,n){ addAiTypingThenText("我是領航員。花兩分鐘，帶你走一遍你上完課每天會做的事。先問你一句——", t, n, {who:"領航員", thinkMs:700}); });
+    s.push(function(t,n){ addAiTypingThenText("你是已經有帳號想升級、還是想從零開始一個新的？", t, n, {who:"領航員", thinkMs:600}); });
+    // 選擇 1：有沒有現有帳號 → 掃描 / 訪談
+    s.push(function(t,n){
+      addChoice([
+        { label:"我有現有帳號", steps: branchScan() },
+        { label:"全新帳號", steps: branchInterview() }
+      ], t, n);
     });
-    s.push(function(token, next){ addUserMessage("開始訪談", token, next); });
-    s.push(function(token, next){ setFakeInput("傳訊息給艦隊…", true); next(); });
-    s.push(function(token, next){
-      addAiTypingThenText(
-        "我是領航員。接下來聊大概 20 分鐘，聊完會幫你寫一份「艦隊藍圖」，之後每個艦員做事前都先看這份藍圖、照你的樣子做事。先問你：現在主要在哪個平台寫東西？大概多少粉絲、多久發一次？",
-        token, next, { who:"領航員", thinkMs:900 }
-      );
+    // 收斂：出稿
+    s.push(function(t,n){ setPhase("出稿", "寫手 · 用你的聲線"); setFakeInput("幫我寫一篇：最近好多人問我要不要學 AI", false); n(); });
+    s.push(function(t,n){ addUserMessage("幫我寫一篇：最近好多人問我要不要學 AI", t, n); });
+    s.push(function(t,n){ setFakeInput("傳訊息給艦隊…", true); n(); });
+    s.push(function(t,n){ addAiTypingThenText(draftText, t, n, {who:"寫手", thinkMs:1000}); });
+    s.push(function(t,n){ pause(fastMode?120:800, t, n); });
+    // 把關
+    s.push(function(t,n){ setPhase("把關", "守門員 · 接手檢查"); n(); });
+    s.push(function(t,n){ addAiTypingThenText("草稿我接手了，跑一輪檢查。", t, n, {who:"守門員", thinkMs:500}); });
+    s.push(function(t,n){ addAiCard(reportCardHtml, t, n, {who:"守門員"}); });
+    s.push(function(t,n){ addAiTypingThenText("四項都過、沒踩到雷。要不要幫這篇配一張圖？", t, n, {who:"守門員", thinkMs:500}); });
+    // 選擇 2：配圖 / 純文字
+    s.push(function(t,n){
+      addChoice([
+        { label:"要，配一張金句卡", steps: branchWithImage() },
+        { label:"先純文字帖", ghost:true, steps: branchTextOnly() }
+      ], t, n);
     });
-    s.push(function(token, next){
-      addUserMessage("Threads 為主，兩千多個追蹤，大概一週發兩篇，斷斷續續的", token, next);
-    });
-    s.push(function(token, next){
-      addAiTypingThenText(
-        "收到。接下來這題比較重要：發佈鍵——貼文最後送出去那一下，這永遠是你按，艦隊不會幫你自動發。這一點沒有例外，你同意嗎？",
-        token, next, { who:"領航員", thinkMs:700 }
-      );
-    });
-    s.push(function(token, next){
-      addUserMessage("對，永遠在我手上", token, next);
-    });
-    s.push(function(token, next){
-      addAiTypingThenText(
-        "記下了。藍圖整理好了，你可以看一下：",
-        token, next, { who:"領航員", thinkMs:600 }
-      );
-    });
-    s.push(function(token, next){
-      addAiCard(fleetConfigCard, token, next, { who:"領航員" });
-    });
-    s.push(function(token, next){
-      pause(fastMode ? 150 : 1100, token, next);
-    });
-
-    // ============ 章節 02：出稿 ============
-    s.push(function(token, next){
-      setChapter("02", "出稿");
-      setSubtitle("寫手 · 待命中");
-      setFakeInput("幫我寫一篇：最近好多人問我要不要學 AI", false);
-      next();
-    });
-    s.push(function(token, next){
-      addUserMessage("幫我寫一篇：最近好多人問我要不要學 AI", token, next);
-    });
-    s.push(function(token, next){ setFakeInput("傳訊息給艦隊…", true); next(); });
-    s.push(function(token, next){
-      addAiTypingThenText(draftText, token, next, { who:"寫手", thinkMs:1000 });
-    });
-    s.push(function(token, next){
-      pause(fastMode ? 120 : 900, token, next);
-    });
-
-    // ============ 章節 03：把關 ============
-    s.push(function(token, next){
-      setChapter("03", "把關");
-      setSubtitle("守門員 · 接手檢查");
-      next();
-    });
-    s.push(function(token, next){
-      addAiTypingThenText(
-        "草稿我接手了，跑一輪檢查。",
-        token, next, { who:"守門員", thinkMs:500 }
-      );
-    });
-    s.push(function(token, next){
-      addAiCard(reportCardHtml, token, next, { who:"守門員" });
-    });
-    s.push(function(token, next){
-      addAiTypingThenText(
-        "這篇沒踩到任何雷，我這邊沒意見，剩下的交給你了。",
-        token, next, { who:"守門員", thinkMs:500 }
-      );
-    });
-    s.push(function(token, next){
-      pause(fastMode ? 120 : 900, token, next);
-    });
-
-    // ============ 章節 04：出圖 ============
-    s.push(function(token, next){
-      setChapter("04", "出圖");
-      setSubtitle("美術 · 照你的品牌做圖");
-      setFakeInput("幫這篇配一張金句卡", false);
-      next();
-    });
-    s.push(function(token, next){ addUserMessage("幫這篇配一張金句卡", token, next); });
-    s.push(function(token, next){ setFakeInput("傳訊息給艦隊…", true); next(); });
-    s.push(function(token, next){
-      addAiTypingThenText(
-        "挑你這篇最想被記住的一句——「工具三個月換一輪，問題意識不會」，照你的品牌做成一張卡。這不是通用 AI 圖、是你這個帳號的圖：",
-        token, next, { who:"美術", thinkMs:900 }
-      );
-    });
-    s.push(function(token, next){
-      addAiCard('<div style="border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;background:#fff;"><img src="assets/demo-card.png" alt="金句卡" style="width:100%;display:block;"></div>', token, next, { who:"美術" });
-    });
-    s.push(function(token, next){
-      pause(fastMode ? 120 : 900, token, next);
-    });
-
-    // ============ 章節 05：拍板 ============
-    s.push(function(token, next){
-      setChapter("05", "拍板");
-      setSubtitle("等你按下發佈");
-      next();
-    });
-    s.push(function(token, next){
-      addAiTypingThenText(
-        "要發嗎？",
-        token, next, { who:"艦隊", thinkMs:500 }
-      );
-    });
-    s.push(function(token, next){
-      // 插入一個「發佈」按鈕的假訊息，讓使用者感覺是自己按下去的
-      var msg = document.createElement("div");
-      msg.className = "msg ai";
-      msg.innerHTML = '<div class="who">你</div><div class="bubble"><div class="action-row"><button class="btn" id="publish-btn">發佈</button><button class="btn ghost">再改改</button></div></div>';
-      msg.style.alignSelf = "flex-end";
-      msg.querySelector(".who").style.textAlign = "right";
-      thread.appendChild(msg);
-      scrollToBottom();
-
-      var publishBtn = msg.querySelector("#publish-btn");
-      var advanced = false;
-
-      function proceed(){
-        if (advanced) return;
-        advanced = true;
-        publishBtn.disabled = true;
-        next();
-      }
-
-      publishBtn.addEventListener("click", proceed);
-      // 自動播放模式下，短暫展示按鈕後自動視為「已按下」，讓劇情繼續
-      wait(fastMode ? 200 : 1400, token, proceed);
-    });
-    s.push(function(token, next){
+    // 發佈（互動：使用者按發佈、可先改一版）
+    s.push(function(t,n){ setPhase("發佈", "等你按下發佈"); n(); });
+    s.push(function(t,n){ addAiTypingThenText("要發嗎？", t, n, {who:"艦隊", thinkMs:400}); });
+    s.push(function(t,n){ publishChoice(t, n); });
+    s.push(function(t,n){
       var msg = document.createElement("div");
       msg.className = "msg ai";
       msg.innerHTML = '<div class="who">艦隊</div><div class="bubble"><span class="published-tag">已發佈到 Threads ✓</span></div>';
-      thread.appendChild(msg);
-      scrollToBottom();
-      wait(fastMode ? 100 : 500, token, next);
+      thread.appendChild(msg); scrollToBottom();
+      wait(fastMode?100:500, t, n);
     });
-    s.push(function(token, next){
-      pause(fastMode ? 120 : 800, token, next);
+    s.push(function(t,n){ pause(fastMode?100:700, t, n); });
+    // 看數據
+    s.push(function(t,n){ setPhase("看數據", "隔天 · 分析師"); n(); });
+    s.push(function(t,n){ addAiTypingThenText("昨天那篇的成績出來了——GPT 不會記得你上一篇發了什麼，我會。", t, n, {who:"分析師", thinkMs:700}); });
+    s.push(function(t,n){ addAiCard(reportDataCard, t, n, {who:"分析師"}); });
+    s.push(function(t,n){ pause(fastMode?120:800, t, n); });
+    // 下一批
+    s.push(function(t,n){ setPhase("下一批", "企劃 · 依數據排選題"); n(); });
+    s.push(function(t,n){ addAiTypingThenText("照昨天的成績，我先幫你排好下一批——坐下來挑一張就好：", t, n, {who:"企劃", thinkMs:700}); });
+    s.push(function(t,n){ addAiCard(topicsCard, t, n, {who:"企劃"}); });
+    s.push(function(t,n){ pause(fastMode?120:800, t, n); });
+    // 收尾 + 重玩
+    s.push(function(t,n){ setPhase("一整圈", "劇情走完 · 換你試"); n(); });
+    s.push(function(t,n){ addAiTypingThenText("這就是一整圈——健檢/訪談、出文、出圖、發佈、看數據、排下一批。每轉一圈，這套系統就更懂你的讀者。AI 備好一切，發佈的手永遠是你的。", t, n, {who:"艦隊", thinkMs:600}); });
+    s.push(function(t,n){
+      var msg = document.createElement("div");
+      msg.className = "msg ai";
+      msg.style.alignSelf = "center";
+      msg.style.maxWidth = "100%";
+      var holder = document.createElement("div");
+      holder.className = "replay-inline";
+      var b = document.createElement("button");
+      b.className = "replay-inline-btn";
+      b.textContent = "🔄 換條路再玩一次";
+      b.addEventListener("click", function(){ start(); });
+      holder.appendChild(b);
+      msg.appendChild(holder);
+      thread.appendChild(msg); scrollToBottom();
+      n();
     });
-
-    // ============ 章節 06：看數據 ============
-    s.push(function(token, next){
-      setChapter("06", "看數據");
-      setSubtitle("隔天 · 分析師");
-      next();
-    });
-    s.push(function(token, next){
-      addAiTypingThenText(
-        "昨天那篇的成績出來了，我幫你翻成白話——GPT 不會記得你上一篇發了什麼，我會。",
-        token, next, { who:"分析師", thinkMs:800 }
-      );
-    });
-    s.push(function(token, next){
-      addAiCard('<div style="border:1px solid rgba(255,255,255,0.12);border-radius:10px;background:#0f1420;color:#cdd3df;padding:14px 16px;font-size:12.5px;line-height:1.75;"><div style="color:#e8a34c;font-weight:600;margin-bottom:8px;">白話週報 · 昨天那篇</div>觸及 1,240 · 留言 18 · 轉發 9<br>留言率比你的平均高——「先想問題、再挑工具」這種戳到痛點的，比純講工具的更多人回。<br><span style="color:#8fd48f;">→ 下週往「問題意識」這根支柱加碼。</span></div>', token, next, { who:"分析師" });
-    });
-    s.push(function(token, next){
-      pause(fastMode ? 120 : 900, token, next);
-    });
-
-    // ============ 章節 07：下一批 ============
-    s.push(function(token, next){
-      setChapter("07", "下一批");
-      setSubtitle("企劃 · 依數據排選題");
-      next();
-    });
-    s.push(function(token, next){
-      addAiTypingThenText(
-        "照昨天的成績，我先幫你排好下一批——你不用從零想題目，坐下來挑一張就好：",
-        token, next, { who:"企劃", thinkMs:800 }
-      );
-    });
-    s.push(function(token, next){
-      addAiCard('<div style="border:1px solid rgba(255,255,255,0.12);border-radius:10px;background:#0f1420;color:#cdd3df;padding:14px 16px;font-size:12.5px;line-height:1.8;"><div style="color:#e8a34c;font-weight:600;margin-bottom:8px;">下一批選題 · 3 張</div>1. 你的 AI 工具清單、其實可以砍一半<br>2. 我每天只花 15 分鐘管一個帳號，靠的是這套流程<br>3. 學 AI 學到焦慮？先問自己這一題<br><span style="color:#7c8393;">每張都指回你的真實經驗，不是憑空生的題目。</span></div>', token, next, { who:"企劃" });
-    });
-    s.push(function(token, next){
-      pause(fastMode ? 120 : 900, token, next);
-    });
-
-    // ============ 收尾 ============
-    s.push(function(token, next){
-      addAiTypingThenText(
-        "這就是一整圈——健檢、出文、出圖、發佈、看數據、排下一批。每轉一圈，這套系統就更懂你的讀者。AI 備好一切，發佈的手永遠是你的。",
-        token, next, { who:"艦隊", thinkMs:600 }
-      );
-    });
-    s.push(function(token, next){
-      setSubtitle("劇情播放完畢");
-      progressLabel.textContent = "07 / 07 · 完";
-      next();
-    });
-
     return s;
   }
 
-  function runSteps(list, token){
-    stepIndex = 0;
+  // ---------------- 引擎：可分支的 queue ----------------
+  function runQueue(token){
     function loop(){
       if (token !== playToken) return;
-      if (stepIndex >= list.length){
-        isPlaying = false;
-        return;
-      }
-      var fn = list[stepIndex];
-      stepIndex++;
+      if (!queue.length){ isPlaying = false; return; }
+      var fn = queue.shift();
       fn(token, loop);
     }
     loop();
   }
+  function playFront(list){
+    for (var i = list.length - 1; i >= 0; i--) queue.unshift(list[i]);
+  }
 
-  function play(fromStart){
+  function start(){
     playToken++;
     var token = playToken;
     isPlaying = true;
-    if (fromStart){
-      clearThread();
-      chapterCard.classList.remove("show");
-      setFakeInput("傳訊息給艦隊…", true);
-      progressLabel.textContent = "00 / 04";
-    }
-    var script = buildScript();
-    runSteps(script, token);
+    clearThread();
+    setFakeInput("傳訊息給艦隊…", true);
+    queue = buildFlow();
+    runQueue(token);
   }
 
   btnReplay.addEventListener("click", function(){
     fastMode = false;
-    btnSkip.textContent = "快轉";
-    play(true);
+    btnSkip.textContent = "快轉打字";
+    start();
   });
-
   btnSkip.addEventListener("click", function(){
-    // 快轉＝從目前這輪劇本重新以壓縮時間常數跑一次
-    // （setTimeout 已排定的舊時間常數無法動態插隊，重播現有 token 才能保證每一步都吃到新的 fastMode）
     fastMode = true;
     btnSkip.textContent = "快轉中";
-    play(true);
+    start();
   });
 
-  // 首次自動播放
-  play(true);
+  start();
 
 })();
 </script>
